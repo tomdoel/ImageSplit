@@ -5,7 +5,7 @@ stages:
 pylintjob:
   stage: pylint_test
   script:
-    - pylint --rcfile=tests/pylintrc niftysplit/engine
+    - pylint --rcfile=tests/pylintrc niftysplit
 
 testjob:
   stage: dev_test
