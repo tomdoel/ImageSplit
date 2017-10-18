@@ -1,0 +1,54 @@
+stages:
+  - pylint_test
+  - dev_test
+
+pylintjob:
+  stage: pylint_test
+  script:
+    - pylint --rcfile=tests/pylintrc niftysplit/engine
+
+testjob:
+  stage: dev_test
+  script:
+    # !!kill coverage in case of hanging processes
+    - if pgrep coverage; then pkill -f coverage; fi
+
+    # print system info
+    - pwd
+
+    #### python 3 tests ###################################
+    # save current folder path just in case
+    - export niftysplit_dir=$(pwd)
+
+    # create a virtual env for testing
+    - venv="niftysplit-test-py3"
+    - mypython=$(which python3)
+    - virtualenv -p $mypython $venv
+    - cd $venv
+    - venv_dir=$(pwd)
+    - source bin/activate
+    
+    # print Python version to CI output
+    - which python
+    - python --version
+    - cd $niftysplit_dir
+
+    - pip install -r requirements.txt
+
+    # tests
+    - python -m unittest discover -s "tests" -p "*_test.py"
+
+    # deactivate virtual environment
+    - deactivate
+    - cd $niftysplit_dir
+    ###############end of python3
+
+    ######### Python 2 ###################### run python2 code with coverage wrapper
+
+    - coverage run -a --source . -m unittest discover -s "tests" -p "*_test.py"
+    - coverage report -m
+    - echo 'finished test'
+  tags:
+    - gift-linux
+
+
