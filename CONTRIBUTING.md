@@ -34,5 +34,5 @@ unit tests, by running:
 
 ``` sh
 cd NiftySplit/
-sh run_test.sh
+sh run_tests.sh
 ```
