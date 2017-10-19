@@ -33,10 +33,10 @@ testjob:
     - $py3_venv_bin/python --version
 
     # Install requirements for tests
+    - cd $niftysplit_dir
     - $py3_venv_bin/pip install -r requirements-test.txt
 
     # Run tests with coverage
-    - cd $niftysplit_dir
     - $py3_venv_bin/coverage run -a --source . -m unittest discover -s "tests" -p "*_test.py"
     - $py3_venv_bin/coverage report -m
 
@@ -57,10 +57,10 @@ testjob:
     - $py2_venv_bin/python --version
 
     # Install requirements for tests
+    - cd $niftysplit_dir
     - $py2_venv_bin/pip install -r requirements-test.txt
 
     # Run tests
-    - cd $niftysplit_dir
     - $py2_venv_bin/python -m unittest discover -s "tests" -p "*_test.py"
 
     ###############end of python3
