@@ -1,6 +1,6 @@
 # NiftySplit
 
-<img src="https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/raw/master/giftsurg-logo.png" width="263" height="155">
+<img src="https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/raw/master/giftsurg-icon.png" width="263" height="155">
 
 [![build status](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/badges/dev/build.svg)](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/commits/dev)
 [![coverage report](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/badges/dev/coverage.svg)](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/commits/dev)
