@@ -10,6 +10,8 @@ from collections import OrderedDict
 
 import numpy as np
 
+from utils.utilities import get_linear_byte_offset
+
 
 def write_files(descriptors_in, descriptors_out, file_factory, original_header, output_type):
     input_combined = CombinedFileReader(descriptors_in, file_factory)
@@ -255,7 +257,7 @@ class HugeFileStreamer:
     def read_image_stream(self, start_coords, num_voxels_to_read):
         """Read a line of image data from a binary file at the specified image location"""
 
-        offset = self._get_linear_byte_offset(self._image_size, self._bytes_per_voxel, start_coords)
+        offset = get_linear_byte_offset(self._image_size, self._bytes_per_voxel, start_coords)
         self._file_wrapper.get_handle().seek(offset)
 
         dt = np.dtype(self._numpy_format)
@@ -265,25 +267,11 @@ class HugeFileStreamer:
     def write_image_stream(self, start_coords, image_line):
         """Write a line of image data to a binary file at the specified image location"""
 
-        offset = self._get_linear_byte_offset(self._image_size, self._bytes_per_voxel, start_coords)
+        offset = get_linear_byte_offset(self._image_size, self._bytes_per_voxel, start_coords)
         self._file_wrapper.get_handle().seek(offset)
 
         dt = np.dtype(self._numpy_format)
         self._file_wrapper.get_handle().write(image_line.astype(dt).tobytes())
-
-    @staticmethod
-    def _get_linear_byte_offset(image_size, bytes_per_voxel, start_coords):
-        """Return the byte offset corresponding to the point at the given coordinates. 
-        
-        Assumes you have a stream of bytes representing a multi-dimensional image, 
-        """
-
-        offset = 0
-        offset_multiple = bytes_per_voxel
-        for coord, image_length in zip(start_coords, image_size):
-            offset += coord * offset_multiple
-            offset_multiple *= image_length
-        return offset
 
     def close(self):
         """Close any files that have been opened."""
