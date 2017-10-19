@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from tools.file_splitter import get_number_of_blocks, \
+from niftysplit.tools.file_splitter import get_number_of_blocks, \
     get_block_coordinate_range, get_image_block_ranges, \
     get_suggested_block_size
 
