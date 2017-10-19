@@ -35,7 +35,7 @@ NiftySplit is released under the BSD-3 license. Please see the LICENSE file for 
 
 ## Acknowledgements
 
-This work was supported through an Innovative Engineering for Health award by the [Wellcome Trust][wellcometrust] [WT101957], the [Engineering and Physical Sciences Research Council (EPSRC)][epsrc] [NS/A000027/1] and a [National Institute for Health Research][nihr] Biomedical Research Centre [UCLH][uclh]/UCL High Impact Initiative.
+This work was supported through an Innovative Engineering for Health award by [Wellcome][wellcome] [WT101957], the [Engineering and Physical Sciences Research Council (EPSRC)][epsrc] [NS/A000027/1] and a [National Institute for Health Research][nihr] Biomedical Research Centre [UCLH][uclh]/UCL High Impact Initiative.
 
 [tig]: http://cmictig.cs.ucl.ac.uk
 [giftsurg]: http://www.gift-surg.ac.uk
@@ -43,7 +43,7 @@ This work was supported through an Innovative Engineering for Health award by th
 [ucl]: http://www.ucl.ac.uk
 [uclh]: http://www.uclh.nhs.uk
 [weiss]: http://www.ucl.ac.uk/weiss
-[wt]: https://wellcome.ac.uk/
+[wellcome]: https://wellcome.ac.uk/
 [epsrc]: https://www.epsrc.ac.uk/
 [nihr]: https://www.nihr.ac.uk/
 
