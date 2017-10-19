@@ -426,10 +426,11 @@ def load_mhd_header(filename):
             elif key in ['BinaryData', 'BinaryDataByteOrderMSB',
                          'CompressedData']:
                 # pylint: disable=simplifiable-if-statement
+                # pylint: disable=redefined-variable-type
                 if val.lower() == "true":
                     val = True
                 else:
-                    val = False  # pylint: disable=simplifiable-if-statement
+                    val = False
 
             metadata[key] = val
 
@@ -555,12 +556,12 @@ def generate_input_descriptors(input_file_base, start_index):
                                   [0, current_image_size[1] - 1, 0, 0],
                                   [0, current_image_size[2] - 1, 0, 0]]
             else:
-                if not current_image_size[0] == full_image_size[0]:
+                if current_image_size[0] != full_image_size[0]:
                     raise ValueError(
                         'When loading without a descriptor file, the first '
                         'dimension of each file must '
                         'match')
-                if not current_image_size[1] == full_image_size[1]:
+                if current_image_size[1] != full_image_size[1]:
                     raise ValueError(
                         'When loading without a descriptor file, the second '
                         'dimension of each file must '

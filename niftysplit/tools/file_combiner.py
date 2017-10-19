@@ -23,9 +23,9 @@ from niftysplit.tools.json_reader import read_json
 def load_descriptor(descriptor_filename):
     """Loads and parses a file descriptor from disk"""
     data = read_json(descriptor_filename)
-    if not data["appname"] == "GIFT-Surg split data":
+    if data["appname"] != "GIFT-Surg split data":
         raise ValueError('Not a GIFT-Surg file')
-    if not data["version"] == "1.0":
+    if data["version"] != "1.0":
         raise ValueError('Cannot read this file version')
     return data
 
@@ -72,7 +72,7 @@ def header_from_descriptor(descriptor_filename):
     """
     descriptor = load_descriptor(descriptor_filename)
     original_file_list = descriptor["source_files"]
-    if not len(original_file_list) == 1:
+    if len(original_file_list) != 1:
         raise ValueError(
             'This function only supports data derived from a single file')
     original_file_descriptor = original_file_list[0]
