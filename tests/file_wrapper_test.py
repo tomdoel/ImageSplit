@@ -6,13 +6,13 @@ import struct
 
 import numpy
 import numpy as np
-from nose_parameterized import parameterized
 
 from pyfakefs import fake_filesystem_unittest
 
 from niftysplit.tools.file_wrapper import HugeFileStreamer
 
 import unittest
+from parameterized import parameterized
 
 from niftysplit.tools import file_wrapper
 

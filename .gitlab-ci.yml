@@ -42,7 +42,7 @@ testjob:
     # deactivate virtual environment
     - deactivate
     - cd $niftysplit_dir
-    
+
     ###############end of python3
 
 
