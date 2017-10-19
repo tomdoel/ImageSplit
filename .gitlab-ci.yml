@@ -20,7 +20,7 @@ testjob:
     - export niftysplit_dir=$(pwd)
 
     #### python 3 tests ###################################
-    - echo '## Running Python 3 tests ##'
+    - echo 'Running Python 3 tests'
 
     # create a virtual env for testing
     - py3_venv_name="niftysplit-test-py3"
@@ -44,7 +44,7 @@ testjob:
 
 
     #### python 2 tests ###################################
-    - echo '## Running Python 2 tests ##'
+    - echo 'Running Python 2 tests'
 
     # create a virtual env for testing
     - py2_venv_name="niftysplit-test-py2"
