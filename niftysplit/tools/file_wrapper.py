@@ -118,7 +118,7 @@ class CombinedFileReader(object):
         # the whole list
         if self._cached_last_subimage \
                 and self._cached_last_subimage.contains_voxel(
-                    start_coords_global, must_be_in_roi):
+                        start_coords_global, must_be_in_roi):
             return self._cached_last_subimage
 
         # Iterate through the list of subimages to find the one containing
