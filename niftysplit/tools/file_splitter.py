@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-#
-# Copyright UCL 2017
-# Author: Tom Doel
-#
+"""
+Utility for splitting large images into subimages
+
+Author: Tom Doel
+Copyright UCL 2017
+
+"""
 
 from __future__ import division, print_function
 
@@ -112,6 +115,7 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
 
 
 def write_descriptor_file(descriptors_in, descriptors_out, filename_out_base):
+    """Saves descriptor files"""
     descriptor = {"appname": "GIFT-Surg split data", "version": "1.0",
                   "split_files": descriptors_out,
                   "source_files": descriptors_in}
@@ -121,6 +125,7 @@ def write_descriptor_file(descriptors_in, descriptors_out, filename_out_base):
 
 def generate_output_descriptors(filename_out_base, max_block_size_voxels,
                                 overlap_size_voxels, header):
+    """Creates descriptors represeting file output"""
     image_size = header["DimSize"]
     num_dims = header["NDims"]
     max_block_size_voxels_array = convert_to_array(max_block_size_voxels,
@@ -144,6 +149,7 @@ def generate_output_descriptors(filename_out_base, max_block_size_voxels,
 
 
 def convert_to_array(scalar_or_list, parameter_name, num_dims):
+    """Converts a list or scalar to an array"""
     if not isinstance(scalar_or_list, list):
         array = [scalar_or_list] * num_dims
     elif len(scalar_or_list) == num_dims:
@@ -156,7 +162,8 @@ def convert_to_array(scalar_or_list, parameter_name, num_dims):
     return array
 
 
-class FileDescriptor:
+class FileDescriptor(object):
+    """Describes an image in relation to a larger image"""
     def __init__(self, file_name, index, suffix, i_range, j_range, k_range):
         self.suffix = suffix
         self.index = index
@@ -167,6 +174,7 @@ class FileDescriptor:
 
 
 def main(args):
+    """Utility for splitting images into subimages"""
     parser = argparse.ArgumentParser(
         description='Splits a large MetaIO (.mhd) file into multiple parts '
                     'with overlap')

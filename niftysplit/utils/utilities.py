@@ -1,6 +1,16 @@
 # coding=utf-8
+"""
+Utility files for splitting large images into subimages
+
+Author: Tom Doel
+Copyright UCL 2017
+
+"""
+
+
 def get_linear_byte_offset(image_size, bytes_per_voxel, start_coords):
-    """Return the byte offset corresponding to the point at the given coordinates.
+    """
+    Return the byte offset corresponding to the given coordinates.
 
     Assumes you have a stream of bytes representing a multi-dimensional image,
     """

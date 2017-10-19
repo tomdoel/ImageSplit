@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""
+Utility for combining subimages into images
 
-#
-# Copyright UCL 2017
-# Author: Tom Doel
-#
+Author: Tom Doel
+Copyright UCL 2017
+
+"""
 
 from __future__ import division, print_function
 
@@ -14,11 +16,12 @@ import sys
 
 from niftysplit.tools.file_wrapper import FileHandleFactory, write_files, \
     generate_input_descriptors
+from niftysplit.tools import file_wrapper
 from niftysplit.tools.json_reader import read_json
-from tools import file_wrapper
 
 
 def load_descriptor(descriptor_filename):
+    """Loads and parses a file descriptor from disk"""
     data = read_json(descriptor_filename)
     if not data["appname"] == "GIFT-Surg split data":
         raise ValueError('Not a GIFT-Surg file')
@@ -39,17 +42,17 @@ def combine_file(input_file_base, descriptor_filename, filename_out_base,
             input_file_base, start_index)
     else:
         [original_header,
-         descriptors_in] = generate_header_from_descriptor_file(
-            descriptor_filename)
+         descriptors_in] = header_from_descriptor(descriptor_filename)
 
-    descriptors_out = generate_output_descriptor_from_header(filename_out_base,
-                                                             original_header)
+    descriptors_out = generate_descriptor_from_header(filename_out_base,
+                                                      original_header)
 
     write_files(descriptors_in, descriptors_out, file_factory, original_header,
                 output_type)
 
 
-def generate_output_descriptor_from_header(filename_out_base, original_header):
+def generate_descriptor_from_header(filename_out_base, original_header):
+    """Loads a header and uses to define a file descriptor"""
     output_image_size = original_header["DimSize"]
     descriptors_out = []
     descriptor_out = {"index": 0, "suffix": "",
@@ -61,7 +64,12 @@ def generate_output_descriptor_from_header(filename_out_base, original_header):
     return descriptors_out
 
 
-def generate_header_from_descriptor_file(descriptor_filename):
+def header_from_descriptor(descriptor_filename):
+    """Creates a file header based on descriptor information
+
+    :param descriptor_filename:
+    :return:
+    """
     descriptor = load_descriptor(descriptor_filename)
     original_file_list = descriptor["source_files"]
     if not len(original_file_list) == 1:
@@ -75,6 +83,7 @@ def generate_header_from_descriptor_file(descriptor_filename):
 
 
 def main(args):
+    """file_combiner command-line utility"""
     parser = argparse.ArgumentParser(
         description='Combines multiple image parts into a single large MetaIO '
                     '(.mhd) file')

@@ -1,20 +1,25 @@
 # coding=utf-8
 
-#
-# Copyright UCL 2017
-# Author: Tom Doel
-#
+"""
+Wrapping code for managing virtual images that may consist of multiple subimages
+
+Author: Tom Doel
+Copyright UCL 2017
+
+"""
+
 import copy
 import os
 from collections import OrderedDict
 
 import numpy as np
 
-from utils.utilities import get_linear_byte_offset
+from niftysplit.utils.utilities import get_linear_byte_offset
 
 
 def write_files(descriptors_in, descriptors_out, file_factory, original_header,
                 output_type):
+    """Creates a set of output files from the input files"""
     input_combined = CombinedFileReader(descriptors_in, file_factory)
     output_combined = CombinedFileWriter(descriptors_out, file_factory,
                                          original_header, output_type)
@@ -24,11 +29,13 @@ def write_files(descriptors_in, descriptors_out, file_factory, original_header,
     output_combined.close()
 
 
-class CombinedFileWriter:
+class CombinedFileWriter(object):
+    """A kind of virtual file for writing where the data are distributed
+        across multiple real files. """
+
     def __init__(self, descriptors, file_factory, header_template,
                  element_type):
-        """A kind of virtual file for writing where the data are distributed
-        across multiple real files. """
+        """Create for the given set of descriptors"""
 
         if element_type:
             header_template = copy.deepcopy(header_template)
@@ -46,13 +53,14 @@ class CombinedFileWriter:
                 SubImage(descriptor, file_factory, header_template))
 
     def write_image_file(self, input_combined):
+        """Write out all the subimages"""
         for next_image in self._subimages:
             output_ranges = next_image.get_ranges()
             i_range_global = output_ranges[0]
             j_range_global = output_ranges[1]
             k_range_global = output_ranges[2]
             num_voxels_to_read_per_line = i_range_global[1] + 1 - \
-                i_range_global[0]
+                                          i_range_global[0]
 
             for k_global in range(k_range_global[0], 1 + k_range_global[1]):
                 for j_global in range(j_range_global[0], 1 + j_range_global[1]):
@@ -64,11 +72,12 @@ class CombinedFileWriter:
                                                   image_line)
 
     def close(self):
+        """Close all files and streams"""
         for subimage in self._subimages:
             subimage.close()
 
 
-class CombinedFileReader:
+class CombinedFileReader(object):
     """A kind of virtual file for reading where the data are distributed
     across multiple real files. """
 
@@ -80,6 +89,7 @@ class CombinedFileReader:
             self._subimages.append(SubImage(descriptor, file_factory, None))
 
     def read_image_stream(self, start_coords_global, num_voxels_to_read):
+        """Reads pixels from an abstract image stream"""
         byte_stream = None
         current_i_start = start_coords_global[0]
         while num_voxels_to_read > 0:
@@ -98,6 +108,7 @@ class CombinedFileReader:
         return byte_stream
 
     def close(self):
+        """Closes all streams and files"""
         for subimage in self._subimages:
             subimage.close()
 
@@ -121,7 +132,9 @@ class CombinedFileReader:
         raise ValueError('Coordinates are out of range')
 
 
-class SubImage:
+class SubImage(object):
+    """An image which forms part of a larger image"""
+
     def __init__(self, descriptor, file_factory, header_template):
         self._descriptor = descriptor
 
@@ -185,22 +198,24 @@ class SubImage:
                     1] and
                 self._roi_start[2] <= start_coords_global[2] <= self._roi_end[
                     2])
-        else:
-            return (
-                self._origin_start[0] <= start_coords_global[0] <=
-                self._origin_end[
-                    0] and
-                self._origin_start[1] <= start_coords_global[1] <=
-                self._origin_end[
-                    1] and
-                self._origin_start[2] <= start_coords_global[2] <=
-                self._origin_end[
-                    2])
+
+        return (
+            self._origin_start[0] <= start_coords_global[0] <=
+            self._origin_end[
+                0] and
+            self._origin_start[1] <= start_coords_global[1] <=
+            self._origin_end[
+                1] and
+            self._origin_start[2] <= start_coords_global[2] <=
+            self._origin_end[
+                2])
 
     def close(self):
+        """Close all streams and files"""
         self._file.close()
 
     def get_bytes_per_voxel(self):
+        """Return the number of bytes used to represent a single voxel"""
         return self._file.get_bytes_per_voxel()
 
     def _convert_coords_to_local(self, start_coords):
@@ -208,7 +223,7 @@ class SubImage:
                 zip(start_coords, self._origin_start)]
 
 
-class MetaIoFile:
+class MetaIoFile(object):
     """A class for reading or writing 3D imaging data to/from a MetaIO file
     pair (.mhd and .raw). """
 
@@ -302,7 +317,7 @@ class MetaIoFile:
             self._file_wrapper = None
 
 
-class HugeFileStreamer:
+class HugeFileStreamer(object):
     """A class to handle streaming of image data with arbitrarily large files"""
 
     def __init__(self, file_wrapper, image_size, bytes_per_voxel, numpy_format):
@@ -319,10 +334,10 @@ class HugeFileStreamer:
                                         start_coords)
         self._file_wrapper.get_handle().seek(offset)
 
-        dt = np.dtype(self._numpy_format)
+        data_type = np.dtype(self._numpy_format)
         bytes_array = self._file_wrapper.get_handle().read(
             num_voxels_to_read * self._bytes_per_voxel)
-        return np.fromstring(bytes_array, dtype=dt)
+        return np.fromstring(bytes_array, dtype=data_type)
 
     def write_image_stream(self, start_coords, image_line):
         """Write a line of image data to a binary file at the specified image
@@ -332,15 +347,16 @@ class HugeFileStreamer:
                                         start_coords)
         self._file_wrapper.get_handle().seek(offset)
 
-        dt = np.dtype(self._numpy_format)
-        self._file_wrapper.get_handle().write(image_line.astype(dt).tobytes())
+        data_type = np.dtype(self._numpy_format)
+        self._file_wrapper.get_handle().write(
+            image_line.astype(data_type).tobytes())
 
     def close(self):
         """Close any files that have been opened."""
         self._file_wrapper.close()
 
 
-class HugeFileWrapper:
+class HugeFileWrapper(object):
     """Read or write to arbitrarily large files."""
 
     def __init__(self, name, file_handle_factory, mode):
@@ -360,26 +376,32 @@ class HugeFileWrapper:
         self.close()
 
     def get_handle(self):
+        """Returns the file handle, opening if necessary"""
         if not self._file_handle:
             self.open()
         return self._file_handle
 
     def open(self):
+        """Opens the file"""
         self._file_handle = self._file_handle_factory.create_file_handle(
             self._filename, self._mode)
 
     def close(self):
+        """Close the file"""
         if self._file_handle and not self._file_handle.closed:
             self._file_handle.close()
             self._file_handle = None
 
 
-class FileHandleFactory:
+class FileHandleFactory(object):
+    """Creates file handles, allowing for abstraction to virtual files"""
+
     def __init__(self):
         pass
 
     @staticmethod
     def create_file_handle(filename, mode):
+        """Create and open a real file with this path and file access mode"""
         folder = os.path.dirname(filename)
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -403,10 +425,11 @@ def load_mhd_header(filename):
                 val = [int(s) for s in val.split()]
             elif key in ['BinaryData', 'BinaryDataByteOrderMSB',
                          'CompressedData']:
+                # pylint: disable=simplifiable-if-statement
                 if val.lower() == "true":
                     val = True
                 else:
-                    val = False
+                    val = False  # pylint: disable=simplifiable-if-statement
 
             metadata[key] = val
 
@@ -481,12 +504,13 @@ def save_mhd_header(filename, metadata):
             value = value.replace("[", "").replace("]", "").replace(",", "")
             header += '%s = %s\n' % (key, value)
 
-    f = open(filename, 'w')
-    f.write(header)
-    f.close()
+    file_handle = open(filename, 'w')
+    file_handle.write(header)
+    file_handle.close()
 
 
 def generate_input_descriptors(input_file_base, start_index):
+    """Create descriptors for input files"""
     descriptors = []
 
     if start_index is None:
@@ -544,7 +568,7 @@ def generate_input_descriptors(input_file_base, start_index):
                 full_image_size[2] = full_image_size[2] + current_image_size[2]
                 current_ranges[2][0] = current_ranges[2][1] + 1
                 current_ranges[2][1] = current_ranges[2][1] + \
-                    current_image_size[2]
+                                       current_image_size[2]
 
             # Update the combined image size
             combined_header["DimSize"] = full_image_size
