@@ -33,7 +33,7 @@ testjob:
     - python --version
     - cd $niftysplit_dir
 
-    - pip install -r requirements.txt
+    - pip install -r requirements-test.txt
 
     # tests
     - python -m unittest discover -s "tests" -p "*_test.py"
