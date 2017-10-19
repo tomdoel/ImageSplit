@@ -10,10 +10,11 @@ from nose_parameterized import parameterized
 
 from pyfakefs import fake_filesystem_unittest
 
-import file_wrapper
-from file_wrapper import HugeFileStreamer
+from niftysplit.tools.file_wrapper import HugeFileStreamer
 
 import unittest
+
+from niftysplit.tools import file_wrapper
 
 
 class FakeFileHandleFactory:
@@ -37,17 +38,17 @@ class FakeFile:
     def __enter__(self):
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, value, traceback):
         pass
 
     def seek(self, num_bytes):
         self.data_pointer = math.floor(num_bytes/self.bytes_per_voxel)
 
     def read(self, num_bytes):
-        return self.data[slice(self.data_pointer, self.data_pointer + math.floor(num_bytes/self.bytes_per_voxel))]
+        return self.data[slice(self.data_pointer, self.data_pointer + int(math.floor(num_bytes/self.bytes_per_voxel)))]
 
     def write(self, bytes_to_write):
-        num_voxels = math.floor(len(bytes_to_write)/self.bytes_per_voxel)
+        num_voxels = int(math.floor(len(bytes_to_write)/self.bytes_per_voxel))
         for index in range(0, num_voxels):
             self.data[self.data_pointer + index] = bytes_to_write[index * self.bytes_per_voxel]
         return len(bytes_to_write)
@@ -83,6 +84,7 @@ class TestHugeFileWrapper(fake_filesystem_unittest.TestCase):
     def tearDown(self):
         pass
 
+    # noinspection PyUnusedLocal
     @parameterized.expand([
         [[2, 3, 8], 4, [1, 2, 3], 2],
         [[101, 222, 4], 4, [1, 1, 1], 10],
@@ -98,6 +100,7 @@ class TestHugeFileWrapper(fake_filesystem_unittest.TestCase):
         self.assertEqual(fake_file.mode, "rb")
         self.assertEqual(fake_file.closed, False)
 
+    # noinspection PyUnusedLocal
     @parameterized.expand([
         [[2, 3, 8], 4, [1, 2, 3], 2],
         [[101, 222, 4], 4, [1, 1, 1], 10],
@@ -111,6 +114,7 @@ class TestHugeFileWrapper(fake_filesystem_unittest.TestCase):
             self.assertEqual(fake_file.closed, False)
         self.assertEqual(fake_file.closed, True)
 
+    # noinspection PyUnusedLocal
     @parameterized.expand([
         [[2, 3, 8], 4, [1, 2, 3], 2],
         [[101, 222, 4], 4, [1, 1, 1], 10],
