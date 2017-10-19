@@ -2,7 +2,7 @@
 
 import unittest
 
-from utils.utilities import get_linear_byte_offset
+from niftysplit.utils.utilities import get_linear_byte_offset
 
 
 class TestUtilities(unittest.TestCase):
