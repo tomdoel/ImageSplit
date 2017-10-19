@@ -20,60 +20,52 @@ testjob:
     - export niftysplit_dir=$(pwd)
 
     #### python 3 tests ###################################
+    - echo '## Running Python 3 tests ##'
 
     # create a virtual env for testing
-    - venv="niftysplit-test-py3"
-    - mypython=$(which python3)
-    - virtualenv -p $mypython $venv
-    - cd $venv
-    - venv_dir=$(pwd)
-    - source bin/activate
-    
+    - py3_venv_name="niftysplit-test-py3"
+    - py3_bin=$(which python3)
+    - virtualenv -p $py3_bin $py3_venv
+    - cd $py3_venv_name/bin
+    - py3_venv_bin=$(pwd)
+
     # print Python version to CI output
-    - which python
-    - python --version
+    - $py3_venv_bin/python --version
+
+    # Install requirements for tests
+    - $py3_venv_bin/pip install -r requirements-test.txt
+
+    # Run tests with coverage
     - cd $niftysplit_dir
-
-    - pip install -r requirements-test.txt
-
-    # tests
-    - python -m unittest discover -s "tests" -p "*_test.py"
-
-    # deactivate virtual environment
-    - deactivate
-    - cd $niftysplit_dir
+    - $py3_venv_bin/coverage run -a --source . -m unittest discover -s "tests" -p "*_test.py"
+    - $py3_venv_bin/coverage report -m
 
     ###############end of python3
 
 
     #### python 2 tests ###################################
+    - echo '## Running Python 2 tests ##'
 
     # create a virtual env for testing
-    - venv="niftysplit-test-py2"
-    - mypython=$(which python2)
-    - virtualenv -p $mypython $venv
-    - cd $venv
-    - venv_dir=$(pwd)
-    - source bin/activate
+    - py2_venv_name="niftysplit-test-py2"
+    - py2_bin=$(which python2)
+    - virtualenv -p py2_bin py2_venv_name
+    - cd $py2_venv_name/bin
+    - py2_venv_bin=$(pwd)
 
     # print Python version to CI output
-    - which python
-    - python --version
+    - $py2_venv_bin/python --version
+
+    # Install requirements for tests
+    - $py2_venv_bin/pip install -r requirements-test.txt
+
+    # Run tests
     - cd $niftysplit_dir
-
-    - pip install -r requirements-test.txt
-
-    # tests
-    - coverage run -a --source . -m unittest discover -s "tests" -p "*_test.py"
-    - coverage report -m
-
-    # deactivate virtual environment
-    - deactivate
-    - cd $niftysplit_dir
+    - $py2_venv_bin/python -m unittest discover -s "tests" -p "*_test.py"
 
     ###############end of python3
 
-    - echo 'finished test'
+    - echo 'finished tests'
   tags:
     - gift-linux
 
