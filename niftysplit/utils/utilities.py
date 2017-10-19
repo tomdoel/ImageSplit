@@ -1,3 +1,4 @@
+# coding=utf-8
 def get_linear_byte_offset(image_size, bytes_per_voxel, start_coords):
     """Return the byte offset corresponding to the point at the given coordinates.
 
