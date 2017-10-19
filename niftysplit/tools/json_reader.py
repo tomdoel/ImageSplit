@@ -16,4 +16,3 @@ def write_json(filename, data):
 def read_json(filename):
     with open(filename) as data_file:
         return json.load(data_file)
-

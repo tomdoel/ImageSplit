@@ -12,8 +12,8 @@ import os
 import sys
 from math import ceil
 
-from file_wrapper import FileHandleFactory, write_files, generate_input_descriptors
-from json_reader import write_json
+from niftysplit.tools.file_wrapper import FileHandleFactory, write_files, generate_input_descriptors
+from niftysplit.tools.json_reader import write_json
 
 
 def get_number_of_blocks(image_size, max_block_size):
