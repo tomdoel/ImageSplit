@@ -11,10 +11,9 @@ import argparse
 import os
 import sys
 
-import file_splitter
-import file_wrapper
-from file_wrapper import FileHandleFactory, write_files, generate_input_descriptors
-from json_reader import read_json
+from niftysplit.tools.file_wrapper import FileHandleFactory, write_files, generate_input_descriptors
+from niftysplit.tools.json_reader import read_json
+from tools import file_wrapper
 
 
 def load_descriptor(descriptor_filename):

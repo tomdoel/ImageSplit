@@ -77,7 +77,8 @@ def get_image_block_ranges(image_size, max_block_size, overlap_size):
     return block_ranges
 
 
-def split_file(input_file, filename_out_base, max_block_size_voxels, overlap_size_voxels, start_index, output_type, file_factory):
+def split_file(input_file, filename_out_base, max_block_size_voxels, overlap_size_voxels, start_index, output_type,
+               file_factory):
     """Saves the specified image file as a number of smaller files"""
 
     input_file_base = os.path.splitext(input_file)[0]
