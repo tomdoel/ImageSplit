@@ -9,7 +9,7 @@ pylintjob:
   tags:
     - gift-linux
 
-testjob:
+testjob-linux:
   stage: dev_test
   script:
     # !!kill coverage in case of hanging processes
@@ -72,7 +72,7 @@ testjob:
     - gift-linux
 
 
-testjob:
+testjob-mac:
   stage: dev_test
   script:
     # print system info
