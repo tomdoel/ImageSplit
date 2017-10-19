@@ -312,6 +312,9 @@ class HugeFileWrapper:
 
 
 class FileHandleFactory:
+    def __init__(self):
+        pass
+
     @staticmethod
     def create_file_handle(filename, mode):
         folder = os.path.dirname(filename)
