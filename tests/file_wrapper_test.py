@@ -210,7 +210,7 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
         fmt = TestHugeFileStreamer.get_fmt_string(bytes_per_voxel, is_signed)
         with open(file_name, 'rb') as f:
             size_bytes = os.fstat(f.fileno()).st_size
-            num_elements = round(size_bytes/bytes_per_voxel)
+            num_elements = int(round(size_bytes/bytes_per_voxel))
             read_list = struct.unpack(fmt * num_elements, f.read())
             return read_list
 
