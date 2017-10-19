@@ -49,7 +49,7 @@ testjob:
     # create a virtual env for testing
     - py2_venv_name="niftysplit-test-py2"
     - py2_bin=$(which python2)
-    - virtualenv -p py2_bin py2_venv_name
+    - virtualenv -p $py2_bin $py2_venv_name
     - cd $py2_venv_name/bin
     - py2_venv_bin=$(pwd)
 
