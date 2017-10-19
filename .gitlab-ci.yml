@@ -25,7 +25,7 @@ testjob:
     # create a virtual env for testing
     - py3_venv_name="niftysplit-test-py3"
     - py3_bin=$(which python3)
-    - virtualenv -p $py3_bin $py3_venv
+    - virtualenv -p $py3_bin $py3_venv_name
     - cd $py3_venv_name/bin
     - py3_venv_bin=$(pwd)
 
