@@ -9,8 +9,8 @@ Copyright UCL 2017
 
 import numpy as np
 
-from utils.file_descriptor import SubImageDescriptor
-from utils.sub_image import SubImage
+from niftysplit.utils.file_descriptor import SubImageDescriptor
+from niftysplit.utils.sub_image import SubImage
 
 
 def write_files(descriptors_in, descriptors_out, file_factory):
@@ -34,8 +34,8 @@ class CombinedFileWriter(object):
         self._subimages = []
         for descriptor in descriptors_sorted:
             subimage_descriptor = SubImageDescriptor(descriptor)
-            file = file_factory.create_write_file(subimage_descriptor)
-            self._subimages.append(SubImage(subimage_descriptor, file))
+            file_handle = file_factory.create_write_file(subimage_descriptor)
+            self._subimages.append(SubImage(subimage_descriptor, file_handle))
 
     def write_image_file(self, input_combined):
         """Write out all the subimages"""
@@ -72,8 +72,8 @@ class CombinedFileReader(object):
         self._cached_last_subimage = None
         for descriptor in descriptors_sorted:
             subimage_descriptor = SubImageDescriptor(descriptor)
-            file = file_factory.create_read_file(subimage_descriptor)
-            self._subimages.append(SubImage(subimage_descriptor, file))
+            file_handle = file_factory.create_read_file(subimage_descriptor)
+            self._subimages.append(SubImage(subimage_descriptor, file_handle))
 
     def read_image_stream(self, start_coords_global, num_voxels_to_read):
         """Reads pixels from an abstract image stream"""

@@ -15,11 +15,11 @@ import argparse
 import os
 import sys
 
-from utils.combined_file import write_files
-from utils.file_descriptor import write_descriptor_file, \
+from niftysplit.utils.combined_file import write_files
+from niftysplit.utils.file_descriptor import write_descriptor_file, \
     generate_output_descriptors, generate_input_descriptors
-from utils.file_wrapper import FileHandleFactory
-from utils.metaio_reader import MetaIoFileFactory
+from niftysplit.utils.file_wrapper import FileHandleFactory
+from niftysplit.utils.metaio_reader import MetaIoFileFactory
 
 
 def split_file(input_file, filename_out_base, max_block_size_voxels,
