@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # coding=utf-8
 """
 Utility for reading and writing data to metaio (mhd/mha) files
@@ -100,7 +99,8 @@ class MetaIoFile(object):
             filename_raw = os.path.join(self._input_path,
                                         header["ElementDataFile"])
             self._file_wrapper = FileWrapper(filename_raw,
-                                             self._file_handle_factory, self._mode)
+                                             self._file_handle_factory,
+                                             self._mode)
         return self._file_wrapper
 
     def _get_file_streamer(self):

@@ -116,7 +116,7 @@ class TestHugeFileWrapper(fake_filesystem_unittest.TestCase):
         fake_file_handle_factory = FakeFileHandleFactory(fake_file)
         self.assertEqual(fake_file.closed, True)
         with file_wrapper.FileWrapper("abc", fake_file_handle_factory,
-                                          'rb') as wrapper:
+                                      'rb') as wrapper:
             self.assertEqual(fake_file.closed, False)
         self.assertEqual(fake_file.closed, True)
 
@@ -131,8 +131,8 @@ class TestHugeFileWrapper(fake_filesystem_unittest.TestCase):
         fake_file = FakeFile(
             range(0, image_size[0] * image_size[1] * image_size[2] - 1),
             bytes_per_voxel)
-        fake_file_handle_factory = FakeFileHandleFactory(fake_file)
-        wrapper = file_wrapper.FileWrapper("abc", fake_file_handle_factory, 'rb')
+        fake_handle_factory = FakeFileHandleFactory(fake_file)
+        wrapper = file_wrapper.FileWrapper("abc", fake_handle_factory, 'rb')
         self.assertEqual(fake_file.closed, True)
         wrapper.open()
         self.assertEqual(fake_file.filename, "abc")
@@ -327,7 +327,8 @@ class TestFileWrapper(unittest.TestCase):
             utils.metaio_reader.compute_bytes_per_voxel('MET_SHORT'), 2)
         self.assertEqual(
             utils.metaio_reader.compute_bytes_per_voxel('MET_USHORT'), 2)
-        self.assertEqual(utils.metaio_reader.compute_bytes_per_voxel('MET_INT'), 4)
+        self.assertEqual(utils.metaio_reader.compute_bytes_per_voxel('MET_INT'),
+                         4)
         self.assertEqual(
             utils.metaio_reader.compute_bytes_per_voxel('MET_UINT'), 4)
         self.assertEqual(

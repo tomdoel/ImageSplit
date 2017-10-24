@@ -1,4 +1,11 @@
-import copy
+# coding=utf-8
+"""
+Wrapper for an image which consists of one or more subimages
+
+Author: Tom Doel
+Copyright UCL 2017
+
+"""
 
 import numpy as np
 
@@ -38,7 +45,7 @@ class CombinedFileWriter(object):
             j_range_global = output_ranges[1]
             k_range_global = output_ranges[2]
             num_voxels_to_read_per_line = i_range_global[1] + 1 - \
-                                          i_range_global[0]
+                i_range_global[0]
 
             for k_global in range(k_range_global[0], 1 + k_range_global[1]):
                 for j_global in range(j_range_global[0], 1 + j_range_global[1]):

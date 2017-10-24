@@ -1,3 +1,12 @@
+# coding=utf-8
+"""
+Wraper for sub images that form part of a larger volume
+
+Author: Tom Doel
+Copyright UCL 2017
+
+"""
+
 import copy
 import os
 from math import ceil
@@ -52,8 +61,8 @@ def get_number_of_blocks(image_size, max_block_size):
     required to split the image into blocks that are subject to a maximum
     size limit """
 
-    return [int(ceil(float(image_size_element) / float(max_block_size_element))) for
-            image_size_element, max_block_size_element in
+    return [int(ceil(float(image_size_element) / float(max_block_size_element)))
+            for image_size_element, max_block_size_element in
             zip(image_size, max_block_size)]
 
 
@@ -262,7 +271,7 @@ def generate_input_descriptors(input_file_base, start_index):
                 full_image_size[2] = full_image_size[2] + current_image_size[2]
                 current_ranges[2][0] = current_ranges[2][1] + 1
                 current_ranges[2][1] = current_ranges[2][1] + \
-                                       current_image_size[2]
+                    current_image_size[2]
 
             # Update the combined image size
             combined_header["DimSize"] = full_image_size

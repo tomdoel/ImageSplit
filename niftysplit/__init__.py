@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 
-.. module:: niftysplit
-   :synopsis: Utilities for splitting and recombining large image files.
+.. module:: utils
+   :synopsis: Helper classes and functions for NiftySplit.
 
 """
