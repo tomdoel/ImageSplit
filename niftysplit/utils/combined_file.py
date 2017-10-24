@@ -6,12 +6,10 @@ from utils.file_descriptor import SubImageDescriptor
 from utils.sub_image import SubImage
 
 
-def write_files(descriptors_in, descriptors_out, file_factory, original_header,
-                output_type):
+def write_files(descriptors_in, descriptors_out, file_factory):
     """Creates a set of output files from the input files"""
     input_combined = CombinedFileReader(descriptors_in, file_factory)
-    output_combined = CombinedFileWriter(descriptors_out, file_factory,
-                                         original_header, output_type)
+    output_combined = CombinedFileWriter(descriptors_out, file_factory)
     output_combined.write_image_file(input_combined)
 
     input_combined.close()
@@ -22,22 +20,14 @@ class CombinedFileWriter(object):
     """A kind of virtual file for writing where the data are distributed
         across multiple real files. """
 
-    def __init__(self, descriptors, file_factory, header_template,
-                 element_type):
+    def __init__(self, descriptors, file_factory):
         """Create for the given set of descriptors"""
 
-        if element_type:
-            header_template = copy.deepcopy(header_template)
-            header_template["ElementType"] = element_type
         descriptors_sorted = sorted(descriptors, key=lambda k: k['index'])
         self._subimages = []
         for descriptor in descriptors_sorted:
             subimage_descriptor = SubImageDescriptor(descriptor)
-
-            file = file_factory.create_file(descriptor["filename"],
-                                            subimage_descriptor,
-                                            header_template)
-
+            file = file_factory.create_write_file(subimage_descriptor)
             self._subimages.append(SubImage(subimage_descriptor, file))
 
     def write_image_file(self, input_combined):
@@ -75,11 +65,7 @@ class CombinedFileReader(object):
         self._cached_last_subimage = None
         for descriptor in descriptors_sorted:
             subimage_descriptor = SubImageDescriptor(descriptor)
-
-            file = file_factory.create_file(descriptor["filename"],
-                                            subimage_descriptor,
-                                            None)
-
+            file = file_factory.create_read_file(subimage_descriptor)
             self._subimages.append(SubImage(subimage_descriptor, file))
 
     def read_image_stream(self, start_coords_global, num_voxels_to_read):

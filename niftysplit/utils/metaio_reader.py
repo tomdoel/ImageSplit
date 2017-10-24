@@ -17,14 +17,23 @@ from niftysplit.utils.file_wrapper import FileWrapper, FileStreamer
 class MetaIoFileFactory(object):
     """Factory for creating MetaIoFile classes"""
 
-    def __init__(self, file_handle_factory):
+    def __init__(self, file_handle_factory, output_header, output_type):
         self._file_handle_factory = file_handle_factory
+        self._output_header_template = copy.deepcopy(output_header)
+        if output_type:
+            self._output_header_template["ElementType"] = output_type
 
-    def create_file(self, filename, subimage_descriptor, header_template):
+    def create_read_file(self, subimage_descriptor):
+        """Create a MetaIoFile class for writing"""
+        filename = subimage_descriptor.filename
+        return MetaIoFile(filename, self._file_handle_factory, None)
+
+    def create_write_file(self, subimage_descriptor):
         """Create a MetaIoFile class for this filename and template"""
-        if header_template:
-            header_template["DimSize"] = subimage_descriptor.image_size
-            header_template["Origin"] = subimage_descriptor.origin_start
+        header_template = copy.deepcopy(self._output_header_template)
+        header_template["DimSize"] = subimage_descriptor.image_size
+        header_template["Origin"] = subimage_descriptor.origin_start
+        filename = subimage_descriptor.filename
         return MetaIoFile(filename, self._file_handle_factory, header_template)
 
 

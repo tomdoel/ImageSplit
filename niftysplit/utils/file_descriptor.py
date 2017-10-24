@@ -11,12 +11,16 @@ class SubImageDescriptor(object):
 
     def __init__(self, descriptor_dict):
         self._descriptor = descriptor_dict
+        self.filename = self._get_filename()
         self.image_size = self._get_image_size()
         self.origin_start = self._get_origin_start()
         self.origin_end = self._get_origin_end()
         self.roi_start = self._get_roi_start()
         self.roi_end = self._get_roi_end()
         self.ranges = self._get_ranges()
+
+    def _get_filename(self):
+        return self._descriptor["filename"]
 
     def _get_ranges(self):
         return self._descriptor["ranges"]
