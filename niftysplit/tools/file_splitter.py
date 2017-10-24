@@ -15,10 +15,10 @@ import argparse
 import os
 import sys
 
-from niftysplit.tools.file_wrapper import FileHandleFactory, write_files, \
-    generate_input_descriptors
 from utils.file_descriptor import write_descriptor_file, \
-    generate_output_descriptors
+    generate_output_descriptors, generate_input_descriptors
+from utils.file_wrapper import FileHandleFactory
+from utils.combined_file import write_files
 
 
 def split_file(input_file, filename_out_base, max_block_size_voxels,
