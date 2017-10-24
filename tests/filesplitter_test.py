@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from niftysplit.tools.file_splitter import get_number_of_blocks, \
-    get_block_coordinate_range, get_image_block_ranges, \
-    get_suggested_block_size
+from utils.file_descriptor import get_number_of_blocks, \
+    get_block_coordinate_range, get_suggested_block_size, get_image_block_ranges
 
 import unittest
 

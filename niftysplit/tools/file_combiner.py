@@ -16,18 +16,8 @@ import sys
 
 from niftysplit.tools.file_wrapper import FileHandleFactory, write_files, \
     generate_input_descriptors
-from niftysplit.tools import file_wrapper
-from niftysplit.tools.json_reader import read_json
-
-
-def load_descriptor(descriptor_filename):
-    """Loads and parses a file descriptor from disk"""
-    data = read_json(descriptor_filename)
-    if data["appname"] != "GIFT-Surg split data":
-        raise ValueError('Not a GIFT-Surg file')
-    if data["version"] != "1.0":
-        raise ValueError('Cannot read this file version')
-    return data
+from utils.file_descriptor import generate_descriptor_from_header, \
+    header_from_descriptor
 
 
 def combine_file(input_file_base, descriptor_filename, filename_out_base,
@@ -49,37 +39,6 @@ def combine_file(input_file_base, descriptor_filename, filename_out_base,
 
     write_files(descriptors_in, descriptors_out, file_factory, original_header,
                 output_type)
-
-
-def generate_descriptor_from_header(filename_out_base, original_header):
-    """Loads a header and uses to define a file descriptor"""
-    output_image_size = original_header["DimSize"]
-    descriptors_out = []
-    descriptor_out = {"index": 0, "suffix": "",
-                      "filename": filename_out_base + '.mhd',
-                      "ranges": [[0, output_image_size[0] - 1, 0, 0],
-                                 [0, output_image_size[1] - 1, 0, 0],
-                                 [0, output_image_size[2] - 1, 0, 0]]}
-    descriptors_out.append(descriptor_out)
-    return descriptors_out
-
-
-def header_from_descriptor(descriptor_filename):
-    """Creates a file header based on descriptor information
-
-    :param descriptor_filename:
-    :return:
-    """
-    descriptor = load_descriptor(descriptor_filename)
-    original_file_list = descriptor["source_files"]
-    if len(original_file_list) != 1:
-        raise ValueError(
-            'This function only supports data derived from a single file')
-    original_file_descriptor = original_file_list[0]
-    original_header = file_wrapper.load_mhd_header(
-        original_file_descriptor["filename"])
-    input_file_list = descriptor["split_files"]
-    return original_header, input_file_list
 
 
 def main(args):
