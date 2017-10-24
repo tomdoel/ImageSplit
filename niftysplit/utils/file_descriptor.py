@@ -9,7 +9,7 @@ def get_number_of_blocks(image_size, max_block_size):
     required to split the image into blocks that are subject to a maximum
     size limit """
 
-    return [int(ceil(image_size_element / max_block_size_element)) for
+    return [int(ceil(float(image_size_element) / float(max_block_size_element))) for
             image_size_element, max_block_size_element in
             zip(image_size, max_block_size)]
 
@@ -47,9 +47,9 @@ def get_suggested_block_size(image_size, number_of_blocks):
     specified number of blocks in each dimension, with each block being
     roughly equal in size """
 
-    return [ceil(image_size_element / number_of_blocks_element) for
-            image_size_element, number_of_blocks_element
-            in zip(image_size, number_of_blocks)]
+    return [ceil(float(image_size_element) / float(number_of_blocks_element))
+            for image_size_element, number_of_blocks_element in
+            zip(image_size, number_of_blocks)]
 
 
 def get_image_block_ranges(image_size, max_block_size, overlap_size):
