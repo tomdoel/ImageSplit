@@ -9,9 +9,9 @@ import numpy as np
 from parameterized import parameterized
 from pyfakefs import fake_filesystem_unittest
 
-import utils.metaio_reader
-from utils import file_wrapper
-from utils.file_wrapper import FileStreamer
+from niftysplit.utils import file_wrapper
+from niftysplit.utils.file_wrapper import FileStreamer
+from niftysplit.utils.metaio_reader import compute_bytes_per_voxel
 
 
 class FakeFileHandleFactory:
@@ -319,32 +319,18 @@ class TestFileWrapper(unittest.TestCase):
     """Tests for FileWrapper"""
 
     def test_get_bytes_per_voxel(self):
-        self.assertEqual(
-            utils.metaio_reader.compute_bytes_per_voxel('MET_CHAR'), 1)
-        self.assertEqual(
-            utils.metaio_reader.compute_bytes_per_voxel('MET_UCHAR'), 1)
-        self.assertEqual(
-            utils.metaio_reader.compute_bytes_per_voxel('MET_SHORT'), 2)
-        self.assertEqual(
-            utils.metaio_reader.compute_bytes_per_voxel('MET_USHORT'), 2)
-        self.assertEqual(utils.metaio_reader.compute_bytes_per_voxel('MET_INT'),
-                         4)
-        self.assertEqual(
-            utils.metaio_reader.compute_bytes_per_voxel('MET_UINT'), 4)
-        self.assertEqual(
-            utils.metaio_reader.compute_bytes_per_voxel('MET_LONG'), 4)
-        self.assertEqual(
-            utils.metaio_reader.compute_bytes_per_voxel('MET_ULONG'), 4)
-        self.assertEqual(
-            utils.metaio_reader.compute_bytes_per_voxel('MET_LONG_LONG'),
-            8)
-        self.assertEqual(
-            utils.metaio_reader.compute_bytes_per_voxel('MET_ULONG_LONG'),
-            8)
-        self.assertEqual(
-            utils.metaio_reader.compute_bytes_per_voxel('MET_FLOAT'), 4)
-        self.assertEqual(
-            utils.metaio_reader.compute_bytes_per_voxel('MET_DOUBLE'), 8)
+        self.assertEqual(compute_bytes_per_voxel('MET_CHAR'), 1)
+        self.assertEqual(compute_bytes_per_voxel('MET_UCHAR'), 1)
+        self.assertEqual(compute_bytes_per_voxel('MET_SHORT'), 2)
+        self.assertEqual(compute_bytes_per_voxel('MET_USHORT'), 2)
+        self.assertEqual(compute_bytes_per_voxel('MET_INT'), 4)
+        self.assertEqual(compute_bytes_per_voxel('MET_UINT'), 4)
+        self.assertEqual(compute_bytes_per_voxel('MET_LONG'), 4)
+        self.assertEqual(compute_bytes_per_voxel('MET_ULONG'), 4)
+        self.assertEqual(compute_bytes_per_voxel('MET_LONG_LONG'), 8)
+        self.assertEqual(compute_bytes_per_voxel('MET_ULONG_LONG'), 8)
+        self.assertEqual(compute_bytes_per_voxel('MET_FLOAT'), 4)
+        self.assertEqual(compute_bytes_per_voxel('MET_DOUBLE'), 8)
 
 
 if __name__ == '__main__':
