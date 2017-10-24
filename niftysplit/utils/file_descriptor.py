@@ -165,7 +165,7 @@ def header_from_descriptor(descriptor_filename):
         raise ValueError(
             'This function only supports data derived from a single file')
     original_file_descriptor = original_file_list[0]
-    original_header = file_wrapper.load_mhd_header(
+    original_header = load_mhd_header(
         original_file_descriptor["filename"])
     input_file_list = descriptor["split_files"]
     return original_header, input_file_list

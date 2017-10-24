@@ -15,6 +15,7 @@ from collections import OrderedDict
 import numpy as np
 
 from niftysplit.utils.utilities import get_linear_byte_offset
+from utils.metaio_reader import load_mhd_header
 
 
 def write_files(descriptors_in, descriptors_out, file_factory, original_header,
@@ -406,35 +407,6 @@ class FileHandleFactory(object):
         if not os.path.exists(folder):
             os.makedirs(folder)
         return open(filename, mode)
-
-
-def load_mhd_header(filename):
-    """Return an OrderedDict containing metadata loaded from an mhd file."""
-
-    metadata = OrderedDict()
-
-    with open(filename) as header_file:
-        for line in header_file:
-            (key, val) = [x.strip() for x in line.split("=")]
-            if key in ['ElementSpacing', 'Offset', 'CenterOfRotation',
-                       'TransformMatrix']:
-                val = [float(s) for s in val.split()]
-            elif key in ['NDims', 'ElementNumberOfChannels']:
-                val = int(val)
-            elif key in ['DimSize']:
-                val = [int(s) for s in val.split()]
-            elif key in ['BinaryData', 'BinaryDataByteOrderMSB',
-                         'CompressedData']:
-                # pylint: disable=simplifiable-if-statement
-                # pylint: disable=redefined-variable-type
-                if val.lower() == "true":
-                    val = True
-                else:
-                    val = False
-
-            metadata[key] = val
-
-    return metadata
 
 
 def compute_bytes_per_voxel(element_type):

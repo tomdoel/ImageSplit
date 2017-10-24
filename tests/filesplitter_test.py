@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from utils.file_descriptor import get_number_of_blocks, \
+from niftysplit.utils.file_descriptor import get_number_of_blocks, \
     get_block_coordinate_range, get_suggested_block_size, get_image_block_ranges
 
 import unittest
