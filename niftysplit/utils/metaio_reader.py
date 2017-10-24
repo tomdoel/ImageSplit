@@ -14,6 +14,20 @@ from collections import OrderedDict
 from niftysplit.utils.file_wrapper import FileWrapper, FileStreamer
 
 
+class MetaIoFileFactory(object):
+    """Factory for creating MetaIoFile classes"""
+
+    def __init__(self, file_handle_factory):
+        self._file_handle_factory = file_handle_factory
+
+    def create_file(self, filename, subimage_descriptor, header_template):
+        """Create a MetaIoFile class for this filename and template"""
+        if header_template:
+            header_template["DimSize"] = subimage_descriptor.image_size
+            header_template["Origin"] = subimage_descriptor.origin_start
+        return MetaIoFile(filename, self._file_handle_factory, header_template)
+
+
 class MetaIoFile(object):
     """A class for reading or writing 3D imaging data to/from a MetaIO file
     pair (.mhd and .raw). """
@@ -227,5 +241,3 @@ def get_default_metadata():
          ('StudyDate', []), ('StudyTime', [])])
 
 
-class MetaIoFileFactory(object):
-    pass

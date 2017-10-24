@@ -22,7 +22,7 @@ from utils.metaio_reader import MetaIoFileFactory
 
 
 def combine_file(input_file_base, descriptor_filename, filename_out_base,
-                 start_index, output_type, file_factory, file_handle_factory):
+                 start_index, output_type, file_factory):
     """Combines several overlapping files into one output file"""
 
     if not filename_out_base:
@@ -38,7 +38,7 @@ def combine_file(input_file_base, descriptor_filename, filename_out_base,
     descriptors_out = generate_descriptor_from_header(filename_out_base,
                                                       original_header)
 
-    write_files(descriptors_in, descriptors_out, file_factory, file_handle_factory, original_header,
+    write_files(descriptors_in, descriptors_out, file_factory, original_header,
                 output_type)
 
 
@@ -72,7 +72,7 @@ def main(args):
         raise ValueError('No filename was specified')
     else:
         combine_file(args.filename, args.descriptor, args.out, args.startindex,
-                     args.type, MetaIoFileFactory(), FileHandleFactory())
+                     args.type, MetaIoFileFactory(FileHandleFactory()))
 
 
 if __name__ == '__main__':
