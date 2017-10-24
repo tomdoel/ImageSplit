@@ -21,7 +21,7 @@ from utils.combined_file import write_files
 
 
 def combine_file(input_file_base, descriptor_filename, filename_out_base,
-                 start_index, output_type, file_factory):
+                 start_index, output_type, file_handle_factory):
     """Combines several overlapping files into one output file"""
 
     if not filename_out_base:
@@ -37,7 +37,7 @@ def combine_file(input_file_base, descriptor_filename, filename_out_base,
     descriptors_out = generate_descriptor_from_header(filename_out_base,
                                                       original_header)
 
-    write_files(descriptors_in, descriptors_out, file_factory, original_header,
+    write_files(descriptors_in, descriptors_out, file_handle_factory, original_header,
                 output_type)
 
 

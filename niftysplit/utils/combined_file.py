@@ -8,11 +8,11 @@ from utils.metaio_reader import compute_bytes_per_voxel, get_numpy_datatype, \
 from utils.sub_image import SubImage
 
 
-def write_files(descriptors_in, descriptors_out, file_factory, original_header,
+def write_files(descriptors_in, descriptors_out, file_handle_factory, original_header,
                 output_type):
     """Creates a set of output files from the input files"""
-    input_combined = CombinedFileReader(descriptors_in, file_factory)
-    output_combined = CombinedFileWriter(descriptors_out, file_factory,
+    input_combined = CombinedFileReader(descriptors_in, file_handle_factory)
+    output_combined = CombinedFileWriter(descriptors_out, file_handle_factory,
                                          original_header, output_type)
     output_combined.write_image_file(input_combined)
 
@@ -24,7 +24,7 @@ class CombinedFileWriter(object):
     """A kind of virtual file for writing where the data are distributed
         across multiple real files. """
 
-    def __init__(self, descriptors, file_factory, header_template,
+    def __init__(self, descriptors, file_handle_factory, header_template,
                  element_type):
         """Create for the given set of descriptors"""
 
@@ -44,7 +44,7 @@ class CombinedFileWriter(object):
             header_template["DimSize"] = subimage_descriptor.image_size
             header_template["Origin"] = subimage_descriptor.origin_start
 
-            file = MetaIoFile(descriptor["filename"], file_factory,
+            file = MetaIoFile(descriptor["filename"], file_handle_factory,
                               header_template)
 
             self._subimages.append(SubImage(subimage_descriptor, file))
@@ -78,13 +78,13 @@ class CombinedFileReader(object):
     """A kind of virtual file for reading where the data are distributed
     across multiple real files. """
 
-    def __init__(self, descriptors, file_factory):
+    def __init__(self, descriptors, file_handle_factory):
         descriptors_sorted = sorted(descriptors, key=lambda k: k['index'])
         self._subimages = []
         self._cached_last_subimage = None
         for descriptor in descriptors_sorted:
             subimage_descriptor = SubImageDescriptor(descriptor)
-            file = MetaIoFile(descriptor["filename"], file_factory, None)
+            file = MetaIoFile(descriptor["filename"], file_handle_factory, None)
 
             self._subimages.append(SubImage(subimage_descriptor, file))
 

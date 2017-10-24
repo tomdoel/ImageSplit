@@ -15,7 +15,7 @@ import numpy as np
 from niftysplit.utils.utilities import get_linear_byte_offset
 
 
-class HugeFileStreamer(object):
+class FileStreamer(object):
     """A class to handle streaming of image data with arbitrarily large files"""
 
     def __init__(self, file_wrapper, image_size, bytes_per_voxel, numpy_format):
@@ -54,7 +54,7 @@ class HugeFileStreamer(object):
         self._file_wrapper.close()
 
 
-class HugeFileWrapper(object):
+class FileWrapper(object):
     """Read or write to arbitrarily large files."""
 
     def __init__(self, name, file_handle_factory, mode):

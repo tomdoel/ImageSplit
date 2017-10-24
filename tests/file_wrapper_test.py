@@ -11,7 +11,7 @@ from pyfakefs import fake_filesystem_unittest
 
 import utils.metaio_reader
 from utils import file_wrapper
-from utils.file_wrapper import HugeFileStreamer
+from utils.file_wrapper import FileStreamer
 
 
 class FakeFileHandleFactory:
@@ -94,8 +94,8 @@ class TestHugeFileWrapper(fake_filesystem_unittest.TestCase):
         fake_file = FakeFile(
             range(0, image_size[0] * image_size[1] * image_size[2] - 1),
             bytes_per_voxel)
-        fake_file_factory = FakeFileHandleFactory(fake_file)
-        wrapper = file_wrapper.HugeFileWrapper("abc", fake_file_factory, 'rb')
+        fake_file_handle_factory = FakeFileHandleFactory(fake_file)
+        wrapper = file_wrapper.FileWrapper("abc", fake_file_handle_factory, 'rb')
         self.assertEqual(fake_file.closed, True)
         self.assertEqual(wrapper.get_handle(), fake_file)
         self.assertEqual(fake_file.filename, "abc")
@@ -113,9 +113,9 @@ class TestHugeFileWrapper(fake_filesystem_unittest.TestCase):
         fake_file = FakeFile(
             range(0, image_size[0] * image_size[1] * image_size[2] - 1),
             bytes_per_voxel)
-        fake_file_factory = FakeFileHandleFactory(fake_file)
+        fake_file_handle_factory = FakeFileHandleFactory(fake_file)
         self.assertEqual(fake_file.closed, True)
-        with file_wrapper.HugeFileWrapper("abc", fake_file_factory,
+        with file_wrapper.FileWrapper("abc", fake_file_handle_factory,
                                           'rb') as wrapper:
             self.assertEqual(fake_file.closed, False)
         self.assertEqual(fake_file.closed, True)
@@ -131,8 +131,8 @@ class TestHugeFileWrapper(fake_filesystem_unittest.TestCase):
         fake_file = FakeFile(
             range(0, image_size[0] * image_size[1] * image_size[2] - 1),
             bytes_per_voxel)
-        fake_file_factory = FakeFileHandleFactory(fake_file)
-        wrapper = file_wrapper.HugeFileWrapper("abc", fake_file_factory, 'rb')
+        fake_file_handle_factory = FakeFileHandleFactory(fake_file)
+        wrapper = file_wrapper.FileWrapper("abc", fake_file_handle_factory, 'rb')
         self.assertEqual(fake_file.closed, True)
         wrapper.open()
         self.assertEqual(fake_file.filename, "abc")
@@ -176,11 +176,11 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
             '/test/test_read_image_stream.bin', base_data_numpy,
             bytes_per_voxel,
             is_signed)
-        file_factory = file_wrapper.FileHandleFactory()
-        wrapper = file_wrapper.HugeFileWrapper(
-            '/test/test_read_image_stream.bin', file_factory, 'rb')
-        file_streamer = HugeFileStreamer(wrapper, image_size, bytes_per_voxel,
-                                         TestHugeFileStreamer.get_np_type(
+        file_handle_factory = file_wrapper.FileHandleFactory()
+        wrapper = file_wrapper.FileWrapper(
+            '/test/test_read_image_stream.bin', file_handle_factory, 'rb')
+        file_streamer = FileStreamer(wrapper, image_size, bytes_per_voxel,
+                                     TestHugeFileStreamer.get_np_type(
                                              bytes_per_voxel, is_signed))
         start = start_coords[0] + start_coords[1] * image_size[0] + \
             start_coords[2] * image_size[0] * image_size[1]
@@ -199,12 +199,12 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
     ])
     def test_write_image_stream(self, image_size, bytes_per_voxel, is_signed,
                                 start_coords, num_voxels_to_write):
-        file_factory = file_wrapper.FileHandleFactory()
+        file_handle_factory = file_wrapper.FileHandleFactory()
 
-        wrapper = file_wrapper.HugeFileWrapper(
-            '/test/test_write_image_stream.bin', file_factory, 'wb')
-        file_streamer = HugeFileStreamer(wrapper, image_size, bytes_per_voxel,
-                                         TestHugeFileStreamer.get_np_type(
+        wrapper = file_wrapper.FileWrapper(
+            '/test/test_write_image_stream.bin', file_handle_factory, 'wb')
+        file_streamer = FileStreamer(wrapper, image_size, bytes_per_voxel,
+                                     TestHugeFileStreamer.get_np_type(
                                              bytes_per_voxel, is_signed))
         start = start_coords[0] + start_coords[1] * image_size[0] + \
             start_coords[2] * image_size[0] * image_size[1]

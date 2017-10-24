@@ -11,15 +11,15 @@ import copy
 import os
 from collections import OrderedDict
 
-from niftysplit.utils.file_wrapper import HugeFileWrapper, HugeFileStreamer
+from niftysplit.utils.file_wrapper import FileWrapper, FileStreamer
 
 
 class MetaIoFile(object):
     """A class for reading or writing 3D imaging data to/from a MetaIO file
     pair (.mhd and .raw). """
 
-    def __init__(self, header_filename, file_factory, header_template):
-        self._file_factory = file_factory
+    def __init__(self, header_filename, file_handle_factory, header_template):
+        self._file_handle_factory = file_handle_factory
         self._header_filename = header_filename
         self._input_path = os.path.dirname(os.path.abspath(header_filename))
         self._file_wrapper = None
@@ -76,8 +76,8 @@ class MetaIoFile(object):
             header = self._get_header()
             filename_raw = os.path.join(self._input_path,
                                         header["ElementDataFile"])
-            self._file_wrapper = HugeFileWrapper(filename_raw,
-                                                 self._file_factory, self._mode)
+            self._file_wrapper = FileWrapper(filename_raw,
+                                             self._file_handle_factory, self._mode)
         return self._file_wrapper
 
     def _get_file_streamer(self):
@@ -90,10 +90,10 @@ class MetaIoFile(object):
             numpy_format = get_numpy_datatype(header["ElementType"],
                                               header["BinaryDataByteOrderMSB"])
             subimage_size = header["DimSize"]
-            self._file_streamer = HugeFileStreamer(self._get_file_wrapper(),
-                                                   subimage_size,
-                                                   bytes_per_voxel,
-                                                   numpy_format)
+            self._file_streamer = FileStreamer(self._get_file_wrapper(),
+                                               subimage_size,
+                                               bytes_per_voxel,
+                                               numpy_format)
         return self._file_streamer
 
     def close(self):
