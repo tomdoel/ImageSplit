@@ -14,6 +14,7 @@ from collections import OrderedDict
 
 import numpy as np
 
+from niftysplit.utils.file_descriptor import SubImageDescriptor
 from niftysplit.utils.utilities import get_linear_byte_offset
 from utils.metaio_reader import load_mhd_header
 
@@ -50,8 +51,14 @@ class CombinedFileWriter(object):
                                                 header_template[
                                                     "BinaryDataByteOrderMSB"])
         for descriptor in descriptors_sorted:
-            self._subimages.append(
-                SubImage(descriptor, file_factory, header_template))
+            subimage_descriptor = SubImageDescriptor(descriptor)
+            header_template["DimSize"] = subimage_descriptor.image_size
+            header_template["Origin"] = subimage_descriptor.origin_start
+
+            file = MetaIoFile(descriptor["filename"], file_factory,
+                              header_template)
+
+            self._subimages.append(SubImage(subimage_descriptor, file))
 
     def write_image_file(self, input_combined):
         """Write out all the subimages"""
@@ -87,7 +94,10 @@ class CombinedFileReader(object):
         self._subimages = []
         self._cached_last_subimage = None
         for descriptor in descriptors_sorted:
-            self._subimages.append(SubImage(descriptor, file_factory, None))
+            subimage_descriptor = SubImageDescriptor(descriptor)
+            file = MetaIoFile(descriptor["filename"], file_factory, None)
+
+            self._subimages.append(SubImage(subimage_descriptor, file))
 
     def read_image_stream(self, start_coords_global, num_voxels_to_read):
         """Reads pixels from an abstract image stream"""
@@ -136,28 +146,18 @@ class CombinedFileReader(object):
 class SubImage(object):
     """An image which forms part of a larger image"""
 
-    def __init__(self, descriptor, file_factory, header_template):
+    def __init__(self, descriptor, data_source):
         self._descriptor = descriptor
+        self._data_source = data_source
 
         # Construct the origin offset used to convert from global
         # coordinates. This excludes overlapping voxels
-        self._image_size = [1 + this_range[1] - this_range[0] for this_range in
-                            descriptor["ranges"]]
-        self._origin_start = [this_range[0] for this_range in
-                              descriptor["ranges"]]
-        self._origin_end = [this_range[1] for this_range in
-                            descriptor["ranges"]]
-        self._roi_start = [this_range[0] + this_range[2] for this_range in
-                           descriptor["ranges"]]
-        self._roi_end = [this_range[1] - this_range[3] for this_range in
-                         descriptor["ranges"]]
-        self._ranges = descriptor["ranges"]
-
-        if header_template:
-            header_template["DimSize"] = self._image_size
-            header_template["Origin"] = self._origin_start
-        self._file = MetaIoFile(descriptor["filename"], file_factory,
-                                header_template)
+        self._image_size = self._descriptor.image_size
+        self._origin_start = self._descriptor.origin_start
+        self._origin_end = self._descriptor.origin_end
+        self._roi_start = self._descriptor.roi_start
+        self._roi_end = self._descriptor.roi_end
+        self._ranges = self._descriptor.ranges
 
     def get_ranges(self):
         """Returns the full range of global coordinates covered by this
@@ -170,7 +170,7 @@ class SubImage(object):
         image location """
 
         start_coords_local = self._convert_coords_to_local(start_coords)
-        self._file.write_image_stream(start_coords_local, image_line)
+        self._data_source.write_image_stream(start_coords_local, image_line)
 
     def read_image_stream(self, start_coords, num_voxels_to_read):
         """Reads a line of image data from a binary file at the specified
@@ -184,8 +184,8 @@ class SubImage(object):
             num_voxels_to_read = self._roi_end[0] - start_coords[0] + 1
 
         start_coords_local = self._convert_coords_to_local(start_coords)
-        return self._file.read_image_stream(start_coords_local,
-                                            num_voxels_to_read)
+        return self._data_source.read_image_stream(start_coords_local,
+                                                   num_voxels_to_read)
 
     def contains_voxel(self, start_coords_global, must_be_in_roi):
         """Determines if the specified voxel lies within the ROI of this
@@ -213,11 +213,11 @@ class SubImage(object):
 
     def close(self):
         """Close all streams and files"""
-        self._file.close()
+        self._data_source.close()
 
     def get_bytes_per_voxel(self):
         """Return the number of bytes used to represent a single voxel"""
-        return self._file.get_bytes_per_voxel()
+        return self._data_source.get_bytes_per_voxel()
 
     def _convert_coords_to_local(self, start_coords):
         return [start_coord - origin_coord for start_coord, origin_coord in

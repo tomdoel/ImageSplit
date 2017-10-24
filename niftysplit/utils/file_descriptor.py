@@ -1,7 +1,44 @@
 from math import ceil
 
-from tools import file_wrapper
-from utils.json_reader import write_json, read_json
+from niftysplit.utils.json_reader import write_json, read_json
+from utils.metaio_reader import load_mhd_header
+
+
+class SubImageDescriptor(object):
+    """Describes an image in relation to a larger image"""
+
+    def __init__(self, descriptor_dict):
+        self._descriptor = descriptor_dict
+        self.image_size = self._get_image_size()
+        self.origin_start = self._get_origin_start()
+        self.origin_end = self._get_origin_end()
+        self.roi_start = self._get_roi_start()
+        self.roi_end = self._get_roi_end()
+        self.ranges = self._get_ranges()
+
+    def _get_ranges(self):
+        return self._descriptor["ranges"]
+
+    def _get_roi_end(self):
+        return [this_range[1] - this_range[3] for this_range in
+                self._descriptor["ranges"]]
+
+    def _get_roi_start(self):
+        return [this_range[0] + this_range[2] for this_range in
+                self._descriptor["ranges"]]
+
+    def _get_origin_end(self):
+        return [this_range[1] for this_range in
+                self._descriptor["ranges"]]
+
+    def _get_origin_start(self):
+        return [this_range[0] for this_range in
+                self._descriptor["ranges"]]
+
+    def _get_image_size(self):
+        """Return the size of this subvolume including overlap regions"""
+        return [1 + this_range[1] - this_range[0] for this_range in
+                self._descriptor["ranges"]]
 
 
 def get_number_of_blocks(image_size, max_block_size):
@@ -121,17 +158,6 @@ def convert_to_array(scalar_or_list, parameter_name, num_dims):
                                       'containing one entry for '
                                       'each image dimension')
     return array
-
-
-class FileDescriptor(object):
-    """Describes an image in relation to a larger image"""
-    def __init__(self, file_name, index, suffix, i_range, j_range, k_range):
-        self.suffix = suffix
-        self.index = index
-        self.file_name = file_name
-        self.i_range = i_range
-        self.j_range = j_range
-        self.k_range = k_range
 
 
 def load_descriptor(descriptor_filename):
