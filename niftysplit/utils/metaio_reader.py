@@ -225,3 +225,7 @@ def get_default_metadata():
          ('Comment', []), ('SeriesDescription', []), ('AcquisitionDate', []),
          ('AcquisitionTime', []),
          ('StudyDate', []), ('StudyTime', [])])
+
+
+class MetaIoFileFactory(object):
+    pass

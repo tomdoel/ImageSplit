@@ -15,15 +15,16 @@ import argparse
 import os
 import sys
 
+from utils.combined_file import write_files
 from utils.file_descriptor import write_descriptor_file, \
     generate_output_descriptors, generate_input_descriptors
 from utils.file_wrapper import FileHandleFactory
-from utils.combined_file import write_files
+from utils.metaio_reader import MetaIoFileFactory
 
 
 def split_file(input_file, filename_out_base, max_block_size_voxels,
                overlap_size_voxels, start_index, output_type,
-               file_handle_factory):
+               file_factory, file_handle_factory):
     """Saves the specified image file as a number of smaller files"""
 
     input_file_base = os.path.splitext(input_file)[0]
@@ -37,7 +38,7 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
                                                   max_block_size_voxels,
                                                   overlap_size_voxels, header)
 
-    write_files(descriptors_in, descriptors_out, file_handle_factory, header,
+    write_files(descriptors_in, descriptors_out, file_factory, file_handle_factory, header,
                 output_type)
 
     write_descriptor_file(descriptors_in, descriptors_out, filename_out_base)
@@ -75,7 +76,7 @@ def main(args):
     else:
         assert sys.version_info >= (3, 0)
         split_file(args.filename, args.out, args.max, args.overlap,
-                   args.startindex, args.type, FileHandleFactory())
+                   args.startindex, args.type, MetaIoFileFactory(), FileHandleFactory())
 
 
 if __name__ == '__main__':
