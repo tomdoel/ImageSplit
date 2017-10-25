@@ -186,8 +186,8 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
             start_coords[2] * image_size[0] * image_size[1]
         end = start + num_voxels_to_read
         expected = base_data_numpy[start:end]
-        read_file_contents = file_streamer.read_image_stream(start_coords,
-                                                             num_voxels_to_read)
+        read_file_contents = file_streamer.read_line(start_coords,
+                                                     num_voxels_to_read)
         expected = np.asarray(expected, dtype=TestHugeFileStreamer.get_np_type(
             bytes_per_voxel, is_signed))
         self.assertTrue(np.array_equal(expected, read_file_contents))
@@ -221,8 +221,8 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
         to_write_numpy = np.asarray(to_write_voxels,
                                     dtype=TestHugeFileStreamer.get_np_type(
                                         bytes_per_voxel, is_signed))
-        file_streamer.write_image_stream([0, 0, 0], base_data_numpy)
-        file_streamer.write_image_stream(start_coords, to_write_numpy)
+        file_streamer.write_line([0, 0, 0], base_data_numpy)
+        file_streamer.write_line(start_coords, to_write_numpy)
         file_streamer.close()
         read_file_contents = TestHugeFileStreamer.read_from_fake_file(
             '/test/test_write_image_stream.bin',

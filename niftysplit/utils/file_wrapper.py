@@ -24,7 +24,7 @@ class FileStreamer(object):
         self._file_wrapper = file_wrapper
         self._numpy_format = numpy_format
 
-    def read_image_stream(self, start_coords, num_voxels_to_read):
+    def read_line(self, start_coords, num_voxels):
         """Read a line of image data from a binary file at the specified
         image location """
 
@@ -34,10 +34,10 @@ class FileStreamer(object):
 
         data_type = np.dtype(self._numpy_format)
         bytes_array = self._file_wrapper.get_handle().read(
-            num_voxels_to_read * self._bytes_per_voxel)
+            num_voxels * self._bytes_per_voxel)
         return np.fromstring(bytes_array, dtype=data_type)
 
-    def write_image_stream(self, start_coords, image_line):
+    def write_line(self, start_coords, image_line):
         """Write a line of image data to a binary file at the specified image
         location """
 

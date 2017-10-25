@@ -62,18 +62,18 @@ class MetaIoFile(object):
             self._mode = 'rb'
             self._header = None
 
-    def write_image_stream(self, start_coords, image_line):
+    def write_line(self, start_coords, image_line):
         """Write consecutive voxels to the raw binary file."""
 
-        return self._get_file_streamer().write_image_stream(start_coords,
-                                                            image_line)
+        return self._get_file_streamer().write_line(start_coords,
+                                                    image_line)
 
-    def read_image_stream(self, start_coords, num_voxels_to_read):
+    def read_line(self, start_coords, num_voxels_to_read):
         """Read consecutive voxels of image data from the raw binary file
         starting at the specified coordinates. """
 
-        return self._get_file_streamer().read_image_stream(start_coords,
-                                                           num_voxels_to_read)
+        return self._get_file_streamer().read_line(start_coords,
+                                                   num_voxels_to_read)
 
     def get_bytes_per_voxel(self):
         """Return the number of bytes used to represent a single voxel in
@@ -91,7 +91,7 @@ class MetaIoFile(object):
         return self._header
 
     def _get_file_wrapper(self):
-        """Return the HugeFileWrapper representing this image, creating it if
+        """Return the FileWrapper representing this image, creating it if
         it does not already exist. """
 
         if not self._file_wrapper:
@@ -104,7 +104,7 @@ class MetaIoFile(object):
         return self._file_wrapper
 
     def _get_file_streamer(self):
-        """Return the HugeFileStreamer representing this image, creating it
+        """Return the FileStreamer representing this image, creating it
         if it does not already exist. """
 
         if not self._file_streamer:
