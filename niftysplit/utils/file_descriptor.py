@@ -22,6 +22,7 @@ class SubImageDescriptor(object):
         self._descriptor = descriptor_dict
         self.filename = self._get_filename()
         self.image_size = self._get_image_size()
+        self.dim_order = self._get_dim_order()
         self.origin_start = self._get_origin_start()
         self.origin_end = self._get_origin_end()
         self.roi_start = self._get_roi_start()
@@ -33,6 +34,9 @@ class SubImageDescriptor(object):
 
     def _get_ranges(self):
         return self._descriptor["ranges"]
+
+    def _get_dim_order(self):
+        return self._descriptor["dim_order"]
 
     def _get_roi_end(self):
         return [this_range[1] - this_range[3] for this_range in
@@ -137,7 +141,7 @@ def write_descriptor_file(descriptors_in, descriptors_out, filename_out_base):
 
 
 def generate_output_descriptors(filename_out_base, max_block_size_voxels,
-                                overlap_size_voxels, header):
+                                overlap_size_voxels, dim_order, header):
     """Creates descriptors represeting file output"""
     image_size = header["DimSize"]
     num_dims = header["NDims"]
@@ -155,7 +159,8 @@ def generate_output_descriptors(filename_out_base, max_block_size_voxels,
         output_filename_header = filename_out_base + suffix + ".mhd"
         file_descriptor_out = {"filename": output_filename_header,
                                "ranges": subimage_range, "suffix": suffix,
-                               "index": index}
+                               "index": index,
+                               "dim_order": dim_order}
         descriptors_out.append(file_descriptor_out)
         index += 1
     return descriptors_out
@@ -188,9 +193,12 @@ def load_descriptor(descriptor_filename):
 def generate_descriptor_from_header(filename_out_base, original_header):
     """Load a header and uses to define a file descriptor"""
     output_image_size = original_header["DimSize"]
+    dim_order = [1, 2, 3]  # ToDo: get from header
     descriptors_out = []
-    descriptor_out = {"index": 0, "suffix": "",
+    descriptor_out = {"index": 0,
+                      "suffix": "",
                       "filename": filename_out_base + '.mhd',
+                      "dim_order": dim_order,
                       "ranges": [[0, output_image_size[0] - 1, 0, 0],
                                  [0, output_image_size[1] - 1, 0, 0],
                                  [0, output_image_size[2] - 1, 0, 0]]}

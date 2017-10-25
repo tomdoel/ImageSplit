@@ -36,6 +36,8 @@ class MetaIoFileFactory(object):
         return MetaIoFile(filename, self._file_handle_factory, header_template)
 
 
+
+
 class MetaIoFile(object):
     """A class for reading or writing 3D imaging data to/from a MetaIO file
     pair (.mhd and .raw). """
@@ -60,15 +62,23 @@ class MetaIoFile(object):
         else:
             # File is for reading
             self._mode = 'rb'
-            self._header = None
+            self._header = load_mhd_header(header_filename)
 
-    def write_line(self, start_coords, image_line):
+        self._bytes_per_voxel = compute_bytes_per_voxel(header["ElementType"])
+        self._numpy_format = get_numpy_datatype(header["ElementType"],
+                                          header["BinaryDataByteOrderMSB"])
+        self._subimage_size = header["DimSize"]
+        self._dimension_ordering = get_dimension_ordering(header)
+
+
+    def write_line(self, start_coords, image_line, direction):
         """Write consecutive voxels to the raw binary file."""
 
-        return self._get_file_streamer().write_line(start_coords,
-                                                    image_line)
+        if direction != 1:
+            raise ValueError("MetaIoFile only supports regular coordinates")
+        return self._get_file_streamer().write_line(start_coords, image_line)
 
-    def read_line(self, start_coords, num_voxels_to_read):
+    def read_line(self, start_coords, num_voxels_to_read, direction):
         """Read consecutive voxels of image data from the raw binary file
         starting at the specified coordinates. """
 
@@ -81,6 +91,19 @@ class MetaIoFile(object):
 
         header = self._get_header()
         return compute_bytes_per_voxel(header["ElementType"])
+
+    def get_dimension_ordering(self):
+        """
+        Return the preferred dimension ordering for writing data.
+
+        Returns an array of 3 element, where each element represents a dimension
+        in the global coordinate system numbered from 1 to 3 and is positive if
+        data are to be written in ascending coordinates (in the global system)
+        or negative if to be written in descending global coordinates along that
+        dimension
+        """
+
+        return self._dimension_ordering
 
     def _get_header(self):
         """Return an OrderedDict containing the MetaIO metaheader metadata
@@ -108,15 +131,11 @@ class MetaIoFile(object):
         if it does not already exist. """
 
         if not self._file_streamer:
-            header = self._get_header()
-            bytes_per_voxel = compute_bytes_per_voxel(header["ElementType"])
-            numpy_format = get_numpy_datatype(header["ElementType"],
-                                              header["BinaryDataByteOrderMSB"])
-            subimage_size = header["DimSize"]
             self._file_streamer = FileStreamer(self._get_file_wrapper(),
-                                               subimage_size,
-                                               bytes_per_voxel,
-                                               numpy_format)
+                                               self._subimage_size,
+                                               self._bytes_per_voxel,
+                                               self._numpy_format,
+                                               self._dimension_ordering)
         return self._file_streamer
 
     def close(self):
@@ -231,6 +250,10 @@ def save_mhd_header(filename, metadata):
     file_handle = open(filename, 'w')
     file_handle.write(header)
     file_handle.close()
+
+
+def get_dimension_ordering(header):
+    return [1, 2, 3]  # ToDo
 
 
 def get_default_metadata():

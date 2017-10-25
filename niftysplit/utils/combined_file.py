@@ -39,22 +39,62 @@ class CombinedFileWriter(object):
 
     def write_image_file(self, input_combined):
         """Write out all the subimages"""
+
+        # Iterate over all the files that will be created
         for next_image in self._subimages:
             output_ranges = next_image.get_ranges()
-            i_range_global = output_ranges[0]
-            j_range_global = output_ranges[1]
-            k_range_global = output_ranges[2]
-            num_voxels_to_read_per_line = i_range_global[1] + 1 - \
-                i_range_global[0]
 
-            for k_global in range(k_range_global[0], 1 + k_range_global[1]):
-                for j_global in range(j_range_global[0], 1 + j_range_global[1]):
-                    start_coords_global = [i_range_global[0], j_global,
-                                           k_global]
-                    image_line = input_combined.read_image_stream(
-                        start_coords_global, num_voxels_to_read_per_line)
-                    next_image.write_image_stream(start_coords_global,
-                                                  image_line)
+            # The order in which we iterate over dimensions depends on the
+            # preferred ordering of the output file
+            dimension_ordering = next_image.get_dimension_ordering()
+
+            u_start, u_end, u_step, u_length = self._get_range(
+                dimension_ordering, output_ranges, 0)
+            v_start, v_end, v_step, v_length = self._get_range(
+                dimension_ordering, output_ranges, 1)
+            w_start, w_end, w_step, w_length = self._get_range(
+                dimension_ordering, output_ranges, 2)
+
+            voxels_per_line = u_length
+            read_direction = dimension_ordering[0]
+
+            for w in range(w_start, w_end, w_step):
+                for v in range(v_start, v_end, v_step):
+                    start_coords_global = self.get_start_coordinates(
+                        dimension_ordering, u_start, v, w)
+
+                    image_line = input_combined.read_line(
+                        start_coords_global, voxels_per_line, read_direction)
+                    next_image.write_line(start_coords_global,
+                                          image_line, read_direction)
+
+    def get_start_coordinates(self, dimension_ordering, u_start, v, w):
+        u = u_start
+        v_dimension = abs(dimension_ordering[1]) - 1
+        w_dimension = abs(dimension_ordering[2]) - 1
+        u_dimension = abs(dimension_ordering[0]) - 1
+        start_coords_global = [0, 0, 0]
+        start_coords_global[u_dimension] = u
+        start_coords_global[v_dimension] = v
+        start_coords_global[w_dimension] = w
+        return start_coords_global
+
+    def _get_range(self, dimension_ordering, output_ranges, index):
+
+        dimension = abs(dimension_ordering[index]) - 1
+        ranges = output_ranges[dimension]
+        voxels_per_line = ranges[1] + 1 - ranges[0]
+
+        if dimension_ordering[0] < 0:
+            x_start = ranges[1]
+            x_end = ranges[0] - 1
+            x_step = -1
+        else:
+            x_start = ranges[0]
+            x_end = ranges[1] + 1
+            x_step = 1
+
+        return x_start, x_end, x_step, voxels_per_line
 
     def close(self):
         """Close all files and streams"""
@@ -75,23 +115,37 @@ class CombinedFileReader(object):
             file_handle = file_factory.create_read_file(subimage_descriptor)
             self._subimages.append(SubImage(subimage_descriptor, file_handle))
 
-    def read_image_stream(self, start_coords_global, num_voxels_to_read):
-        """Reads pixels from an abstract image stream"""
+    def read_image_stream(self, start_coords_global, num_voxels_to_read,
+                          read_direction):
+        """
+        Reads pixels from an abstract image stream
+
+        :param start_coords_global: Global coordinates of first voxel to read
+        :param num_voxels_to_read: Number of voxels to read
+        :param read_direction: +1 read forward along first dimension
+                               -1 read back along first dimension
+                               similarly for other dimensions: +2, -2, +3, -3
+        :return: np array containing the data that has been read
+        """
         byte_stream = None
-        current_i_start = start_coords_global[0]
+        flip = read_direction < 0
+        incr_dim = abs(read_direction) - 1
+        current_start_coords = [start_coords_global[0], start_coords_global[1],
+                                start_coords_global[2]]
         while num_voxels_to_read > 0:
-            current_start_coords = [current_i_start, start_coords_global[1],
-                                    start_coords_global[2]]
             next_image = self._find_subimage(current_start_coords, True)
-            next_byte_stream = next_image.read_image_stream(
-                current_start_coords, num_voxels_to_read)
+            next_byte_stream = next_image.read_line(
+                current_start_coords, num_voxels_to_read, read_direction)
             if byte_stream is not None:
                 byte_stream = np.concatenate((byte_stream, next_byte_stream))
             else:
                 byte_stream = next_byte_stream
             num_voxels_read = round(len(next_byte_stream))
             num_voxels_to_read -= num_voxels_read
-            current_i_start += num_voxels_read
+            if flip:
+                current_start_coords[incr_dim] -= num_voxels_read
+            else:
+                current_start_coords[incr_dim] += num_voxels_read
         return byte_stream
 
     def close(self):

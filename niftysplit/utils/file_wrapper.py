@@ -18,18 +18,20 @@ from niftysplit.utils.utilities import get_linear_byte_offset
 class FileStreamer(object):
     """A class to handle streaming of image data with arbitrarily large files"""
 
-    def __init__(self, file_wrapper, image_size, bytes_per_voxel, numpy_format):
+    def __init__(self, file_wrapper, image_size, bytes_per_voxel, numpy_format,
+                 dimension_ordering):
         self._bytes_per_voxel = bytes_per_voxel
         self._image_size = image_size
         self._file_wrapper = file_wrapper
         self._numpy_format = numpy_format
+        self._dimension_ordering = dimension_ordering
 
     def read_line(self, start_coords, num_voxels):
         """Read a line of image data from a binary file at the specified
         image location """
 
         offset = get_linear_byte_offset(self._image_size, self._bytes_per_voxel,
-                                        start_coords)
+                                        start_coords, self._dimension_ordering)
         self._file_wrapper.get_handle().seek(offset)
 
         data_type = np.dtype(self._numpy_format)

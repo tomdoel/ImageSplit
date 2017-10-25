@@ -24,7 +24,7 @@ from niftysplit.utils.metaio_reader import MetaIoFileFactory
 
 def split_file(input_file, filename_out_base, max_block_size_voxels,
                overlap_size_voxels, start_index, output_type,
-               file_handle_factory):
+               dim_order, file_handle_factory):
     """Saves the specified image file as a number of smaller files"""
 
     input_file_base = os.path.splitext(input_file)[0]
@@ -36,7 +36,9 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
 
     descriptors_out = generate_output_descriptors(filename_out_base,
                                                   max_block_size_voxels,
-                                                  overlap_size_voxels, header)
+                                                  overlap_size_voxels,
+                                                  dim_order,
+                                                  header)
 
     file_factory = MetaIoFileFactory(file_handle_factory, header, output_type)
 
@@ -69,6 +71,7 @@ def main(args):
                         help="Output data type (default: same as input file "
                              "datatype)")
 
+    dim_order = [1, 2, 3]  # ToDo: Specify as a command line parameter
     args = parser.parse_args(args)
 
     if args.filename == '_no_filename_specified':
@@ -77,6 +80,7 @@ def main(args):
         assert sys.version_info >= (3, 0)
         split_file(args.filename, args.out, args.max, args.overlap,
                    args.startindex, args.type,
+                   dim_order,
                    FileHandleFactory())
 
 

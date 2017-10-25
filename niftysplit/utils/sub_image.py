@@ -21,8 +21,13 @@ class SubImage(object):
         self._origin_start = self._descriptor.origin_start
         self._origin_end = self._descriptor.origin_end
         self._roi_start = self._descriptor.roi_start
+        self._dim_order = self._descriptor.dim_order
         self._roi_end = self._descriptor.roi_end
         self._ranges = self._descriptor.ranges
+
+        # Comvenience arrays for reordering dimensions
+        self._dim_index = [abs(d) - 1 for d in self._dim_order]
+        self._dim_flip = [d < 0 for d in self._dim_order]
 
     def get_ranges(self):
         """Returns the full range of global coordinates covered by this
@@ -30,14 +35,14 @@ class SubImage(object):
 
         return self._ranges
 
-    def write_image_stream(self, start_coords, image_line):
+    def write_line(self, start_coords, image_line, direction):
         """Writes a line of image data to a binary file at the specified
         image location """
 
-        start_coords_local = self._convert_coords_to_local(start_coords)
-        self._data_source.write_image_stream(start_coords_local, image_line)
+        start_coords_local = self._to_local_coords(start_coords)
+        self._data_source.write_line(start_coords_local, image_line, direction)
 
-    def read_image_stream(self, start_coords, num_voxels_to_read):
+    def read_line(self, start_coords, num_voxels, direction):
         """Reads a line of image data from a binary file at the specified
         image location """
 
@@ -45,12 +50,12 @@ class SubImage(object):
             raise ValueError('The data range to load extends beyond this file')
 
         # Don't read bytes beyond the end of the valid range
-        if start_coords[0] + num_voxels_to_read - 1 > self._roi_end[0]:
-            num_voxels_to_read = self._roi_end[0] - start_coords[0] + 1
+        if start_coords[0] + num_voxels - 1 > self._roi_end[0]:
+            num_voxels = self._roi_end[0] - start_coords[0] + 1
 
-        start_coords_local = self._convert_coords_to_local(start_coords)
-        return self._data_source.read_image_stream(start_coords_local,
-                                                   num_voxels_to_read)
+        start_local, direction = self._to_local_coords(start_coords, direction)
+        return self._data_source.read_line(start_local, num_voxels,
+                                           direction)
 
     def contains_voxel(self, start_coords_global, must_be_in_roi):
         """Determines if the specified voxel lies within the ROI of this
@@ -84,6 +89,28 @@ class SubImage(object):
         """Return the number of bytes used to represent a single voxel"""
         return self._data_source.get_bytes_per_voxel()
 
-    def _convert_coords_to_local(self, start_coords):
-        return [start_coord - origin_coord for start_coord, origin_coord in
-                zip(start_coords, self._origin_start)]
+    def get_dimension_ordering(self):
+        """Return the preferred ordering of dimensions"""
+        return self._data_source.get_dimension_ordering()
+
+    def _to_local_coords(self, global_coords, direction):
+        local_coords = [0, 0, 0]
+        translated = [start_coord - origin_coord for start_coord, origin_coord
+                      in zip(global_coords, self._origin_start)]
+
+        # Flip coordinates if writing the voxels in reverse
+        if self._dim_flip[0]:
+            translated[0] = 1 + self._image_size[0] - translated[0]
+        if self._dim_flip[1]:
+            translated[1] = 1 + self._image_size[1] - translated[1]
+        if self._dim_flip[2]:
+            translated[2] = 1 + self._image_size[2] - translated[2]
+
+        if self._dim_flip[abs(direction) - 1]:
+            direction = - direction
+            
+        local_coords[0] = translated[self._dim_index[0]]
+        local_coords[1] = translated[self._dim_index[1]]
+        local_coords[2] = translated[self._dim_index[2]]
+
+        return local_coords
