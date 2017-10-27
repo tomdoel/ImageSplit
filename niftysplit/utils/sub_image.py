@@ -29,6 +29,61 @@ class SubImage(object):
         self._dim_index = [abs(d) - 1 for d in self._dim_order]
         self._dim_flip = [d < 0 for d in self._dim_order]
 
+    def write_image_file(self, input_combined):
+        output_ranges = self.get_ranges()
+
+        # The order in which we iterate over dimensions depends on the
+        # preferred ordering of the output file
+        dimension_ordering = self.get_dimension_ordering()
+
+        u_start, u_end, u_step, u_length = self._get_range(
+            dimension_ordering, output_ranges, 0)
+        v_start, v_end, v_step, v_length = self._get_range(
+            dimension_ordering, output_ranges, 1)
+        w_start, w_end, w_step, w_length = self._get_range(
+            dimension_ordering, output_ranges, 2)
+
+        voxels_per_line = u_length
+        read_direction = dimension_ordering[0]
+
+        for w in range(w_start, w_end, w_step):
+            for v in range(v_start, v_end, v_step):
+                start_coords_global = self._get_start_coordinates(
+                    dimension_ordering, u_start, v, w)
+
+                image_line = input_combined.read_line(
+                    start_coords_global, voxels_per_line, read_direction)
+                self.write_line(start_coords_global,
+                                      image_line, read_direction)
+
+    def _get_range(self, dimension_ordering, output_ranges, index):
+
+        dimension = abs(dimension_ordering[index]) - 1
+        ranges = output_ranges[dimension]
+        voxels_per_line = ranges[1] + 1 - ranges[0]
+
+        if dimension_ordering[0] < 0:
+            x_start = ranges[1]
+            x_end = ranges[0] - 1
+            x_step = -1
+        else:
+            x_start = ranges[0]
+            x_end = ranges[1] + 1
+            x_step = 1
+
+        return x_start, x_end, x_step, voxels_per_line
+
+    def _get_start_coordinates(self, dimension_ordering, u_start, v, w):
+        u = u_start
+        v_dimension = abs(dimension_ordering[1]) - 1
+        w_dimension = abs(dimension_ordering[2]) - 1
+        u_dimension = abs(dimension_ordering[0]) - 1
+        start_coords_global = [0, 0, 0]
+        start_coords_global[u_dimension] = u
+        start_coords_global[v_dimension] = v
+        start_coords_global[w_dimension] = w
+        return start_coords_global
+
     def get_ranges(self):
         """Returns the full range of global coordinates covered by this
         subimage """
@@ -119,19 +174,21 @@ class SubImage(object):
 class StoredImage(object):
     """Convert image coordinates to a"""
 
-    def __init__(self, dim_order):
+    def __init__(self, data_source):
+
+        dim_order = data_source.get_dim_order()
+        self._file_image_size = data_source.get_file_image_size()
 
         # Comvenience arrays for reordering dimensions
         self._dim_index = [abs(d) - 1 for d in dim_order]
         self._dim_flip = [1 if d < 0 else 0 for d in dim_order]
 
-
     def write_line(self, start_coords, image_line, direction):
         """Writes a line of image data to a binary file at the specified
         image location """
 
-        start_coords_local, direction = self._to_file_coords(start_coords)
-        self._data_source.write_line(start_coords_local, image_line, direction)
+        file_coords, direction = self._to_file_coords(start_coords)
+        self._data_source.write_line(file_coords, image_line, direction)
 
     def _to_file_coords(self, image_coords, direction):
 

@@ -15,8 +15,15 @@ from niftysplit.utils.sub_image import SubImage
 
 def write_files(descriptors_in, descriptors_out, file_factory):
     """Creates a set of output files from the input files"""
-    input_combined = CombinedFileReader(descriptors_in, file_factory)
-    output_combined = CombinedFileWriter(descriptors_out, file_factory)
+
+    descriptors_in_sorted = sorted(descriptors_in, key=lambda k: k['index'])
+    descriptors_out_sorted = sorted(descriptors_out, key=lambda k: k['index'])
+
+    desc_in = [SubImageDescriptor(d) for d in descriptors_in_sorted]
+    desc_out = [SubImageDescriptor(d) for d in descriptors_out_sorted]
+
+    input_combined = CombinedFileReader(desc_in, file_factory)
+    output_combined = CombinedFileWriter(desc_out, file_factory)
     output_combined.write_image_file(input_combined)
 
     input_combined.close()
@@ -30,71 +37,17 @@ class CombinedFileWriter(object):
     def __init__(self, descriptors, file_factory):
         """Create for the given set of descriptors"""
 
-        descriptors_sorted = sorted(descriptors, key=lambda k: k['index'])
         self._subimages = []
-        for descriptor in descriptors_sorted:
-            subimage_descriptor = SubImageDescriptor(descriptor)
+        for subimage_descriptor in descriptors:
             file_handle = file_factory.create_write_file(subimage_descriptor)
             self._subimages.append(SubImage(subimage_descriptor, file_handle))
 
     def write_image_file(self, input_combined):
         """Write out all the subimages"""
 
-        # Iterate over all the files that will be created
+        # Get each subimage to write itself
         for next_image in self._subimages:
-            output_ranges = next_image.get_ranges()
-
-            # The order in which we iterate over dimensions depends on the
-            # preferred ordering of the output file
-            dimension_ordering = next_image.get_dimension_ordering()
-
-            u_start, u_end, u_step, u_length = self._get_range(
-                dimension_ordering, output_ranges, 0)
-            v_start, v_end, v_step, v_length = self._get_range(
-                dimension_ordering, output_ranges, 1)
-            w_start, w_end, w_step, w_length = self._get_range(
-                dimension_ordering, output_ranges, 2)
-
-            voxels_per_line = u_length
-            read_direction = dimension_ordering[0]
-
-            for w in range(w_start, w_end, w_step):
-                for v in range(v_start, v_end, v_step):
-                    start_coords_global = self.get_start_coordinates(
-                        dimension_ordering, u_start, v, w)
-
-                    image_line = input_combined.read_line(
-                        start_coords_global, voxels_per_line, read_direction)
-                    next_image.write_line(start_coords_global,
-                                          image_line, read_direction)
-
-    def get_start_coordinates(self, dimension_ordering, u_start, v, w):
-        u = u_start
-        v_dimension = abs(dimension_ordering[1]) - 1
-        w_dimension = abs(dimension_ordering[2]) - 1
-        u_dimension = abs(dimension_ordering[0]) - 1
-        start_coords_global = [0, 0, 0]
-        start_coords_global[u_dimension] = u
-        start_coords_global[v_dimension] = v
-        start_coords_global[w_dimension] = w
-        return start_coords_global
-
-    def _get_range(self, dimension_ordering, output_ranges, index):
-
-        dimension = abs(dimension_ordering[index]) - 1
-        ranges = output_ranges[dimension]
-        voxels_per_line = ranges[1] + 1 - ranges[0]
-
-        if dimension_ordering[0] < 0:
-            x_start = ranges[1]
-            x_end = ranges[0] - 1
-            x_step = -1
-        else:
-            x_start = ranges[0]
-            x_end = ranges[1] + 1
-            x_step = 1
-
-        return x_start, x_end, x_step, voxels_per_line
+            next_image.write_image_file(input_combined)
 
     def close(self):
         """Close all files and streams"""
@@ -107,13 +60,33 @@ class CombinedFileReader(object):
     across multiple real files. """
 
     def __init__(self, descriptors, file_factory):
-        descriptors_sorted = sorted(descriptors, key=lambda k: k['index'])
         self._subimages = []
         self._cached_last_subimage = None
-        for descriptor in descriptors_sorted:
-            subimage_descriptor = SubImageDescriptor(descriptor)
+        for subimage_descriptor in descriptors:
             file_handle = file_factory.create_read_file(subimage_descriptor)
             self._subimages.append(SubImage(subimage_descriptor, file_handle))
+
+    def read_image_range(self, start_global, num_voxels):
+        """Assembles an image range from subimages"""
+
+        read_dim_order = [0, 1, 2]  # ToDo
+
+        current_start = [start_global[0], start_global[1], start_global[2]]
+        current_num = num_voxels
+
+        for w in range(0, num_voxels[read_dim_order[2]]):
+            for v in range(0, num_voxels[read_dim_order[1]]):
+                current_start = [start_global[0], start_global[1],
+                                 start_global[2]]
+                next_image = self._find_subimage(current_start, True)
+
+                next_byte_stream = next_image.read_image_range(
+                    current_start, current_num)
+
+
+
+
+
 
     def read_image_stream(self, start_coords_global, num_voxels_to_read,
                           read_direction):
@@ -142,10 +115,10 @@ class CombinedFileReader(object):
                 byte_stream = next_byte_stream
             num_voxels_read = round(len(next_byte_stream))
             num_voxels_to_read -= num_voxels_read
-            if flip:
-                current_start_coords[incr_dim] -= num_voxels_read
-            else:
-                current_start_coords[incr_dim] += num_voxels_read
+            # if flip:
+            #     current_start_coords[incr_dim] -= num_voxels_read
+            # else:
+            #     current_start_coords[incr_dim] += num_voxels_read
         return byte_stream
 
     def close(self):
