@@ -28,9 +28,10 @@ class TestImageWrapper(TestCase):
                     for main_origin in offsets_list:
                         for sub_origin in offsets_list:
 
-                            self.test_image(num_dimensions, main_dim_size, main_origin, sub_dim_size, sub_origin)
+                            self.check_image(num_dimensions, main_dim_size, main_origin, sub_dim_size, sub_origin)
 
-    def test_image(self, num_dimensions, main_dim_size, main_origin, sub_dim_size, sub_origin):
+    def check_image(self, num_dimensions, main_dim_size, main_origin,
+                sub_dim_size, sub_origin):
         raw_array = np.reshape(np.arange(0, np.prod(main_dim_size)), main_dim_size)
         main_image = ImageWrapper(main_origin, image=raw_array)
         sub_raw_array = np.reshape(np.arange(1000, 1000 + np.prod(sub_dim_size)), sub_dim_size)
