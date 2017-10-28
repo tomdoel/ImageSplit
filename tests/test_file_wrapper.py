@@ -181,7 +181,7 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
             '/test/test_read_image_stream.bin', file_handle_factory, 'rb')
         file_streamer = FileStreamer(wrapper, image_size, bytes_per_voxel,
                                      TestHugeFileStreamer.get_np_type(
-                                             bytes_per_voxel, is_signed))
+                                             bytes_per_voxel, is_signed), [1, 2, 3])
         start = start_coords[0] + start_coords[1] * image_size[0] + \
             start_coords[2] * image_size[0] * image_size[1]
         end = start + num_voxels_to_read
@@ -205,7 +205,7 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
             '/test/test_write_image_stream.bin', file_handle_factory, 'wb')
         file_streamer = FileStreamer(wrapper, image_size, bytes_per_voxel,
                                      TestHugeFileStreamer.get_np_type(
-                                             bytes_per_voxel, is_signed))
+                                             bytes_per_voxel, is_signed), [1, 2, 3])
         start = start_coords[0] + start_coords[1] * image_size[0] + \
             start_coords[2] * image_size[0] * image_size[1]
 

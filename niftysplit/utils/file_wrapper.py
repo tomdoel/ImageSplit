@@ -44,7 +44,7 @@ class FileStreamer(object):
         location """
 
         offset = get_linear_byte_offset(self._image_size, self._bytes_per_voxel,
-                                        start_coords)
+                                        start_coords, [1, 2, 3])
         self._file_wrapper.get_handle().seek(offset)
 
         data_type = np.dtype(self._numpy_format)

@@ -30,6 +30,8 @@ def write_files(descriptors_in, descriptors_out, file_factory):
     output_combined.close()
 
 
+
+
 class CombinedFileWriter(object):
     """A kind of virtual file for writing where the data are distributed
         across multiple real files. """
@@ -66,8 +68,11 @@ class CombinedFileReader(object):
             file_handle = file_factory.create_read_file(subimage_descriptor)
             self._subimages.append(SubImage(subimage_descriptor, file_handle))
 
-    def read_image_range(self, start_global, num_voxels):
+    def read_image(self, start_global, image_size):
         """Assembles an image range from subimages"""
+
+        combined_image = None  # Initialise as empty since we don't know the data type
+
 
         read_dim_order = [0, 1, 2]  # ToDo
 

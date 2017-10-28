@@ -25,7 +25,7 @@ class SubImage(object):
         self._roi_end = self._descriptor.roi_end
         self._ranges = self._descriptor.ranges
 
-        # Comvenience arrays for reordering dimensions
+        # Convenience arrays for reordering dimensions
         self._dim_index = [abs(d) - 1 for d in self._dim_order]
         self._dim_flip = [d < 0 for d in self._dim_order]
 
