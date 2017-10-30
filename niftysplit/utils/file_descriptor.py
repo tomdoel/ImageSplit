@@ -22,12 +22,15 @@ class SubImageDescriptor(object):
         self._descriptor = descriptor_dict
         self.filename = self._get_filename()
         self.image_size = self._get_image_size()
-        self.dim_order = self._get_dim_order()
+        self.dim_order_and_flip = self._get_dim_order()
         self.origin_start = self._get_origin_start()
         self.origin_end = self._get_origin_end()
         self.roi_start = self._get_roi_start()
         self.roi_end = self._get_roi_end()
         self.ranges = self._get_ranges()
+
+        self.dim_order = [abs(d) - 1 for d in self.dim_order_and_flip]
+        self.dim_flip = [d < 0 for d in self.dim_order_and_flip]
 
     def _get_filename(self):
         return self._descriptor["filename"]
