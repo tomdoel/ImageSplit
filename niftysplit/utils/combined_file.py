@@ -9,6 +9,7 @@ Copyright UCL 2017
 
 import numpy as np
 
+from image.image_wrapper import ImageWrapper
 from niftysplit.utils.file_descriptor import SubImageDescriptor
 from niftysplit.utils.sub_image import SubImage
 
@@ -68,30 +69,14 @@ class CombinedFileReader(object):
             file_handle = file_factory.create_read_file(subimage_descriptor)
             self._subimages.append(SubImage(subimage_descriptor, file_handle))
 
-    def read_image(self, start_global, image_size):
+    def read_image(self, start_global, size):
         """Assembles an image range from subimages"""
 
-        combined_image = None  # Initialise as empty since we don't know the data type
-
-
-        read_dim_order = [0, 1, 2]  # ToDo
-
-        current_start = [start_global[0], start_global[1], start_global[2]]
-        current_num = num_voxels
-
-        for w in range(0, num_voxels[read_dim_order[2]]):
-            for v in range(0, num_voxels[read_dim_order[1]]):
-                current_start = [start_global[0], start_global[1],
-                                 start_global[2]]
-                next_image = self._find_subimage(current_start, True)
-
-                next_byte_stream = next_image.read_image_range(
-                    current_start, current_num)
-
-
-
-
-
+        combined_image = ImageWrapper(start_global, image_size=size)
+        for next_subimage in self._subimages:
+            part_image = next_subimage.read_part_image(start_global, size)
+            if part_image:
+                combined_image.set_sub_image(part_image)
 
     def read_image_stream(self, start_coords_global, num_voxels_to_read,
                           read_direction):

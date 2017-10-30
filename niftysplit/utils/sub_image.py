@@ -7,6 +7,11 @@ Copyright UCL 2017
 
 """
 
+import numpy as np
+
+from niftysplit.image.image_wrapper import ImageWrapper
+from niftysplit.utils.utilities import CoordinateTransformer
+
 
 class SubImage(object):
     """An image which forms part of a larger image"""
@@ -22,12 +27,33 @@ class SubImage(object):
         self._origin_end = self._descriptor.origin_end
         self._roi_start = self._descriptor.roi_start
         self._dim_order = self._descriptor.dim_order
+        self._dim_flip = self._descriptor.dim_flip
         self._roi_end = self._descriptor.roi_end
+        self._roi_size = np.add(np.subtract(self._roi_end, self._roi_end),
+                                np.ones(shape=self._roi_start))
         self._ranges = self._descriptor.ranges
+        self._transformer = CoordinateTransformer(self._origin_start,
+                                                  self._dim_order,
+                                                  self._dim_flip)
 
-        # Convenience arrays for reordering dimensions
-        self._dim_index = [abs(d) - 1 for d in self._dim_order]
-        self._dim_flip = [d < 0 for d in self._dim_order]
+    def read_image(self, start_global, size):
+        """Returns a subimage containing any overlap from the ROI"""
+
+        # Find the part of the requested region that fits in the ROI
+        start, end, size = self._adjust_bounds(start_global, size)
+
+        # Check if none of the requested region is contained in this subimage
+        if np.any(np.less(size, np.zeros(shape=size))):
+            return None
+
+        # Convert to local coordinates for the data source
+        local_start, local_size = self._transformer.to_local(start, size)
+
+        # Get the image data from the data source
+        image_data = self._data_source.read_image(local_start, local_size)
+
+        # Wrap the image data in an ImageWrapper
+        return ImageWrapper(start, image=image_data)
 
     def write_image_file(self, input_combined):
         output_ranges = self.get_ranges()
@@ -169,6 +195,16 @@ class SubImage(object):
         local_coords[2] = translated[self._dim_index[2]]
 
         return local_coords
+
+    def _adjust_bounds(self, start_global, size_global):
+        start = np.maximum(start_global, self._roi_start)
+        end = np.minimum(np.add(start_global, size_global),
+                         np.add(self._roi_start, self._roi_size))
+        size = np.subtract(end, start)
+        return start, end, size
+
+    def _to_local(self, start):
+        return np.subtract(start, self._origin_start)
 
 
 class StoredImage(object):
