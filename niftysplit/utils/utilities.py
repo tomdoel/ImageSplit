@@ -8,8 +8,7 @@ Copyright UCL 2017
 """
 
 
-def get_linear_byte_offset(image_size, bytes_per_voxel, start_coords,
-                           dimension_ordering):
+def get_linear_byte_offset(image_size, bytes_per_voxel, start_coords):
     """
     Return the byte offset corresponding to the given coordinates.
 
@@ -22,5 +21,4 @@ def get_linear_byte_offset(image_size, bytes_per_voxel, start_coords,
         offset += coord * offset_multiple
         offset_multiple *= image_length
     return offset
-
 

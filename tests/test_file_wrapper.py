@@ -9,8 +9,8 @@ import numpy as np
 from parameterized import parameterized
 from pyfakefs import fake_filesystem_unittest
 
-from niftysplit.utils import file_wrapper
-from niftysplit.utils.file_wrapper import FileStreamer
+from file import file_wrapper
+from file.file_wrapper import FileStreamer
 from niftysplit.utils.metaio_reader import compute_bytes_per_voxel
 
 

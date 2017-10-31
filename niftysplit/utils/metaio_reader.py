@@ -10,10 +10,11 @@ import copy
 import os
 from collections import OrderedDict
 
-from niftysplit.utils.file_wrapper import FileWrapper, FileStreamer
+from file.file_wrapper import FileWrapper, FileStreamer
+from niftysplit.file.linear_image_file import AbstractLinearImageFile
 
 
-class MetaIoFile(object):
+class MetaIoFile(AbstractLinearImageFile):
     """A class for reading or writing 3D imaging data to/from a MetaIO file
     pair (.mhd and .raw). """
 
@@ -64,14 +65,16 @@ class MetaIoFile(object):
         filename = subimage_descriptor.filename
         return MetaIoFile(filename, file_handle_factory, header_template)
 
-    def write_line(self, start_coords, image_line, direction):
+    def close_file(self):
+        """Close file"""
+        self.close()
+
+    def write_line(self, start_coords, image_line):
         """Write consecutive voxels to the raw binary file."""
 
-        if direction != 1:
-            raise ValueError("MetaIoFile only supports regular coordinates")
         return self._get_file_streamer().write_line(start_coords, image_line)
 
-    def read_line(self, start_coords, num_voxels_to_read, direction):
+    def read_line(self, start_coords, num_voxels_to_read):
         """Read consecutive voxels of image data from the raw binary file
         starting at the specified coordinates. """
 

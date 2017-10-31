@@ -1,4 +1,5 @@
 # coding=utf-8
+"""A wrapper for a multi-dimensional image with an origin offset"""
 
 import numpy as np
 
