@@ -33,6 +33,29 @@ class AbstractLinearImageFile(AbstractImageFile):
         self.subimage_descriptor = subimage_descriptor
         self.size = subimage_descriptor.image_size
 
+    def read_image(self, start, size):
+        """Read the specified part of the image"""
+
+        # Initialise the output array
+        image = np.zeros(shape=size)
+
+        # Exclude first coordinate and get a range for the rest in reverse order
+        size_excluding_first = size[:0:-1]
+        size_ranges = [range(0, s) for s in size_excluding_first]
+
+        # Iterate over all ranges (equivalent to multiple for loops)
+        for main_dim_size in itertools.product(*size_ranges):
+            start = [0] + list(reversed(main_dim_size))
+            size = np.ones(shape=size)
+            size[0] = self.size[0]
+
+            # Read one image line from the file
+            image_line = self.read_line(start, size)
+            image = np.concatenate(image, image_line)  # ToDo
+
+        return image
+
+
     def write_file(self, data_source):
         """Create and write out this file, using data from this image source"""
 
@@ -40,12 +63,10 @@ class AbstractLinearImageFile(AbstractImageFile):
         size_excluding_first = self.size[:0:-1]
         size_ranges = [range(0, s) for s in size_excluding_first]
 
-        # self.create_write_file()
-
         # Iterate over all ranges (equivalent to multiple for loops)
         for main_dim_size in itertools.product(*size_ranges):
             start = [0] + list(reversed(main_dim_size))
-            size = np.ones(shape=self.size)
+            size = np.ones(shape=self.size.shape)
             size[0] = self.size[0]
 
             # Read one image line from the transformed source

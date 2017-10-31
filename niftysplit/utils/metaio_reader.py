@@ -18,7 +18,8 @@ class MetaIoFile(AbstractLinearImageFile):
     """A class for reading or writing 3D imaging data to/from a MetaIO file
     pair (.mhd and .raw). """
 
-    def __init__(self, header_filename, file_handle_factory, header_template):
+    def __init__(self, subimage_descriptor, header_filename, file_handle_factory, header_template):
+        super().__init__(subimage_descriptor)
         self._file_handle_factory = file_handle_factory
         self._header_filename = header_filename
         self._input_path = os.path.dirname(os.path.abspath(header_filename))
@@ -51,7 +52,7 @@ class MetaIoFile(AbstractLinearImageFile):
         """Create a MetaIoFile class for writing"""
 
         filename = subimage_descriptor.filename
-        return MetaIoFile(filename, file_handle_factory, None)
+        return MetaIoFile(subimage_descriptor, filename, file_handle_factory, None)
 
     @staticmethod
     def create_write_file(subimage_descriptor, file_handle_factory):
@@ -63,7 +64,7 @@ class MetaIoFile(AbstractLinearImageFile):
         header_template["DimSize"] = subimage_descriptor.image_size
         header_template["Origin"] = subimage_descriptor.origin_start
         filename = subimage_descriptor.filename
-        return MetaIoFile(filename, file_handle_factory, header_template)
+        return MetaIoFile(subimage_descriptor, filename, file_handle_factory, header_template)
 
     def close_file(self):
         """Close file"""

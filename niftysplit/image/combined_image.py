@@ -57,6 +57,7 @@ class SubImage(object):
                                 np.ones(shape=self._roi_start))
         self._ranges = self._descriptor.ranges
         self._transformer = CoordinateTransformer(self._origin_start,
+                                                  self._image_size,
                                                   self._dim_order,
                                                   self._dim_flip)
 
@@ -127,7 +128,7 @@ class TransformedDataSource(object):
 class CoordinateTransformer(object):
     """Convert coordinates between orthogonal systems"""
 
-    def __init__(self, origin, dim_ordering, dim_flip):
+    def __init__(self, origin, size, dim_ordering, dim_flip):
         """Create a transformer object for converting between systems
 
         :param origin: local coordinate origin in global coordinates
@@ -135,6 +136,7 @@ class CoordinateTransformer(object):
         :param dim_flip: whether local axes should be flipped
         """
         self._origin = origin
+        self._size = size
         self._dim_ordering = dim_ordering
         self._dim_flip = dim_flip
 
@@ -151,7 +153,24 @@ class CoordinateTransformer(object):
         # Flip dimensions where necessary
         for index, flip in enumerate(self._dim_flip):
             if flip:
-                start = np.flip(start, index)
-                size = np.flip(size, index)
+                start[index] = size[index] - start[index] - 1
+
+        return start, size
+
+    def to_global(self, local_start, local_size):
+        """Convert local coordinates to global coordinates"""
+
+        # Translate coordinates to the local origin
+        start = np.add(local_start, self._origin)
+        size = local_size
+
+        # Flip dimensions where necessary
+        for index, flip in enumerate(self._dim_flip):
+            if flip:
+                start[index] = size[index] - start[index] - 1
+
+        # Reverse permute dimensions of local coordinates
+        start = np.transpose(start, np.argsort(self._dim_ordering))
+        size = np.transpose(size, np.argsort(self._dim_ordering))
 
         return start, size
