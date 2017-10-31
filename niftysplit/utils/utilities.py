@@ -9,6 +9,9 @@ Copyright UCL 2017
 
 import numpy as np
 
+from utils.file_descriptor import SubImageDescriptor
+
+
 def get_linear_byte_offset(image_size, bytes_per_voxel, start_coords,
                            dimension_ordering):
     """
@@ -56,3 +59,9 @@ class CoordinateTransformer(object):
                 size = np.flip(size, index)
 
         return start, size
+
+
+def convert_to_descriptors(descriptors):
+    descriptors_sorted = sorted(descriptors, key=lambda k: k['index'])
+    desc = [SubImageDescriptor(d) for d in descriptors_sorted]
+    return desc

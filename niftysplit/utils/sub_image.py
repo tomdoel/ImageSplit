@@ -16,9 +16,10 @@ from niftysplit.utils.utilities import CoordinateTransformer
 class SubImage(object):
     """An image which forms part of a larger image"""
 
-    def __init__(self, descriptor, data_source):
+    def __init__(self, descriptor, file_factory):
+        self._file_factory = file_factory
         self._descriptor = descriptor
-        self._data_source = data_source
+        self._read_source = None
 
         # Construct the origin offset used to convert from global
         # coordinates. This excludes overlapping voxels
@@ -36,51 +37,27 @@ class SubImage(object):
                                                   self._dim_order,
                                                   self._dim_flip)
 
-    def read_image(self, start_global, size):
+    def read_part_image(self, start_global, size):
         """Returns a subimage containing any overlap from the ROI"""
 
         # Find the part of the requested region that fits in the ROI
-        start, end, size = self._adjust_bounds(start_global, size)
+        start, end, size = self._get_bounds_in_roi(start_global, size)
 
         # Check if none of the requested region is contained in this subimage
         if np.any(np.less(size, np.zeros(shape=size))):
             return None
 
-        # Convert to local coordinates for the data source
-        local_start, local_size = self._transformer.to_local(start, size)
-
-        # Get the image data from the data source
-        image_data = self._data_source.read_image(local_start, local_size)
+        image_data = self._get_read_source().read_image(start, size)
 
         # Wrap the image data in an ImageWrapper
         return ImageWrapper(start, image=image_data)
 
-    def write_image_file(self, input_combined):
-        output_ranges = self.get_ranges()
-
-        # The order in which we iterate over dimensions depends on the
-        # preferred ordering of the output file
-        dimension_ordering = self.get_dimension_ordering()
-
-        u_start, u_end, u_step, u_length = self._get_range(
-            dimension_ordering, output_ranges, 0)
-        v_start, v_end, v_step, v_length = self._get_range(
-            dimension_ordering, output_ranges, 1)
-        w_start, w_end, w_step, w_length = self._get_range(
-            dimension_ordering, output_ranges, 2)
-
-        voxels_per_line = u_length
-        read_direction = dimension_ordering[0]
-
-        for w in range(w_start, w_end, w_step):
-            for v in range(v_start, v_end, v_step):
-                start_coords_global = self._get_start_coordinates(
-                    dimension_ordering, u_start, v, w)
-
-                image_line = input_combined.read_line(
-                    start_coords_global, voxels_per_line, read_direction)
-                self.write_line(start_coords_global,
-                                      image_line, read_direction)
+    def write_subimage(self, source):
+        """Write out SubImage using data from the specified source"""
+        file = self._file_factory.create_write_file(self._descriptor)
+        transformed_source = TransformedDataSource(source, self._transformer)
+        file.write_file(transformed_source)
+        file.close()
 
     def _get_range(self, dimension_ordering, output_ranges, index):
 
@@ -164,7 +141,8 @@ class SubImage(object):
 
     def close(self):
         """Close all streams and files"""
-        self._data_source.close()
+        self._read_source.close()
+        self._read_source = None
 
     def get_bytes_per_voxel(self):
         """Return the number of bytes used to represent a single voxel"""
@@ -196,51 +174,38 @@ class SubImage(object):
 
         return local_coords
 
-    def _adjust_bounds(self, start_global, size_global):
+    def _get_bounds_in_roi(self, start_global, size_global):
         start = np.maximum(start_global, self._roi_start)
         end = np.minimum(np.add(start_global, size_global),
                          np.add(self._roi_start, self._roi_size))
         size = np.subtract(end, start)
         return start, end, size
 
-    def _to_local(self, start):
-        return np.subtract(start, self._origin_start)
+    def _get_read_source(self):
+        if not self._read_source:
+            source = self._file_factory.create_read_file(self._descriptor)
+            self._read_source = TransformedDataSource(source, self._transformer)
+        return self._read_source
 
 
-class StoredImage(object):
-    """Convert image coordinates to a"""
+class TransformedDataSource(object):
+    """Data source with conversion between local and global coordinates"""
 
-    def __init__(self, data_source):
+    def __init__(self, data_source, converter):
+        self._data_source = data_source
+        self._converter = converter
 
-        dim_order = data_source.get_dim_order()
-        self._file_image_size = data_source.get_file_image_size()
+    def read_image(self, start_local, size_local):
+        """Returns a partial image using the specified local coordinates"""
 
-        # Comvenience arrays for reordering dimensions
-        self._dim_index = [abs(d) - 1 for d in dim_order]
-        self._dim_flip = [1 if d < 0 else 0 for d in dim_order]
+        start, size = self._converter.to_global(start_local, size_local)
+        return self._data_source.read_image(start, size)
 
-    def write_line(self, start_coords, image_line, direction):
-        """Writes a line of image data to a binary file at the specified
-        image location """
+    def read_image_local(self, start_global, size_global):
+        """Returns a partial image using the specified global coordinates"""
 
-        file_coords, direction = self._to_file_coords(start_coords)
-        self._data_source.write_line(file_coords, image_line, direction)
+        # Convert to local coordinates for the data source
+        start, size = self._converter.to_local(start_global, size_global)
 
-    def _to_file_coords(self, image_coords, direction):
-
-        # Flip coordinates if writing the voxels in reverse
-        flipped_coords = [x + flip*(1 + length - 2*x) for x, flip, length in
-                          zip(image_coords, self._dim_flip, self._image_size)]
-
-        # Reorder dimensions
-        file_coords = [flipped_coords[self._dim_index[x]] for x in [0, 1, 2]]
-
-        # Reorder direction
-        direction = 1 + self._dim_index.index(abs(direction) - 1)
-
-        # Flip direction
-        if self._dim_flip[abs(direction) - 1]:
-            direction = - direction
-
-
-        return file_coords, direction
+        # Get the image data from the data source
+        return self._data_source.read_image(start, size)

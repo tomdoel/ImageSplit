@@ -14,11 +14,12 @@ import argparse
 import os
 import sys
 
+from file.file_factory import FileFactory
+from niftysplit.utils.write_files import write_files
 from niftysplit.utils.file_descriptor import generate_descriptor_from_header, \
     header_from_descriptor, generate_input_descriptors
 from niftysplit.utils.file_wrapper import FileHandleFactory
-from niftysplit.utils.combined_file import write_files
-from niftysplit.utils.metaio_reader import MetaIoFileFactory
+from utils.utilities import convert_to_descriptors
 
 
 def combine_file(input_file_base, descriptor_filename, filename_out_base,
@@ -35,13 +36,16 @@ def combine_file(input_file_base, descriptor_filename, filename_out_base,
         [original_header,
          descriptors_in] = header_from_descriptor(descriptor_filename)
 
-    file_factory = MetaIoFileFactory(file_handle_factory, original_header,
-                                     output_type)
+    file_factory = FileFactory(file_handle_factory)
 
     descriptors_out = generate_descriptor_from_header(filename_out_base,
-                                                      original_header)
+                                                      original_header,
+                                                      output_type)
 
-    write_files(descriptors_in, descriptors_out, file_factory)
+    desc_in = convert_to_descriptors(descriptors_in)
+    desc_out = convert_to_descriptors(descriptors_out)
+
+    write_files(desc_in, desc_out, file_factory)
 
 
 def main(args):

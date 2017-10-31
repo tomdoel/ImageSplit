@@ -29,6 +29,10 @@ class SubImageDescriptor(object):
         self.roi_end = self._get_roi_end()
         self.ranges = self._get_ranges()
 
+        self.file_format = "mhd"
+        self.data_type = self._get_data_type()
+        self.template = self._get_template()
+
         self.dim_order = [abs(d) - 1 for d in self.dim_order_and_flip]
         self.dim_flip = [d < 0 for d in self.dim_order_and_flip]
 
@@ -61,6 +65,12 @@ class SubImageDescriptor(object):
         """Return the size of this subvolume including overlap regions"""
         return [1 + this_range[1] - this_range[0] for this_range in
                 self._descriptor["ranges"]]
+
+    def _get_data_type(self):
+        return self._descriptor["data_type"]
+
+    def _get_template(self):
+        return self._descriptor["template"]
 
 
 def get_number_of_blocks(image_size, max_block_size):
@@ -144,7 +154,8 @@ def write_descriptor_file(descriptors_in, descriptors_out, filename_out_base):
 
 
 def generate_output_descriptors(filename_out_base, max_block_size_voxels,
-                                overlap_size_voxels, dim_order, header):
+                                overlap_size_voxels, dim_order, header,
+                                output_type):
     """Creates descriptors represeting file output"""
     image_size = header["DimSize"]
     num_dims = header["NDims"]
@@ -163,7 +174,9 @@ def generate_output_descriptors(filename_out_base, max_block_size_voxels,
         file_descriptor_out = {"filename": output_filename_header,
                                "ranges": subimage_range, "suffix": suffix,
                                "index": index,
-                               "dim_order": dim_order}
+                               "dim_order": dim_order,
+                               "data_type": output_type,
+                               "header": copy.deepcopy(header)}
         descriptors_out.append(file_descriptor_out)
         index += 1
     return descriptors_out
@@ -193,7 +206,8 @@ def load_descriptor(descriptor_filename):
     return data
 
 
-def generate_descriptor_from_header(filename_out_base, original_header):
+def generate_descriptor_from_header(filename_out_base, original_header,
+                                    output_type):
     """Load a header and uses to define a file descriptor"""
     output_image_size = original_header["DimSize"]
     dim_order = [1, 2, 3]  # ToDo: get from header
@@ -202,6 +216,8 @@ def generate_descriptor_from_header(filename_out_base, original_header):
                       "suffix": "",
                       "filename": filename_out_base + '.mhd',
                       "dim_order": dim_order,
+                      "data_type": output_type,
+                      "template": copy.deepcopy(original_header),
                       "ranges": [[0, output_image_size[0] - 1, 0, 0],
                                  [0, output_image_size[1] - 1, 0, 0],
                                  [0, output_image_size[2] - 1, 0, 0]]}
@@ -238,7 +254,7 @@ def generate_input_descriptors(input_file_base, start_index):
 
         # Create a descriptor for this subimage
         descriptor = {"index": 0, "suffix": "", "filename": header_filename,
-                      "ranges": current_ranges}
+                      "ranges": current_ranges, "template": combined_header}
         descriptors.append(descriptor)
         return combined_header, descriptors
 
@@ -291,7 +307,8 @@ def generate_input_descriptors(input_file_base, start_index):
             ranges_to_write = copy.deepcopy(current_ranges)
             descriptor = {"index": file_index, "suffix": suffix,
                           "filename": header_filename,
-                          "ranges": ranges_to_write}
+                          "ranges": ranges_to_write,
+                          "template": combined_header}
             descriptors.append(descriptor)
 
             file_index += 1

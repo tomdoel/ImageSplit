@@ -15,11 +15,12 @@ import argparse
 import os
 import sys
 
-from niftysplit.utils.combined_file import write_files
+from file.file_factory import FileFactory
+from niftysplit.utils.write_files import write_files
 from niftysplit.utils.file_descriptor import write_descriptor_file, \
     generate_output_descriptors, generate_input_descriptors
 from niftysplit.utils.file_wrapper import FileHandleFactory
-from niftysplit.utils.metaio_reader import MetaIoFileFactory
+from utils.utilities import convert_to_descriptors
 
 
 def split_file(input_file, filename_out_base, max_block_size_voxels,
@@ -38,11 +39,14 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
                                                   max_block_size_voxels,
                                                   overlap_size_voxels,
                                                   dim_order,
-                                                  header)
+                                                  header,
+                                                  output_type)
 
-    file_factory = MetaIoFileFactory(file_handle_factory, header, output_type)
+    file_factory = FileFactory(file_handle_factory)
 
-    write_files(descriptors_in, descriptors_out, file_factory)
+    desc_in = convert_to_descriptors(descriptors_in)
+    desc_out = convert_to_descriptors(descriptors_out)
+    write_files(desc_in, desc_out, file_factory)
     write_descriptor_file(descriptors_in, descriptors_out, filename_out_base)
 
 
