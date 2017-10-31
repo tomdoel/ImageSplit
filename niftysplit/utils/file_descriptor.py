@@ -312,3 +312,10 @@ def generate_input_descriptors(input_file_base, start_index):
             descriptors.append(descriptor)
 
             file_index += 1
+
+
+def convert_to_descriptors(descriptors):
+    """Convert descriptor dictionary to list of SubImageDescriptor objects"""
+    descriptors_sorted = sorted(descriptors, key=lambda k: k['index'])
+    desc = [SubImageDescriptor(d) for d in descriptors_sorted]
+    return desc

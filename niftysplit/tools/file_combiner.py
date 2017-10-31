@@ -19,7 +19,7 @@ from niftysplit.utils.write_files import write_files
 from niftysplit.utils.file_descriptor import generate_descriptor_from_header, \
     header_from_descriptor, generate_input_descriptors
 from niftysplit.utils.file_wrapper import FileHandleFactory
-from utils.utilities import convert_to_descriptors
+from niftysplit.utils.file_descriptor import convert_to_descriptors
 
 
 def combine_file(input_file_base, descriptor_filename, filename_out_base,

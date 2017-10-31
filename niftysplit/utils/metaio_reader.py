@@ -64,7 +64,6 @@ class MetaIoFile(object):
         filename = subimage_descriptor.filename
         return MetaIoFile(filename, file_handle_factory, header_template)
 
-
     def write_line(self, start_coords, image_line, direction):
         """Write consecutive voxels to the raw binary file."""
 
