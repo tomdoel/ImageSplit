@@ -318,7 +318,7 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
 class TestFileWrapper(unittest.TestCase):
     """Tests for FileWrapper"""
 
-    def test_get_bytes_per_voxel(self):
+    def test_compute_bytes_per_voxel(self):
         self.assertEqual(compute_bytes_per_voxel('MET_CHAR'), 1)
         self.assertEqual(compute_bytes_per_voxel('MET_UCHAR'), 1)
         self.assertEqual(compute_bytes_per_voxel('MET_SHORT'), 2)
