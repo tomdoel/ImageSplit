@@ -20,7 +20,7 @@ from niftysplit.file.file_wrapper import FileHandleFactory
 from niftysplit.utils.file_descriptor import convert_to_descriptors
 from niftysplit.utils.file_descriptor import write_descriptor_file, \
     generate_output_descriptors, generate_input_descriptors
-from niftysplit.tools.write_files import write_files
+from niftysplit.applications.write_files import write_files
 
 
 def split_file(input_file, filename_out_base, max_block_size_voxels,

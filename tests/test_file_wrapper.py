@@ -11,7 +11,7 @@ from pyfakefs import fake_filesystem_unittest
 
 from niftysplit.file import file_wrapper
 from niftysplit.file.file_wrapper import FileStreamer
-from niftysplit.utils.metaio_reader import compute_bytes_per_voxel
+from niftysplit.file.metaio_reader import compute_bytes_per_voxel
 
 
 class FakeFileHandleFactory:

@@ -11,8 +11,8 @@ import copy
 import os
 from math import ceil
 
+from niftysplit.file.metaio_reader import load_mhd_header
 from niftysplit.utils.json_reader import write_json, read_json
-from niftysplit.utils.metaio_reader import load_mhd_header
 
 
 class SubImageDescriptor(object):

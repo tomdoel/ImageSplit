@@ -1,7 +1,7 @@
 # coding=utf-8
 """Factory for creating file objects fod different file types"""
 
-from niftysplit.utils.metaio_reader import MetaIoFile
+from niftysplit.file.metaio_reader import MetaIoFile
 
 
 class FileFactory(object):
