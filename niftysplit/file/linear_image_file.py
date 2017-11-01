@@ -22,6 +22,10 @@ class AbstractLinearImageFile(AbstractImageFile):
     @abstractmethod
     def write_line(self, start, image_line):
         """Write the next line of bytes to the file"""
+
+    @abstractmethod
+    def read_line(self, start, num_voxels):
+        """Reads a line of bytes from the file"""
         pass
 
     @abstractmethod
@@ -33,38 +37,45 @@ class AbstractLinearImageFile(AbstractImageFile):
         self.subimage_descriptor = subimage_descriptor
         self.size = subimage_descriptor.image_size
 
-    def read_image(self, start, size):
+    def read_image(self, start_local, size_local):
         """Read the specified part of the image"""
 
         # Initialise the output array
-        image = np.zeros(shape=size)
+        image = np.zeros(shape=size_local)
 
-        # Exclude first coordinate and get a range for the rest in reverse order
-        size_excluding_first = size[:0:-1]
-        size_ranges = [range(0, s) for s in size_excluding_first]
+        # Compute coordinate ranges
+        ranges = [range(st, sz) for st, sz in zip(start_local, size_local)]
 
-        # Iterate over all ranges (equivalent to multiple for loops)
-        for main_dim_size in itertools.product(*size_ranges):
+        # Exclude first coordinate and get others in reverse order
+        ranges_to_iterate = ranges[:0:-1]
+
+        # Iterate over each line (equivalent to multiple for loops)
+        for main_dim_size in itertools.product(*ranges_to_iterate):
             start = [0] + list(reversed(main_dim_size))
-            size = np.ones(shape=size)
-            size[0] = self.size[0]
+            size = np.ones(shape=size_local.shape)
+            size[0] = size_local[0]
 
             # Read one image line from the file
             image_line = self.read_line(start, size)
-            image = np.concatenate(image, image_line)  # ToDo
+
+            # Replace image line
+            start_in_image = np.subtract(start, start_local)
+            line_coords = [Ellipsis] + start_in_image[1:]
+            image[line_coords] = image_line
 
         return image
-
 
     def write_file(self, data_source):
         """Create and write out this file, using data from this image source"""
 
-        # Exclude first coordinate and get a range for the rest in reverse order
-        size_excluding_first = self.size[:0:-1]
-        size_ranges = [range(0, s) for s in size_excluding_first]
+        # Compute coordinate ranges
+        ranges = [range(0, sz) for sz in self.size]
 
-        # Iterate over all ranges (equivalent to multiple for loops)
-        for main_dim_size in itertools.product(*size_ranges):
+        # Exclude first coordinate and get others in reverse order
+        ranges_to_iterate = ranges[:0:-1]
+
+        # Iterate over each line (equivalent to multiple for loops)
+        for main_dim_size in itertools.product(*ranges_to_iterate):
             start = [0] + list(reversed(main_dim_size))
             size = np.ones(shape=self.size.shape)
             size[0] = self.size[0]
