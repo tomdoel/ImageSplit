@@ -1,6 +1,6 @@
 stages:
-  - pylint_test
   - dev_test
+  - pylint_test
 
 pylintjob:
   stage: pylint_test
