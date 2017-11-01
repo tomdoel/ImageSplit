@@ -60,7 +60,7 @@ class SubImage(object):
         """Returns a subimage containing any overlap from the ROI"""
 
         # Find the part of the requested region that fits in the ROI
-        start, end, size = self._get_bounds_in_roi(start_global, size)
+        start, size = self._get_bounds_in_roi(start_global, size)
 
         # Check if none of the requested region is contained in this subimage
         if np.any(np.less(size, np.zeros(shape=size))):
@@ -88,7 +88,7 @@ class SubImage(object):
         end = np.minimum(np.add(start_global, size_global),
                          np.add(self._roi_start, self._roi_size))
         size = np.subtract(end, start)
-        return start, end, size
+        return start, size
 
     def _get_read_source(self):
         if not self._read_source:
@@ -119,6 +119,10 @@ class TransformedDataSource(object):
 
         # Get the image data from the data source
         return self._data_source.read_image(start, size)
+
+    def close(self):
+        """Close all streams and files"""
+        self._data_source.close()
 
 
 class CoordinateTransformer(object):
