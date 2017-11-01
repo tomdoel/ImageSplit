@@ -133,47 +133,48 @@ testjob-mac:
 testjob-win:
   stage: dev_test
   script:
-    - ::print system info
+
+    # print system info
     - echo %CD%
 
-    - :: PYTHON 3 Print Python version
+    # PYTHON 3 Print Python version
     - py -3 --version
 
-    - :: create a virtual env for testing
+    # create a virtual env for testing
     - set py3_venv_name=niftysplit-test-py3
 
-    - :: Create virtual environment if it does not exist
+    # Create virtual environment if it does not exist
     - IF NOT EXIST %py3_venv_name%\Scripts\python.exe (
     - py -3 -m virtualenv %py3_venv_name%
     - if %errorlevel% neq 0 exit /b %errorlevel%
     - )
 
-    - :: Install requirements for tests
-    - %py3_venv_name%\Scripts\pip install -r requirements-test.txt
+    # Install requirements for tests
+    - .\%py3_venv_name%\Scripts\pip install -r requirements-test.txt
     - if %errorlevel% neq 0 exit /b %errorlevel%
 
-    - :: Run tests
-    - %py3_venv_name%\Scripts\python -m unittest discover -s "tests" -p "*_test.py"
+    # Run tests
+    - .\%py3_venv_name%\Scripts\python -m unittest discover -s "tests" -p "*_test.py"
     - if %errorlevel% neq 0 exit /b %errorlevel%
 
-    - :: PYTHON 2 Print Python version
+    # PYTHON 2 Print Python version
     - py -2 --version
 
-    - :: create a virtual env for testing
+    # create a virtual env for testing
     - set py2_venv_name=niftysplit-test-py2
 
-    - :: Create virtual environment if it does not exist
+    # Create virtual environment if it does not exist
     - IF NOT EXIST %py2_venv_name%\Scripts\python2 (
     - py -2.7 -m virtualenv %py2_venv_name%
     - if %errorlevel% neq 0 exit /b %errorlevel%
     - )
 
-    - : Install requirements for tests
-    - %py2_venv_name%\Scripts\pip install -r requirements-test.txt
+    # Install requirements for tests
+    - .\%py2_venv_name%\Scripts\pip install -r requirements-test.txt
     - if %errorlevel% neq 0 exit /b %errorlevel%
 
-    - : Run tests
-    - %py2_venv_name%\Scripts\python -m unittest discover -s "tests" -p "*_test.py"
+    # Run tests
+    - .\%py2_venv_name%\Scripts\python -m unittest discover -s "tests" -p "*_test.py"
     - if %errorlevel% neq 0 exit /b %errorlevel%
 
   tags:
