@@ -27,7 +27,7 @@ def combine_file(input_file_base, descriptor_filename, filename_out_base,
     """Combines several overlapping files into one output file"""
 
     if not filename_out_base:
-        filename_out_base = os.path.splitext(filename_out_base)[0] + "_combined"
+        filename_out_base = os.path.splitext(input_file_base)[0] + "_combined"
 
     if not descriptor_filename:
         [original_header, descriptors_in] = generate_input_descriptors(
