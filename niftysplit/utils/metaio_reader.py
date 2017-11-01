@@ -172,6 +172,7 @@ def load_mhd_header(filename):
             elif key in ['BinaryData', 'BinaryDataByteOrderMSB',
                          'CompressedData']:
                 # pylint: disable=simplifiable-if-statement
+                # pylint: disable=redefined-variable-type
                 if val.lower() == "true":
                     val = True
                 else:
