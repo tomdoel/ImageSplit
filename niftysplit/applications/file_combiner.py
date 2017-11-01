@@ -16,7 +16,6 @@ import sys
 
 from niftysplit.file.file_factory import FileFactory
 from niftysplit.file.file_wrapper import FileHandleFactory
-from niftysplit.utils.file_descriptor import convert_to_descriptors
 from niftysplit.utils.file_descriptor import generate_descriptor_from_header, \
     header_from_descriptor, generate_input_descriptors
 from niftysplit.applications.write_files import write_files
