@@ -18,6 +18,8 @@ from niftysplit.utils.metaio_reader import load_mhd_header
 class SubImageDescriptor(object):
     """Describes an image in relation to a larger image"""
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, descriptor_dict):
         self._descriptor = descriptor_dict
         self.filename = self._get_filename()

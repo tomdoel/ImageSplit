@@ -18,6 +18,8 @@ class MetaIoFile(AbstractLinearImageFile):
     """A class for reading or writing 3D imaging data to/from a MetaIO file
     pair (.mhd and .raw). """
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, subimage_descriptor, header_filename,
                  file_handle_factory, header_template):
         super(MetaIoFile, self).__init__(subimage_descriptor)
@@ -42,8 +44,8 @@ class MetaIoFile(AbstractLinearImageFile):
             self._mode = 'rb'
             self._header = load_mhd_header(header_filename)
 
-        self._bytes_per_voxel = compute_bytes_per_voxel(self._header[
-                                                            "ElementType"])
+        self._bytes_per_voxel = compute_bytes_per_voxel(
+            self._header["ElementType"])
         self._numpy_format = get_numpy_datatype(
             self._header["ElementType"],
             self._header["BinaryDataByteOrderMSB"])
@@ -170,7 +172,6 @@ def load_mhd_header(filename):
             elif key in ['BinaryData', 'BinaryDataByteOrderMSB',
                          'CompressedData']:
                 # pylint: disable=simplifiable-if-statement
-                # pylint: disable=redefined-variable-type
                 if val.lower() == "true":
                     val = True
                 else:
@@ -260,7 +261,7 @@ def get_dimension_ordering(header):
     The first element in the array contains the index of the global dimension
     which is represented by the first dimension in the file, and so on
     """
-
+    # pylint: disable=unused-argument
     return [1, 2, 3]  # ToDo
 
 
@@ -279,5 +280,3 @@ def get_default_metadata():
          ('Comment', []), ('SeriesDescription', []), ('AcquisitionDate', []),
          ('AcquisitionTime', []),
          ('StudyDate', []), ('StudyTime', [])])
-
-

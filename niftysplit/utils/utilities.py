@@ -21,4 +21,3 @@ def get_linear_byte_offset(image_size, bytes_per_voxel, start_coords):
         offset += coord * offset_multiple
         offset_multiple *= image_length
     return offset
-
