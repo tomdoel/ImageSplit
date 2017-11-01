@@ -132,6 +132,7 @@ class CoordinateTransformer(object):
         """Create a transformer object for converting between systems
 
         :param origin: local coordinate origin in global coordinates
+        :param size: size of the local frame in global coordinates
         :param dim_ordering: ordering of local dimensions
         :param dim_flip: whether local axes should be flipped
         """
@@ -145,32 +146,39 @@ class CoordinateTransformer(object):
 
         # Translate coordinates to the local origin
         start = np.subtract(global_start, self._origin)
+        size = np.array(global_size)  # Make sure global_size is a numpy array
 
         # Permute dimensions of local coordinates
-        start = np.transpose(start, self._dim_ordering)
-        size = np.transpose(global_size, self._dim_ordering)
+        start = start[self._dim_ordering]
+        size = size[self._dim_ordering]
+        size_t = np.array(self._size)[self._dim_ordering]
 
         # Flip dimensions where necessary
         for index, flip in enumerate(self._dim_flip):
             if flip:
-                start[index] = size[index] - start[index] - 1
+                start[index] = size_t[index] - start[index] - 1
 
         return start, size
 
     def to_global(self, local_start, local_size):
         """Convert local coordinates to global coordinates"""
 
-        # Translate coordinates to the local origin
-        start = np.add(local_start, self._origin)
-        size = local_size
+        start = np.array(local_start)
+        size = np.array(local_size)
+
+        size_t = np.array(self._size)[self._dim_ordering]
 
         # Flip dimensions where necessary
         for index, flip in enumerate(self._dim_flip):
             if flip:
-                start[index] = size[index] - start[index] - 1
+                start[index] = size_t[index] - start[index] - 1
 
         # Reverse permute dimensions of local coordinates
-        start = np.transpose(start, np.argsort(self._dim_ordering))
-        size = np.transpose(size, np.argsort(self._dim_ordering))
+        start = start[np.argsort(self._dim_ordering)]
+        size = size[np.argsort(self._dim_ordering)]
+
+        # Translate coordinates to the global origin
+        start = np.add(start, self._origin)
+        size = np.array(size)  # Make sure global_size is a numpy array
 
         return start, size
