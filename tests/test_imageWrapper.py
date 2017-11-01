@@ -1,3 +1,7 @@
+# coding=utf-8
+
+"""Unit tests"""
+
 from unittest import TestCase
 import numpy as np
 

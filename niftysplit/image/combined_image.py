@@ -1,5 +1,8 @@
-import numpy as np
+# coding=utf-8
 
+"""Classes for aggregating images from multiple files into a single image"""
+
+import numpy as np
 from image.image_wrapper import ImageWrapper
 
 

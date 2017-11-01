@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Common context"""
+
 import sys
 import os
 

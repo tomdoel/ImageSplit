@@ -255,6 +255,12 @@ def save_mhd_header(filename, metadata):
 
 
 def get_dimension_ordering(header):
+    """
+    Return the order in which dimensions are stored in the global system.
+    The first element in the array contains the index of the global dimension
+    which is represented by the first dimension in the file, and so on
+    """
+
     return [1, 2, 3]  # ToDo
 
 
