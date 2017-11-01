@@ -1,7 +1,8 @@
 # coding=utf-8
 
 """
-Wrapping code for managing virtual images that may consist of multiple subimages
+Wrapping code for managing virtual images that may consist of multiple
+subimages
 
 Author: Tom Doel
 Copyright UCL 2017
@@ -16,7 +17,7 @@ from niftysplit.utils.utilities import get_linear_byte_offset
 
 
 class FileStreamer(object):
-    """A class to handle streaming of image data with arbitrarily large files"""
+    """Handle streaming of image data with arbitrarily large files"""
 
     def __init__(self, file_wrapper, image_size, bytes_per_voxel, numpy_format,
                  dimension_ordering):
@@ -30,8 +31,9 @@ class FileStreamer(object):
         """Read a line of image data from a binary file at the specified
         image location """
 
-        offset = get_linear_byte_offset(self._image_size, self._bytes_per_voxel,
-                                        start_coords, self._dimension_ordering)
+        offset = get_linear_byte_offset(self._image_size,
+                                        self._bytes_per_voxel,
+                                        start_coords)
         self._file_wrapper.get_handle().seek(offset)
 
         data_type = np.dtype(self._numpy_format)
@@ -43,8 +45,9 @@ class FileStreamer(object):
         """Write a line of image data to a binary file at the specified image
         location """
 
-        offset = get_linear_byte_offset(self._image_size, self._bytes_per_voxel,
-                                        start_coords, [1, 2, 3])
+        offset = get_linear_byte_offset(self._image_size,
+                                        self._bytes_per_voxel,
+                                        start_coords)
         self._file_wrapper.get_handle().seek(offset)
 
         data_type = np.dtype(self._numpy_format)

@@ -78,19 +78,22 @@ def get_number_of_blocks(image_size, max_block_size):
     required to split the image into blocks that are subject to a maximum
     size limit """
 
-    return [int(ceil(float(image_size_element) / float(max_block_size_element)))
+    return [int(ceil(float(image_size_element) /
+                     float(max_block_size_element)))
             for image_size_element, max_block_size_element in
             zip(image_size, max_block_size)]
 
 
 def get_block_coordinate_range(block_number, block_size, overlap_size,
                                image_size):
-    """Returns the minimum and maximum coordinate values in one dimension for
+    """
+    Returns the minimum and maximum coordinate values in one dimension for
     an image block, where the dimension length image_size is to be split into
     the number of blocks specified by block_size with an overlap of
     overlap_size voxels at each boundary, and the current block_number is
     specified. There is no overlap at the outer border of the image, and the
-    length of the final block is reduced if necessary so there is no padding """
+    length of the final block is reduced if necessary so there is no padding
+    """
 
     # Compute the minimum coordinate of the block
     if block_number == 0:
@@ -136,8 +139,8 @@ def get_image_block_ranges(image_size, max_block_size, overlap_size):
         for j in range(number_of_blocks[1]):
             for k in range(number_of_blocks[2]):
                 block_ranges.append(
-                    [get_block_coordinate_range(index, block, overlap, size) for
-                     index, block, overlap, size in
+                    [get_block_coordinate_range(index, block, overlap, size)
+                     for index, block, overlap, size in
                      zip([i, j, k], suggested_block_size, overlap_size,
                          image_size)])
 

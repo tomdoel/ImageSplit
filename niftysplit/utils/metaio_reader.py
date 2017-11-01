@@ -18,8 +18,9 @@ class MetaIoFile(AbstractLinearImageFile):
     """A class for reading or writing 3D imaging data to/from a MetaIO file
     pair (.mhd and .raw). """
 
-    def __init__(self, subimage_descriptor, header_filename, file_handle_factory, header_template):
-        super().__init__(subimage_descriptor)
+    def __init__(self, subimage_descriptor, header_filename,
+                 file_handle_factory, header_template):
+        super(MetaIoFile, self).__init__(subimage_descriptor)
         self._file_handle_factory = file_handle_factory
         self._header_filename = header_filename
         self._input_path = os.path.dirname(os.path.abspath(header_filename))
@@ -41,18 +42,21 @@ class MetaIoFile(AbstractLinearImageFile):
             self._mode = 'rb'
             self._header = load_mhd_header(header_filename)
 
-        self._bytes_per_voxel = compute_bytes_per_voxel(header["ElementType"])
-        self._numpy_format = get_numpy_datatype(header["ElementType"],
-                                          header["BinaryDataByteOrderMSB"])
-        self._subimage_size = header["DimSize"]
-        self._dimension_ordering = get_dimension_ordering(header)
+        self._bytes_per_voxel = compute_bytes_per_voxel(self._header[
+                                                            "ElementType"])
+        self._numpy_format = get_numpy_datatype(
+            self._header["ElementType"],
+            self._header["BinaryDataByteOrderMSB"])
+        self._subimage_size = self._header["DimSize"]
+        self._dimension_ordering = get_dimension_ordering(self._header)
 
     @staticmethod
     def create_read_file(subimage_descriptor, file_handle_factory):
         """Create a MetaIoFile class for writing"""
 
         filename = subimage_descriptor.filename
-        return MetaIoFile(subimage_descriptor, filename, file_handle_factory, None)
+        return MetaIoFile(subimage_descriptor, filename, file_handle_factory,
+                          None)
 
     @staticmethod
     def create_write_file(subimage_descriptor, file_handle_factory):
@@ -64,7 +68,8 @@ class MetaIoFile(AbstractLinearImageFile):
         header_template["DimSize"] = subimage_descriptor.image_size
         header_template["Origin"] = subimage_descriptor.origin_start
         filename = subimage_descriptor.filename
-        return MetaIoFile(subimage_descriptor, filename, file_handle_factory, header_template)
+        return MetaIoFile(subimage_descriptor, filename, file_handle_factory,
+                          header_template)
 
     def close_file(self):
         """Close file"""
@@ -93,11 +98,11 @@ class MetaIoFile(AbstractLinearImageFile):
         """
         Return the preferred dimension ordering for writing data.
 
-        Returns an array of 3 element, where each element represents a dimension
-        in the global coordinate system numbered from 1 to 3 and is positive if
-        data are to be written in ascending coordinates (in the global system)
-        or negative if to be written in descending global coordinates along that
-        dimension
+        Returns an array of 3 element, where each element represents a
+        dimension in the global coordinate system numbered from 1 to 3 and
+        is positive if data are to be written in ascending coordinates (in
+        the global system) or negative if to be written in descending global
+        coordinates along that dimension
         """
 
         return self._dimension_ordering

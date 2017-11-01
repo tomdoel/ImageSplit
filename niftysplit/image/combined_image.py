@@ -78,10 +78,10 @@ class SubImage(object):
 
     def write_subimage(self, source):
         """Write out SubImage using data from the specified source"""
-        file = self._file_factory.create_write_file(self._descriptor)
+        out_file = self._file_factory.create_write_file(self._descriptor)
         transformed_source = TransformedDataSource(source, self._transformer)
-        file.write_file(transformed_source)
-        file.close()
+        out_file.write_file(transformed_source)
+        out_file.close()
 
     def close(self):
         """Close all streams and files"""
@@ -98,7 +98,8 @@ class SubImage(object):
     def _get_read_source(self):
         if not self._read_source:
             source = self._file_factory.create_read_file(self._descriptor)
-            self._read_source = TransformedDataSource(source, self._transformer)
+            self._read_source = TransformedDataSource(source,
+                                                      self._transformer)
         return self._read_source
 
 
