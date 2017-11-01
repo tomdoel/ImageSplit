@@ -1,9 +1,9 @@
 # coding=utf-8
 """Write multidimensional data line by line"""
 
+from abc import ABCMeta, abstractmethod
 import itertools
 import numpy as np
-from abc import ABCMeta, abstractmethod
 
 
 class AbstractImageFile(object):

@@ -5,7 +5,7 @@
 from unittest import TestCase
 import numpy as np
 
-from image.image_wrapper import ImageWrapper
+from niftysplit.image.image_wrapper import ImageWrapper
 import itertools
 
 

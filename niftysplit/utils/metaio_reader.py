@@ -10,7 +10,7 @@ import copy
 import os
 from collections import OrderedDict
 
-from file.file_wrapper import FileWrapper, FileStreamer
+from niftysplit.file.file_wrapper import FileWrapper, FileStreamer
 from niftysplit.file.linear_image_file import AbstractLinearImageFile
 
 

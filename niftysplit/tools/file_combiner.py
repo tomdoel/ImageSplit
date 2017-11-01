@@ -14,12 +14,12 @@ import argparse
 import os
 import sys
 
-from file.file_factory import FileFactory
-from file.file_wrapper import FileHandleFactory
+from niftysplit.file.file_factory import FileFactory
+from niftysplit.file.file_wrapper import FileHandleFactory
 from niftysplit.utils.file_descriptor import convert_to_descriptors
 from niftysplit.utils.file_descriptor import generate_descriptor_from_header, \
     header_from_descriptor, generate_input_descriptors
-from tools.write_files import write_files
+from niftysplit.tools.write_files import write_files
 
 
 def combine_file(input_file_base, descriptor_filename, filename_out_base,
