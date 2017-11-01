@@ -133,58 +133,49 @@ testjob-mac:
 testjob-win:
   stage: dev_test
   script:
-    # print system info
-    - pwd
+    - ::print system info
+    - echo %CD%
 
-    # save current folder path just in case
-    - export niftysplit_dir=$(pwd)
+    - :: PYTHON 3 Print Python version
+    - py -3 --version
 
-    #### python 3 tests ###################################
-    - echo 'Running Python 3 tests'
+    - :: create a virtual env for testing
+    - set py3_venv_name=niftysplit-test-py3
 
-    # create a virtual env for testing
-    - py3_venv_name="niftysplit-test-py3"
-    - py3_bin=$(which python3)
-    - virtualenv -p $py3_bin $py3_venv_name
-    - cd $py3_venv_name/bin
-    - py3_venv_bin=$(pwd)
+    - :: Create virtual environment if it does not exist
+    - IF NOT EXIST %py3_venv_name%\Scripts\python.exe (
+    - py -3 -m virtualenv %py3_venv_name%
+    - if %errorlevel% neq 0 exit /b %errorlevel%
+    - )
 
-    # print Python version to CI output
-    - $py3_venv_bin/python --version
+    - :: Install requirements for tests
+    - %py3_venv_name%\Scripts\pip install -r requirements-test.txt
+    - if %errorlevel% neq 0 exit /b %errorlevel%
 
-    # Install requirements for tests
-    - cd $niftysplit_dir
-    - $py3_venv_bin/pip install -r requirements-test.txt
+    - :: Run tests
+    - %py3_venv_name%\Scripts\python -m unittest discover -s "tests" -p "*_test.py"
+    - if %errorlevel% neq 0 exit /b %errorlevel%
 
-    # Run tests
-    - $py3_venv_bin/python -m unittest discover -s "tests" -p "*_test.py"
+    - :: PYTHON 2 Print Python version
+    - py -2 --version
 
-    ###############end of python3
+    - :: create a virtual env for testing
+    - set py2_venv_name=niftysplit-test-py2
 
+    - :: Create virtual environment if it does not exist
+    - IF NOT EXIST %py2_venv_name%\Scripts\python2 (
+    - py -2.7 -m virtualenv %py2_venv_name%
+    - if %errorlevel% neq 0 exit /b %errorlevel%
+    - )
 
-    #### python 2 tests ###################################
-    - echo 'Running Python 2 tests'
+    - : Install requirements for tests
+    - %py2_venv_name%\Scripts\pip install -r requirements-test.txt
+    - if %errorlevel% neq 0 exit /b %errorlevel%
 
-    # create a virtual env for testing
-    - py2_venv_name="niftysplit-test-py2"
-    - py2_bin=$(which python2)
-    - virtualenv -p $py2_bin $py2_venv_name
-    - cd $py2_venv_name/bin
-    - py2_venv_bin=$(pwd)
+    - : Run tests
+    - %py2_venv_name%\Scripts\python -m unittest discover -s "tests" -p "*_test.py"
+    - if %errorlevel% neq 0 exit /b %errorlevel%
 
-    # print Python version to CI output
-    - $py2_venv_bin/python --version
-
-    # Install requirements for tests
-    - cd $niftysplit_dir
-    - $py2_venv_bin/pip install -r requirements-test.txt
-
-    # Run tests
-    - $py2_venv_bin/python -m unittest discover -s "tests" -p "*_test.py"
-
-    ###############end of python3
-
-    - echo 'finished tests'
   tags:
-    - gift-win-bash
+    - gift-win
 
