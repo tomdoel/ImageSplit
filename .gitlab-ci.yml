@@ -39,7 +39,7 @@ testjob-linux:
     - $py3_venv_bin/pip install -r requirements-test.txt
 
     # Run tests with coverage
-    - $py3_venv_bin/coverage run -a --source . -m unittest discover -s "tests" -p "*_test.py"
+    - $py3_venv_bin/coverage run -a --source . -m unittest discover -s "tests"
     - $py3_venv_bin/coverage report -m
 
     ###############end of python3
@@ -63,7 +63,7 @@ testjob-linux:
     - $py2_venv_bin/pip install -r requirements-test.txt
 
     # Run tests
-    - $py2_venv_bin/python -m unittest discover -s "tests" -p "*_test.py"
+    - $py2_venv_bin/python -m unittest discover -s "tests"
 
     ###############end of python3
 
@@ -99,7 +99,7 @@ testjob-mac:
     - $py3_venv_bin/pip install -r requirements-test.txt
 
     # Run tests
-    - $py3_venv_bin/python -m unittest discover -s "tests" -p "*_test.py"
+    - $py3_venv_bin/python -m unittest discover -s "tests"
 
     ###############end of python3
 
@@ -122,7 +122,7 @@ testjob-mac:
     - $py2_venv_bin/pip install -r requirements-test.txt
 
     # Run tests
-    - $py2_venv_bin/python -m unittest discover -s "tests" -p "*_test.py"
+    - $py2_venv_bin/python -m unittest discover -s "tests"
 
     ###############end of python3
 
@@ -154,7 +154,7 @@ testjob-win:
     - if %errorlevel% neq 0 exit /b %errorlevel%
 
     # Run tests
-    - .\%py3_venv_name%\Scripts\python -m unittest discover -s "tests" -p "*_test.py"
+    - .\%py3_venv_name%\Scripts\python -m unittest discover -s "tests"
     - if %errorlevel% neq 0 exit /b %errorlevel%
 
     # PYTHON 2 Print Python version
@@ -174,7 +174,7 @@ testjob-win:
     - if %errorlevel% neq 0 exit /b %errorlevel%
 
     # Run tests
-    - .\%py2_venv_name%\Scripts\python -m unittest discover -s "tests" -p "*_test.py"
+    - .\%py2_venv_name%\Scripts\python -m unittest discover -s "tests"
     - if %errorlevel% neq 0 exit /b %errorlevel%
 
   tags:
