@@ -42,10 +42,7 @@ def combine_file(input_file_base, descriptor_filename, filename_out_base,
                                                       original_header,
                                                       output_type)
 
-    desc_in = convert_to_descriptors(descriptors_in)
-    desc_out = convert_to_descriptors(descriptors_out)
-
-    write_files(desc_in, desc_out, file_factory)
+    write_files(descriptors_in, descriptors_out, file_factory)
 
 
 def main(args):

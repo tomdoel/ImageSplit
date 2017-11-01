@@ -227,7 +227,7 @@ def generate_descriptor_from_header(filename_out_base, original_header,
                                  [0, output_image_size[1] - 1, 0, 0],
                                  [0, output_image_size[2] - 1, 0, 0]]}
     descriptors_out.append(descriptor_out)
-    return descriptors_out
+    return convert_to_descriptors(descriptors_out)
 
 
 def header_from_descriptor(descriptor_filename):
@@ -241,7 +241,8 @@ def header_from_descriptor(descriptor_filename):
     original_header = load_mhd_header(
         original_file_descriptor["filename"])
     input_file_list = descriptor["split_files"]
-    return original_header, input_file_list
+    descriptors = convert_to_descriptors(input_file_list)
+    return original_header, descriptors
 
 
 def generate_input_descriptors(input_file_base, start_index):
@@ -261,6 +262,7 @@ def generate_input_descriptors(input_file_base, start_index):
         descriptor = {"index": 0, "suffix": "", "filename": header_filename,
                       "ranges": current_ranges, "template": combined_header}
         descriptors.append(descriptor)
+        descriptors = convert_to_descriptors(descriptors)
         return combined_header, descriptors
 
     else:
@@ -280,6 +282,7 @@ def generate_input_descriptors(input_file_base, start_index):
             suffix = str(file_index)
             header_filename = input_file_base + suffix + '.mhd'
             if not os.path.isfile(header_filename):
+                descriptors = convert_to_descriptors(descriptors)
                 return combined_header, descriptors
             current_header = load_mhd_header(header_filename)
             current_image_size = current_header["DimSize"]
