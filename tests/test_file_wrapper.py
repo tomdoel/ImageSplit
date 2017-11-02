@@ -14,7 +14,7 @@ from niftysplit.file.file_wrapper import FileStreamer
 from niftysplit.file.metaio_reader import compute_bytes_per_voxel
 
 
-class FakeFileHandleFactory:
+class FakeFileHandleFactory(object):
     def __init__(self, fake_file):
         self._fake_file = fake_file
 
@@ -23,7 +23,7 @@ class FakeFileHandleFactory:
         return self._fake_file
 
 
-class FakeFile:
+class FakeFile(object):
     def __init__(self, data, bytes_per_voxel):
         self.data = data
         self.bytes_per_voxel = bytes_per_voxel
@@ -74,8 +74,8 @@ class FakeFile:
         pass
 
 
-class TestHugeFileWrapper(fake_filesystem_unittest.TestCase):
-    """Tests for HugeFileWrapper"""
+class TestFileWrapper(fake_filesystem_unittest.TestCase):
+    """Tests for FileWrapper"""
 
     def setUp(self):
         self.setUpPyfakefs()
@@ -142,8 +142,8 @@ class TestHugeFileWrapper(fake_filesystem_unittest.TestCase):
         self.assertEqual(fake_file.closed, True)
 
 
-class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
-    """Tests for HugeFileStreamer"""
+class TestHugeStreamer(fake_filesystem_unittest.TestCase):
+    """Tests for FileStreamer"""
 
     def setUp(self):
         self.setUpPyfakefs()
@@ -168,11 +168,11 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
 
         # Create a fake file of random data within the full range of this
         # datatype
-        base_data_numpy = TestHugeFileStreamer.generate_array(
+        base_data_numpy = TestHugeStreamer.generate_array(
             image_size[0] * image_size[1] * image_size[2],
             bytes_per_voxel, is_signed)
 
-        TestHugeFileStreamer.write_to_fake_file(
+        TestHugeStreamer.write_to_fake_file(
             '/test/test_read_image_stream.bin', base_data_numpy,
             bytes_per_voxel,
             is_signed)
@@ -180,7 +180,7 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
         wrapper = file_wrapper.FileWrapper(
             '/test/test_read_image_stream.bin', file_handle_factory, 'rb')
         file_streamer = FileStreamer(wrapper, image_size, bytes_per_voxel,
-                                     TestHugeFileStreamer.get_np_type(
+                                     TestHugeStreamer.get_np_type(
                                              bytes_per_voxel, is_signed), [1, 2, 3])
         start = start_coords[0] + start_coords[1] * image_size[0] + \
             start_coords[2] * image_size[0] * image_size[1]
@@ -188,7 +188,7 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
         expected = base_data_numpy[start:end]
         read_file_contents = file_streamer.read_line(start_coords,
                                                      num_voxels_to_read)
-        expected = np.asarray(expected, dtype=TestHugeFileStreamer.get_np_type(
+        expected = np.asarray(expected, dtype=TestHugeStreamer.get_np_type(
             bytes_per_voxel, is_signed))
         self.assertTrue(np.array_equal(expected, read_file_contents))
 
@@ -204,7 +204,7 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
         wrapper = file_wrapper.FileWrapper(
             '/test/test_write_image_stream.bin', file_handle_factory, 'wb')
         file_streamer = FileStreamer(wrapper, image_size, bytes_per_voxel,
-                                     TestHugeFileStreamer.get_np_type(
+                                     TestHugeStreamer.get_np_type(
                                              bytes_per_voxel, is_signed), [1, 2, 3])
         start = start_coords[0] + start_coords[1] * image_size[0] + \
             start_coords[2] * image_size[0] * image_size[1]
@@ -214,29 +214,29 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
         for index in range(0, num_voxels_to_write):
             to_write_voxels[index] = index + 12
 
-        base_data_numpy = TestHugeFileStreamer.generate_array(
+        base_data_numpy = TestHugeStreamer.generate_array(
             image_size[0] * image_size[1] * image_size[2],
             bytes_per_voxel, is_signed)
         expected = base_data_numpy.copy()
         to_write_numpy = np.asarray(to_write_voxels,
-                                    dtype=TestHugeFileStreamer.get_np_type(
+                                    dtype=TestHugeStreamer.get_np_type(
                                         bytes_per_voxel, is_signed))
         file_streamer.write_line([0, 0, 0], base_data_numpy)
         file_streamer.write_line(start_coords, to_write_numpy)
         file_streamer.close()
-        read_file_contents = TestHugeFileStreamer.read_from_fake_file(
+        read_file_contents = TestHugeStreamer.read_from_fake_file(
             '/test/test_write_image_stream.bin',
             bytes_per_voxel, is_signed)
         for index in range(0, num_voxels_to_write):
             expected[index + start] = to_write_voxels[index]
 
-        expected = np.asarray(expected, dtype=TestHugeFileStreamer.get_np_type(
+        expected = np.asarray(expected, dtype=TestHugeStreamer.get_np_type(
             bytes_per_voxel, is_signed))
         self.assertTrue(np.array_equal(expected, read_file_contents))
 
     @staticmethod
     def read_from_fake_file(file_name, bytes_per_voxel, is_signed):
-        fmt = TestHugeFileStreamer.get_fmt_string(bytes_per_voxel, is_signed)
+        fmt = TestHugeStreamer.get_fmt_string(bytes_per_voxel, is_signed)
         with open(file_name, 'rb') as f:
             size_bytes = os.fstat(f.fileno()).st_size
             num_elements = int(round(size_bytes / bytes_per_voxel))
@@ -251,8 +251,8 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
             offset = round(max_value / 2) + 1
         else:
             offset = 0
-        dt = TestHugeFileStreamer.get_np_type(bytes_per_voxel=bytes_per_voxels,
-                                              is_signed=is_signed)
+        dt = TestHugeStreamer.get_np_type(bytes_per_voxel=bytes_per_voxels,
+                                          is_signed=is_signed)
         max_value -= offset
         return numpy.random.randint(low=min_value, high=max_value, size=length,
                                     dtype=dt)
@@ -305,7 +305,7 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
     def write_to_fake_file(file_name, array_to_write, bytes_per_voxel,
                            is_signed):
 
-        fmt = TestHugeFileStreamer.get_fmt_string(bytes_per_voxel, is_signed)
+        fmt = TestHugeStreamer.get_fmt_string(bytes_per_voxel, is_signed)
         folder = os.path.dirname(file_name)
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -315,8 +315,8 @@ class TestHugeFileStreamer(fake_filesystem_unittest.TestCase):
             f.write(to_write_bytes)
 
 
-class TestFileWrapper(unittest.TestCase):
-    """Tests for FileWrapper"""
+class TestMetaIoReader(unittest.TestCase):
+    """Tests for MetaIoReader"""
 
     def test_compute_bytes_per_voxel(self):
         self.assertEqual(compute_bytes_per_voxel('MET_CHAR'), 1)

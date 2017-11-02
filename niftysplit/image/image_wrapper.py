@@ -5,7 +5,7 @@ import numpy as np
 
 
 class ImageWrapper(object):
-    """Mult-dimensional image array with an origin"""
+    """Multi-dimensional image array with an origin"""
 
     def __init__(self, origin, image_size=None, image=None):
         self.origin = origin

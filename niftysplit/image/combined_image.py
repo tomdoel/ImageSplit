@@ -48,13 +48,15 @@ class SubImage(object):
         self._read_source = None
 
         self._roi_start = self._descriptor.roi_start
-        self._roi_end = self._descriptor.roi_end
-        self._roi_size = np.add(np.subtract(self._roi_end, self._roi_start),
-                                np.ones(shape=self._roi_start))
-        self._transformer = CoordinateTransformer(self._descriptor.origin_start,
-                                                  self._descriptor.image_size,
-                                                  self._descriptor.dim_order,
-                                                  self._descriptor.dim_flip)
+        self._roi_size = np.add(
+            np.subtract(self._descriptor.roi_end, self._descriptor.roi_start),
+            np.ones(shape=self._roi_start))
+
+        self._transformer = CoordinateTransformer(
+            self._descriptor.origin_start,
+            self._descriptor.image_size,
+            self._descriptor.dim_order,
+            self._descriptor.dim_flip)
 
     def read_part_image(self, start_global, size):
         """Returns a subimage containing any overlap from the ROI"""
