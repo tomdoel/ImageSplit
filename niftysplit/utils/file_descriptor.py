@@ -35,7 +35,7 @@ class SubImageDescriptor(object):
         self.roi_start = self._get_roi_start()
         self.roi_end = self._get_roi_end()
 
-        self.dim_order_and_flip = self._get_dim_order()
+        self.dim_order_and_flip = descriptor_dict["dim_order"]
         self.dim_order = [abs(d) - 1 for d in self.dim_order_and_flip]
         self.dim_flip = [d < 0 for d in self.dim_order_and_flip]
 
@@ -43,12 +43,6 @@ class SubImageDescriptor(object):
         """Get a dictionary for the metadata for this subimage"""
 
         return self._descriptor
-
-    def _get_ranges(self):
-        return self._descriptor["ranges"]
-
-    def _get_dim_order(self):
-        return self._descriptor["dim_order"]
 
     def _get_roi_end(self):
         return [this_range[1] - this_range[3] for this_range in
