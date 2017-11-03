@@ -7,11 +7,11 @@ import numpy as np
 
 
 class AbstractImageFile(object):
-    """Base class for writing data from source to destination line by line"""
+    """Base class for writing data from source to destination"""
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def write_file(self, data_source):
+    def write_image(self, data_source):
         """Create and write out this file, using data from this image source"""
         pass
 
@@ -65,7 +65,7 @@ class AbstractLinearImageFile(AbstractImageFile):
 
         return image
 
-    def write_file(self, data_source):
+    def write_image(self, data_source):
         """Create and write out this file, using data from this image source"""
 
         # Compute coordinate ranges

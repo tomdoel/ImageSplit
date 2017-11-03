@@ -14,7 +14,7 @@ def write_files(descriptors_in, descriptors_out, file_factory):
 
     input_combined = CombinedImage(descriptors_in, file_factory)
     output_combined = CombinedImage(descriptors_out, file_factory)
-    output_combined.write_image_file(input_combined)
+    output_combined.write_image(input_combined)
 
     input_combined.close()
     output_combined.close()

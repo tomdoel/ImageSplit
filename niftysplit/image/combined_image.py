@@ -1,12 +1,28 @@
 # coding=utf-8
 
 """Classes for aggregating images from multiple files into a single image"""
+from abc import ABCMeta, abstractmethod
 
 import numpy as np
 from niftysplit.image.image_wrapper import ImageWrapper
 
 
-class CombinedImage(object):
+class Source(object):
+    """Base class for reading data"""
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def read_image(self, start, size):
+        """Read image from specified starting coordinates and size"""
+        pass
+
+    @abstractmethod
+    def close(self):
+        """Read image from specified starting coordinates and size"""
+        pass
+
+
+class CombinedImage(Source):
     """A kind of virtual file for writing where the data are distributed
         across multiple real files. """
 
@@ -17,20 +33,18 @@ class CombinedImage(object):
         for subimage_descriptor in descriptors:
             self._subimages.append(SubImage(subimage_descriptor, file_factory))
 
-    def write_image_file(self, input_combined):
-        """Write out all the subimages"""
-
-        # Get each subimage to write itself
-        for next_image in self._subimages:
-            next_image.write_subimage(input_combined)
-
-    def read_image(self, start_global, size):
+    def read_image(self, start, size):
         """Assembles an image range from subimages"""
 
-        combined_image = ImageWrapper(start_global, image_size=size)
-        for next_subimage in self._subimages:
-            part_image = next_subimage.read_part_image(start_global, size)
-            if part_image:
+        combined_image = ImageWrapper(start, image_size=size)
+        for subimage in self._subimages:
+
+            # Find the part of the requested region that fits in the ROI
+            sub_start, sub_size = subimage.bind_by_roi(start, size)
+
+            # Check if any of the requested region is contained in this subimage
+            if np.all(np.greater(sub_size, np.zeros_like(sub_size))):
+                part_image = subimage.read_image_global(sub_start, sub_size)
                 combined_image.set_sub_image(part_image)
 
     def close(self):
@@ -38,8 +52,15 @@ class CombinedImage(object):
         for subimage in self._subimages:
             subimage.close()
 
+    def write_image(self, source):
+        """Write out all the subimages with data from supplied source"""
 
-class SubImage(object):
+        # Get each subimage to write itself
+        for next_image in self._subimages:
+            next_image.write_image(source)
+
+
+class SubImage(Source):
     """An image which forms part of a larger image"""
 
     def __init__(self, descriptor, file_factory):
@@ -50,7 +71,7 @@ class SubImage(object):
         self._roi_start = self._descriptor.roi_start
         self._roi_size = np.add(
             np.subtract(self._descriptor.roi_end, self._descriptor.roi_start),
-            np.ones(shape=self._roi_start))
+            np.ones_like(self._roi_start))
 
         self._transformer = CoordinateTransformer(
             self._descriptor.origin_start,
@@ -58,34 +79,32 @@ class SubImage(object):
             self._descriptor.dim_order,
             self._descriptor.dim_flip)
 
-    def read_part_image(self, start_global, size):
+    def read_image(self, start, size):
         """Returns a subimage containing any overlap from the ROI"""
 
-        # Find the part of the requested region that fits in the ROI
-        start, size = self._get_bounds_in_roi(start_global, size)
-
-        # Check if none of the requested region is contained in this subimage
-        if np.any(np.less(size, np.zeros(shape=size))):
-            return None
-
-        image_data = self._get_read_source().read_image(start, size)
-
         # Wrap the image data in an ImageWrapper
-        return ImageWrapper(start, image=image_data)
-
-    def write_subimage(self, source):
-        """Write out SubImage using data from the specified source"""
-        out_file = self._file_factory.create_write_file(self._descriptor)
-        transformed_source = TransformedDataSource(source, self._transformer)
-        out_file.write_file(transformed_source)
-        out_file.close()
+        return ImageWrapper(
+            start,
+            image=self._get_read_source().read_image(start, size))
 
     def close(self):
         """Close all streams and files"""
-        self._read_source.close()
-        self._read_source = None
 
-    def _get_bounds_in_roi(self, start_global, size_global):
+        if self._read_source:
+            self._read_source.close()
+            self._read_source = None
+
+    def write_image(self, global_source):
+        """Write out SubImage using data from the specified source"""
+
+        out_file = self._file_factory.create_write_file(self._descriptor)
+        local_source = LocalSource(global_source, self._transformer)
+        out_file.write_image(local_source)
+        out_file.close()
+
+    def bind_by_roi(self, start_global, size_global):
+        """Find the part of the specified region that fits within the ROI"""
+
         start = np.maximum(start_global, self._roi_start)
         end = np.minimum(np.add(start_global, size_global),
                          np.add(self._roi_start, self._roi_size))
@@ -94,14 +113,34 @@ class SubImage(object):
 
     def _get_read_source(self):
         if not self._read_source:
-            source = self._file_factory.create_read_file(self._descriptor)
-            self._read_source = TransformedDataSource(source,
-                                                      self._transformer)
+            local_source = self._file_factory.create_read_file(self._descriptor)
+            self._read_source = GlobalSource(local_source, self._transformer)
         return self._read_source
 
 
-class TransformedDataSource(object):
-    """Data source with conversion between local and global coordinates"""
+class GlobalSource(Source):
+    """Data source allowing use of a local source with global coordinates"""
+
+    def __init__(self, data_source, converter):
+        self._data_source = data_source
+        self._converter = converter
+
+    def read_image(self, start_global, size_global):
+        """Returns a partial image using the specified global coordinates"""
+
+        # Convert to local coordinates for the data source
+        start, size = self._converter.to_local(start_global, size_global)
+
+        # Get the image data from the data source
+        return self._data_source.read_image(start, size)
+
+    def close(self):
+        """Close all streams and files"""
+        self._data_source.close()
+
+
+class LocalSource(Source):
+    """Data source allowing use of a global source with local coordinates"""
 
     def __init__(self, data_source, converter):
         self._data_source = data_source
@@ -111,15 +150,6 @@ class TransformedDataSource(object):
         """Returns a partial image using the specified local coordinates"""
 
         start, size = self._converter.to_global(start_local, size_local)
-        return self._data_source.read_image(start, size)
-
-    def read_image_local(self, start_global, size_global):
-        """Returns a partial image using the specified global coordinates"""
-
-        # Convert to local coordinates for the data source
-        start, size = self._converter.to_local(start_global, size_global)
-
-        # Get the image data from the data source
         return self._data_source.read_image(start, size)
 
     def close(self):
