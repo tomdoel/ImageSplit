@@ -22,24 +22,27 @@ class SubImageDescriptor(object):
 
     def __init__(self, descriptor_dict):
         self._descriptor = descriptor_dict
-        self.filename = self._get_filename()
+
+        self.filename = descriptor_dict["filename"]
+        self.file_format = "mhd"  # ToDo
+        self.data_type = descriptor_dict["data_type"]
+        self.template = descriptor_dict["template"]
+
+        self.ranges = descriptor_dict["ranges"]
         self.image_size = self._get_image_size()
-        self.dim_order_and_flip = self._get_dim_order()
         self.origin_start = self._get_origin_start()
         self.origin_end = self._get_origin_end()
         self.roi_start = self._get_roi_start()
         self.roi_end = self._get_roi_end()
-        self.ranges = self._get_ranges()
 
-        self.file_format = "mhd"
-        self.data_type = self._get_data_type()
-        self.template = self._get_template()
-
+        self.dim_order_and_flip = self._get_dim_order()
         self.dim_order = [abs(d) - 1 for d in self.dim_order_and_flip]
         self.dim_flip = [d < 0 for d in self.dim_order_and_flip]
 
-    def _get_filename(self):
-        return self._descriptor["filename"]
+    def to_dict(self):
+        """Get a dictionary for the metadata for this subimage"""
+
+        return self._descriptor
 
     def _get_ranges(self):
         return self._descriptor["ranges"]
@@ -67,12 +70,6 @@ class SubImageDescriptor(object):
         """Return the size of this subvolume including overlap regions"""
         return [1 + this_range[1] - this_range[0] for this_range in
                 self._descriptor["ranges"]]
-
-    def _get_data_type(self):
-        return self._descriptor["data_type"]
-
-    def _get_template(self):
-        return self._descriptor["template"]
 
 
 def get_number_of_blocks(image_size, max_block_size):
@@ -151,9 +148,11 @@ def get_image_block_ranges(image_size, max_block_size, overlap_size):
 
 def write_descriptor_file(descriptors_in, descriptors_out, filename_out_base):
     """Saves descriptor files"""
+    dict_in = convert_to_dict(descriptors_in)
+    dict_out = convert_to_dict(descriptors_out)
     descriptor = {"appname": "GIFT-Surg split data", "version": "1.0",
-                  "split_files": descriptors_out,
-                  "source_files": descriptors_in}
+                  "split_files": dict_out,
+                  "source_files": dict_in}
     descriptor_output_filename = filename_out_base + "_info.gift"
     write_json(descriptor_output_filename, descriptor)
 
@@ -322,8 +321,14 @@ def generate_input_descriptors(input_file_base, start_index):
             file_index += 1
 
 
-def convert_to_descriptors(descriptors):
+def convert_to_descriptors(descriptors_dict):
     """Convert descriptor dictionary to list of SubImageDescriptor objects"""
-    descriptors_sorted = sorted(descriptors, key=lambda k: k['index'])
+    descriptors_sorted = sorted(descriptors_dict, key=lambda k: k['index'])
     desc = [SubImageDescriptor(d) for d in descriptors_sorted]
     return desc
+
+
+def convert_to_dict(descriptors):
+    """Convert SubImageDescriptor objects to descriptor dictionary"""
+
+    return [d.to_dict() for d in descriptors]

@@ -44,9 +44,7 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
 
     file_factory = FileFactory(file_handle_factory)
 
-    desc_in = convert_to_descriptors(descriptors_in)
-    desc_out = convert_to_descriptors(descriptors_out)
-    write_files(desc_in, desc_out, file_factory)
+    write_files(descriptors_in, descriptors_out, file_factory)
     write_descriptor_file(descriptors_in, descriptors_out, filename_out_base)
 
 
