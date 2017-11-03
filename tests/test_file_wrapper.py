@@ -312,7 +312,3 @@ class TestStreamer(fake_filesystem_unittest.TestCase):
             num_elements = len(array_to_write)
             to_write_bytes = struct.pack(fmt * num_elements, *array_to_write)
             f.write(to_write_bytes)
-
-
-if __name__ == '__main__':
-    unittest.main()

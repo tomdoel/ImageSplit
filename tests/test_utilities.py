@@ -21,8 +21,3 @@ class TestUtilities(unittest.TestCase):
         self.assertEqual(
             get_linear_byte_offset([55, 301, 999], 7, [14, 208, 88]),
             (14 + 208 * 55 + 88 * 55 * 301) * 7)
-
-
-if __name__ == '__main__':
-    unittest.main()
-
