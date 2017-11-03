@@ -6,7 +6,7 @@ from parameterized import parameterized, param
 
 from niftysplit.file.linear_image_file import AbstractImageFile
 from niftysplit.image.combined_image import SubImage, Source, \
-    CoordinateTransformer
+    CoordinateTransformer, CombinedImage
 from niftysplit.image.image_wrapper import ImageWrapper
 from niftysplit.utils.file_descriptor import SubImageDescriptor
 
@@ -48,6 +48,61 @@ class FakeFileFactory(object):
         write_file = FakeImageFile(descriptor)
         self.write_files.append(write_file)
         return write_file
+
+
+class TestCombinedImage(TestCase):
+
+    def test_combined_image(self):
+        d1 = self._make_descriptor(1, [[0, 9, 0, 2], [0,  9,  0, 2], [0,  9,  0, 2]])
+        d2 = self._make_descriptor(2, [[0, 9, 0, 2], [0,  9,  0, 2], [10, 19, 0, 2]])
+        d3 = self._make_descriptor(3, [[0, 9, 0, 2], [0,  9,  0, 2], [20, 29, 0, 2]])
+        d4 = self._make_descriptor(4, [[0, 9, 0, 2], [10, 19, 2, 2], [0,  9,  2, 2]])
+        d5 = self._make_descriptor(5, [[0, 9, 0, 2], [10, 19, 2, 2], [10, 19, 2, 2]])
+        d6 = self._make_descriptor(6, [[0, 9, 0, 2], [10, 19, 2, 2], [20, 29, 2, 2]])
+        d7 = self._make_descriptor(7, [[0, 9, 0, 2], [20, 29, 2, 0], [0,  9,  2, 0]])
+        d8 = self._make_descriptor(8, [[0, 9, 0, 2], [20, 29, 2, 0], [10, 19, 2, 0]])
+        d9 = self._make_descriptor(9, [[0, 9, 0, 2], [20, 29, 2, 0], [20, 29, 2, 0]])
+
+        d11 = self._make_descriptor(11, [[10, 19, 0, 2], [0,  9,  0, 2], [0,  9,  0, 2]])
+        d12 = self._make_descriptor(12, [[10, 19, 0, 2], [0,  9,  0, 2], [10, 19, 0, 2]])
+        d13 = self._make_descriptor(13, [[10, 19, 0, 2], [0,  9,  0, 2], [20, 29, 0, 2]])
+        d14 = self._make_descriptor(14, [[10, 19, 0, 2], [10, 19, 2, 2], [0,  9,  2, 2]])
+        d15 = self._make_descriptor(15, [[10, 19, 0, 2], [10, 19, 2, 2], [10, 19, 2, 2]])
+        d16 = self._make_descriptor(16, [[10, 19, 0, 2], [10, 19, 2, 2], [20, 29, 2, 2]])
+        d17 = self._make_descriptor(17, [[10, 19, 0, 2], [20, 29, 2, 0], [0,  9,  2, 0]])
+        d18 = self._make_descriptor(18, [[10, 19, 0, 2], [20, 29, 2, 0], [10, 19, 2, 0]])
+        d19 = self._make_descriptor(19, [[10, 19, 0, 2], [20, 29, 2, 0], [20, 29, 2, 0]])
+
+        d21 = self._make_descriptor(21, [[20, 29, 0, 2], [0,  9,  0, 2], [0,  9,  0, 2]])
+        d22 = self._make_descriptor(22, [[20, 29, 0, 2], [0,  9,  0, 2], [10, 19, 0, 2]])
+        d23 = self._make_descriptor(23, [[20, 29, 0, 2], [0,  9,  0, 2], [20, 29, 0, 2]])
+        d24 = self._make_descriptor(24, [[20, 29, 0, 2], [10, 19, 2, 2], [0,  9,  2, 2]])
+        d25 = self._make_descriptor(25, [[20, 29, 0, 2], [10, 19, 2, 2], [10, 19, 2, 2]])
+        d26 = self._make_descriptor(26, [[20, 29, 0, 2], [10, 19, 2, 2], [20, 29, 2, 2]])
+        d27 = self._make_descriptor(27, [[20, 29, 0, 2], [20, 29, 2, 0], [0,  9,  2, 0]])
+        d28 = self._make_descriptor(28, [[20, 29, 0, 2], [20, 29, 2, 0], [10, 19, 2, 0]])
+        d29 = self._make_descriptor(29, [[20, 29, 0, 2], [20, 29, 2, 0], [20, 29, 2, 0]])
+
+        descriptors = [d1, d2, d3, d4, d5, d6, d7, d8, d9,
+                       d11, d12, d13, d14, d15, d16, d17, d18, d19,
+                       d21, d22, d23, d24, d25, d26, d27, d28, d29]
+
+        file_factory = FakeFileFactory()
+
+        ci = CombinedImage(descriptors, file_factory)
+        source = Mock()
+        ci.write_image(source)
+        self.assertEquals(len(file_factory.write_files), 27)
+        for descriptor, write_file in zip(descriptors, file_factory.write_files):
+            self.assertEquals(descriptor.ranges, write_file.descriptor.ranges)
+            self.assertFalse(write_file.open)
+
+        # ToDo: test read and close
+
+    def _make_descriptor(self, index, ranges):
+        return SubImageDescriptor({"filename": 'TestFileName',
+            "ranges": ranges, "suffix": "SUFFIX", "dim_order": [1, 2, 3],
+            "data_type": "XXXX", "index": index, "template": []})
 
 
 class TestSubImage(TestCase):
