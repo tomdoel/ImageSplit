@@ -4,39 +4,28 @@
 
 from unittest import TestCase
 import numpy as np
+from parameterized import parameterized, param
 
 from niftysplit.image.image_wrapper import ImageWrapper
 import itertools
 
 
 class TestImageWrapper(TestCase):
-    def test_set_sub_image(self):
-        test_array = np.array([[1, 2, 3, 4, 5, 6], [21, 22, 23, 24, 25, 26], [31, 32, 33, 34, 35, 36], [41, 42, 43, 44, 45, 46]])
-        main_image = ImageWrapper([1, 2], image=test_array)
-        sub_image = ImageWrapper([2, 3], image=np.array([[7, 8], [9, 10]]))
-        main_image.set_sub_image(sub_image)
-        compare_array = np.array([[1, 2, 3, 4, 5, 6], [21, 7, 8, 24, 25, 26], [31, 9, 10, 34, 35, 36], [41, 42, 43, 44, 45, 46]])
-        self.assertTrue(np.array_equal(compare_array, main_image.image))
 
-        all_dim_sizes = [1, 37]
-        all_origins = [0, 17]
-        for num_dimensions in [2, 3, 4]:
-
-            multi_dimensions = [all_dim_sizes] * num_dimensions
-            multi_origins = [all_origins] * num_dimensions
-            dim_sizes_list = list(itertools.product(*multi_dimensions))
-            offsets_list = list(itertools.product(*multi_origins))
-
-            for main_dim_size in dim_sizes_list:
-                for sub_dim_size in dim_sizes_list:
-                    for main_origin in offsets_list:
-                        for sub_origin in offsets_list:
-
-                            self.check_image(num_dimensions, main_dim_size, main_origin, sub_dim_size, sub_origin)
-
-    def check_image(self, num_dimensions, main_dim_size, main_origin,
-                    sub_dim_size, sub_origin):
-        raw_array = np.reshape(np.arange(0, np.prod(main_dim_size)), main_dim_size)
+    @parameterized.expand([
+        param(main_dim_size=[10], main_origin=[1], sub_dim_size=[5], sub_origin=[3]),
+        param(main_dim_size=[11, 12], main_origin=[2, 3], sub_dim_size=[5, 7], sub_origin=[4, 3]),
+        param(main_dim_size=[1, 2, 3], main_origin=[1, 2, 3], sub_dim_size=[1, 2, 3], sub_origin=[1, 2, 3]),
+        param(main_dim_size=[20, 20, 20], main_origin=[0, 0, 0], sub_dim_size=[20, 20, 20], sub_origin=[0, 0, 0]),
+        param(main_dim_size=[20, 20, 20], main_origin=[0, 0, 0], sub_dim_size=[19, 18, 17], sub_origin=[1, 2, 3]),
+        param(main_dim_size=[1, 2, 3], main_origin=[1, 2, 3], sub_dim_size=[1, 2, 3], sub_origin=[1, 2, 3]),
+        param(main_dim_size=[10, 11, 12], main_origin=[1, 2, 3], sub_dim_size=[5, 8, 3], sub_origin=[2, 3, 4]),
+        param(main_dim_size=[10, 11, 12, 13], main_origin=[1, 2, 3, 4], sub_dim_size=[5, 4, 6, 7], sub_origin=[2, 3, 4, 5]),
+        param(main_dim_size=[30, 30, 30, 30, 30], main_origin=[1, 2, 3, 4, 0], sub_dim_size=[5, 4, 6, 7, 2], sub_origin=[2, 3, 4, 5, 4])
+    ])
+    def test_set_sub_image(self, main_dim_size, main_origin, sub_dim_size, sub_origin):
+        num_dimensions = len(main_dim_size)
+        raw_array = np.arange(0, np.prod(main_dim_size)).reshape(main_dim_size)
         main_image = ImageWrapper(main_origin, image=raw_array)
         sub_raw_array = np.reshape(np.arange(1000, 1000 + np.prod(sub_dim_size)), sub_dim_size)
         sub_image = ImageWrapper(sub_origin, image=sub_raw_array)
