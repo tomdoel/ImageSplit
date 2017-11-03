@@ -44,7 +44,7 @@ class CombinedImage(Source):
 
             # Check if any of region is contained in this subimage
             if np.all(np.greater(sub_size, np.zeros_like(sub_size))):
-                part_image = subimage.read_image_global(sub_start, sub_size)
+                part_image = subimage.read_image(sub_start, sub_size)
                 combined_image.set_sub_image(part_image)
 
     def close(self):
@@ -84,8 +84,7 @@ class SubImage(Source):
 
         # Wrap the image data in an ImageWrapper
         return ImageWrapper(
-            start,
-            image=self._get_read_source().read_image(start, size))
+            start, image=self._get_read_source().read_image(start, size))
 
     def close(self):
         """Close all streams and files"""
