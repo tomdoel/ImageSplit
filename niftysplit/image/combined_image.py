@@ -42,7 +42,7 @@ class CombinedImage(Source):
             # Find the part of the requested region that fits in the ROI
             sub_start, sub_size = subimage.bind_by_roi(start, size)
 
-            # Check if any of the requested region is contained in this subimage
+            # Check if any of region is contained in this subimage
             if np.all(np.greater(sub_size, np.zeros_like(sub_size))):
                 part_image = subimage.read_image_global(sub_start, sub_size)
                 combined_image.set_sub_image(part_image)
