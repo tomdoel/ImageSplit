@@ -2,3 +2,4 @@ pyfakefs
 numpy
 parameterized
 coverage
+mock

@@ -48,6 +48,11 @@ class TestImageWrapper(TestCase):
                 is_valid = False
         if is_valid:
             main_image.set_sub_image(sub_image)
+            self.assertTrue(
+                np.array_equal(
+                    main_image.get_sub_image(sub_origin, sub_raw_array.shape),
+                    sub_image.image))
+
         else:
             try:
                 main_image.set_sub_image(sub_image)
