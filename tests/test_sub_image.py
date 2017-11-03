@@ -11,14 +11,6 @@ from niftysplit.image.image_wrapper import ImageWrapper
 from niftysplit.utils.file_descriptor import SubImageDescriptor
 
 
-class FakeImage(object):
-    def __init__(self, size):
-        self._image = np.reshape(np.arange(0, np.prod(size)), size)
-
-    def read_image(self, start_global, size):
-        pass
-
-
 class FakeImageFile(AbstractImageFile, Source):
     """Fake data source"""
 
