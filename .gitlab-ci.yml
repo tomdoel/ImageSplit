@@ -39,7 +39,7 @@ testjob-linux:
     - $py3_venv_bin/pip install -r requirements-test.txt
 
     # Run tests with coverage
-    - $py3_venv_bin/coverage run -a --source . -m unittest discover -s "tests"
+    - $py3_venv_bin/coverage run -a --source ./niftysplit -m unittest discover -s "tests"
     - $py3_venv_bin/coverage report -m
 
     ###############end of python3
