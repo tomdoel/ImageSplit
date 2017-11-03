@@ -2,8 +2,8 @@
 
 <img src="https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/raw/master/giftsurg-icon.png" width="150" height="150">
 
-[![build status](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/badges/master/build.svg)](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/commits/dev)
-[![coverage report](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/badges/master/coverage.svg)](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/commits/dev)
+[![build status](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/badges/master/build.svg)](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/commits/master)
+[![coverage report](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/badges/master/coverage.svg)](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/commits/master)
 
 NiftySplit is a utility for splitting very large image volumes into multiple overlapping sub-volumes, and for recombining sub-volumes into a one or more volumes. NiftySplit can also convert the underlying data types.
 NiftySplit is designed to prioritise low memory usage over performance, so that large volumes can be easily processed with limited memory resources.
