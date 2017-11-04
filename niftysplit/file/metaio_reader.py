@@ -22,7 +22,7 @@ class MetaIoFile(AbstractLinearImageFile):
 
     def __init__(self, subimage_descriptor, header_filename,
                  file_handle_factory, header_template):
-        super(MetaIoFile, self).__init__(subimage_descriptor)
+        super(MetaIoFile, self).__init__(subimage_descriptor.image_size)
         self._file_handle_factory = file_handle_factory
         self._header_filename = header_filename
         self._input_path = os.path.dirname(os.path.abspath(header_filename))

@@ -33,9 +33,8 @@ class AbstractLinearImageFile(AbstractImageFile):
         """Close the file"""
         pass
 
-    def __init__(self, subimage_descriptor):
-        self.subimage_descriptor = subimage_descriptor
-        self.size = subimage_descriptor.image_size
+    def __init__(self, image_size):
+        self.size = image_size
 
     def read_image(self, start_local, size_local):
         """Read the specified part of the image"""
@@ -77,13 +76,13 @@ class AbstractLinearImageFile(AbstractImageFile):
         # Iterate over each line (equivalent to multiple for loops)
         for main_dim_size in itertools.product(*ranges_to_iterate):
             start = [0] + list(reversed(main_dim_size))
-            size = np.ones(shape=np.shape(self.size))
+            size = np.ones_like(self.size)
             size[0] = self.size[0]
 
             # Read one image line from the transformed source
-            image_line = data_source.read_image_local(start, size)
+            image_line = data_source.read_image(start, size)
 
             # Write out the image data to the file
-            self.write_line(start, image_line.image)
+            self.write_line(start, image_line)
 
         self.close_file()
