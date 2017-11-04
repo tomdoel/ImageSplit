@@ -47,11 +47,11 @@ class TestImageWrapper(TestCase):
             main_image_unset.set_sub_image(sub_image)
             self.assertTrue(
                 np.array_equal(
-                    main_image.get_sub_image(sub_origin, sub_raw_array.shape),
+                    main_image.get_sub_image(sub_origin, sub_raw_array.shape).image,
                     sub_image.image))
             self.assertTrue(
                 np.array_equal(
-                    main_image_unset.get_sub_image(sub_origin, sub_raw_array.shape),
+                    main_image_unset.get_sub_image(sub_origin, sub_raw_array.shape).image,
                     sub_image.image))
 
         else:
@@ -61,7 +61,7 @@ class TestImageWrapper(TestCase):
             except ValueError:
                 pass
             try:
-                main_image.get_sub_image(sub_origin, sub_raw_array.shape)
+                main_image.get_sub_image(sub_origin, sub_raw_array.shape).image
                 self.fail("Expeced this function call to fail")
             except ValueError:
                 pass

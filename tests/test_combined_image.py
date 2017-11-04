@@ -25,7 +25,7 @@ class FakeImageFile(AbstractImageFile, Source):
     def read_image(self, start, size):
         if self.global_image:
             start_global, size_global = self.transformer.to_global(start, size)
-            return self.global_image.get_sub_image(start_global, size_global)
+            return self.global_image.get_sub_image(start_global, size_global).image
         else:
             return None
 
@@ -193,7 +193,7 @@ class TestSubImage(TestCase):
         image = np.arange(0, np.prod(global_image_size)).reshape(global_image_size)
         image_wrapper = ImageWrapper(len(dim_order)*[0], image=image)
         sub_image = image_wrapper.get_sub_image(start, size)
-        read_file.read_image.return_value = sub_image
+        read_file.read_image.return_value = sub_image.image
 
         file_factory = Mock()
         file_factory.create_read_file.return_value = read_file
@@ -211,7 +211,7 @@ class TestSubImage(TestCase):
         expected_start, expected_size = transformer.to_local(start, size)
         test_image = si.read_image(start, size)
         # ranges = (range(st, st+sz) for st, sz in zip(start, size))
-        np.testing.assert_array_equal(test_image.image, sub_image)
+        np.testing.assert_array_equal(test_image.image, sub_image.image)
         np.testing.assert_array_equal(read_file.read_image.call_args[0][0], expected_start)
         np.testing.assert_array_equal(read_file.read_image.call_args[0][1], expected_size)
 
@@ -351,4 +351,4 @@ class TestLocalSource(TestCase):
 
 
 def create_dummy_image(size):
-    return ImageWrapper([0, 0, 0], image=np.arange(0, np.prod(size)).reshape(size))
+    return ImageWrapper(np.zeros_like(size), image=np.arange(0, np.prod(size)).reshape(size))
