@@ -44,23 +44,23 @@ class AbstractLinearImageFile(AbstractImageFile):
         image = np.zeros(shape=size_local)
 
         # Compute coordinate ranges
-        ranges = [range(st, sz) for st, sz in zip(start_local, size_local)]
+        ranges = [range(st, st + sz) for st, sz in zip(start_local, size_local)]
 
         # Exclude first coordinate and get others in reverse order
         ranges_to_iterate = ranges[:0:-1]
 
         # Iterate over each line (equivalent to multiple for loops)
-        for main_dim_size in itertools.product(*ranges_to_iterate):
-            start = [0] + list(reversed(main_dim_size))
-            size = np.ones(shape=size_local.shape)
+        for start_points in itertools.product(*ranges_to_iterate):
+            start = [start_local[0]] + list(reversed(start_points))
+            size = np.ones(shape=np.shape(size_local))
             size[0] = size_local[0]
 
             # Read one image line from the file
-            image_line = self.read_line(start, size)
+            image_line = self.read_line(start, size[0])
 
             # Replace image line
             start_in_image = np.subtract(start, start_local)
-            line_coords = [Ellipsis] + start_in_image[1:]
+            line_coords = (Ellipsis,) + tuple(start_in_image[1:])
             image[line_coords] = image_line
 
         return image
@@ -77,7 +77,7 @@ class AbstractLinearImageFile(AbstractImageFile):
         # Iterate over each line (equivalent to multiple for loops)
         for main_dim_size in itertools.product(*ranges_to_iterate):
             start = [0] + list(reversed(main_dim_size))
-            size = np.ones(shape=self.size.shape)
+            size = np.ones(shape=np.shape(self.size))
             size[0] = self.size[0]
 
             # Read one image line from the transformed source
