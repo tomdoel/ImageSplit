@@ -1,39 +1,14 @@
 from unittest import TestCase
-from mock import Mock
 
 import numpy as np
+from mock import Mock
 from parameterized import parameterized, param
 
-from niftysplit.file.linear_image_file import AbstractImageFile
-from niftysplit.image.combined_image import SubImage, Source, \
-    CoordinateTransformer, CombinedImage, GlobalSource, LocalSource
+from common_test_functions import FakeImageFile, create_dummy_image
+from niftysplit.image.combined_image import SubImage, CoordinateTransformer, \
+    CombinedImage, GlobalSource, LocalSource
 from niftysplit.image.image_wrapper import ImageWrapper
 from niftysplit.utils.file_descriptor import SubImageDescriptor
-
-
-class FakeImageFile(AbstractImageFile, Source):
-    """Fake data source"""
-
-    def __init__(self, descriptor, global_image=None):
-        self.global_image = global_image
-        self.descriptor = descriptor
-        self.open = True
-        self.transformer = CoordinateTransformer(
-            self.descriptor.origin_start, self.descriptor.image_size,
-            self.descriptor.dim_order, self.descriptor.dim_flip)
-
-    def read_image(self, start, size):
-        if self.global_image:
-            start_global, size_global = self.transformer.to_global(start, size)
-            return self.global_image.get_sub_image(start_global, size_global).image
-        else:
-            return None
-
-    def write_image(self, data_source):
-        pass
-
-    def close(self):
-        self.open = False
 
 
 class FakeFileFactory(object):
@@ -348,7 +323,3 @@ class TestLocalSource(TestCase):
         self.assertEquals(data_source.close.call_count, 0)
         source.close()
         self.assertEquals(data_source.close.call_count, 1)
-
-
-def create_dummy_image(size):
-    return ImageWrapper(np.zeros_like(size), image=np.arange(0, np.prod(size)).reshape(size))
