@@ -6,7 +6,7 @@ from parameterized import parameterized, param
 
 from niftysplit.file.linear_image_file import AbstractImageFile
 from niftysplit.image.combined_image import SubImage, Source, \
-    CoordinateTransformer, CombinedImage
+    CoordinateTransformer, CombinedImage, GlobalSource, LocalSource
 from niftysplit.image.image_wrapper import ImageWrapper
 from niftysplit.utils.file_descriptor import SubImageDescriptor
 
@@ -14,12 +14,20 @@ from niftysplit.utils.file_descriptor import SubImageDescriptor
 class FakeImageFile(AbstractImageFile, Source):
     """Fake data source"""
 
-    def __init__(self, descriptor):
+    def __init__(self, descriptor, global_image=None):
+        self.global_image = global_image
         self.descriptor = descriptor
         self.open = True
+        self.transformer = CoordinateTransformer(
+            self.descriptor.origin_start, self.descriptor.image_size,
+            self.descriptor.dim_order, self.descriptor.dim_flip)
 
-    def read_image(self, start_global, size):
-        pass
+    def read_image(self, start, size):
+        if self.global_image:
+            start_global, size_global = self.transformer.to_global(start, size)
+            return self.global_image.get_sub_image(start_global, size_global)
+        else:
+            return None
 
     def write_image(self, data_source):
         pass
@@ -31,14 +39,15 @@ class FakeImageFile(AbstractImageFile, Source):
 class FakeFileFactory(object):
     """Create objects for handling file input and output"""
 
-    def __init__(self):
+    def __init__(self, image=None):
+        self.image = image
         self.read_files = []
         self.write_files = []
 
     def create_read_file(self, descriptor):
         """Create a class for reading"""
 
-        read_file = FakeImageFile(descriptor)
+        read_file = FakeImageFile(descriptor, self.image)
         self.read_files.append(read_file)
         return read_file
 
@@ -53,51 +62,63 @@ class FakeFileFactory(object):
 class TestCombinedImage(TestCase):
 
     def test_combined_image(self):
-        d1 = self._make_descriptor(1, [[0, 9, 0, 2], [0,  9,  0, 2], [0,  9,  0, 2]])
-        d2 = self._make_descriptor(2, [[0, 9, 0, 2], [0,  9,  0, 2], [10, 19, 0, 2]])
-        d3 = self._make_descriptor(3, [[0, 9, 0, 2], [0,  9,  0, 2], [20, 29, 0, 2]])
-        d4 = self._make_descriptor(4, [[0, 9, 0, 2], [10, 19, 2, 2], [0,  9,  2, 2]])
-        d5 = self._make_descriptor(5, [[0, 9, 0, 2], [10, 19, 2, 2], [10, 19, 2, 2]])
-        d6 = self._make_descriptor(6, [[0, 9, 0, 2], [10, 19, 2, 2], [20, 29, 2, 2]])
-        d7 = self._make_descriptor(7, [[0, 9, 0, 2], [20, 29, 2, 0], [0,  9,  2, 0]])
-        d8 = self._make_descriptor(8, [[0, 9, 0, 2], [20, 29, 2, 0], [10, 19, 2, 0]])
-        d9 = self._make_descriptor(9, [[0, 9, 0, 2], [20, 29, 2, 0], [20, 29, 2, 0]])
+        d1 = self._make_descriptor( 1,  [[ 0, 11, 0, 2], [ 0, 11, 0, 2], [ 0, 11, 0, 2]])
+        d2 = self._make_descriptor( 2,  [[ 0, 11, 0, 2], [ 0, 11, 0, 2], [ 8, 21, 2, 2]])
+        d3 = self._make_descriptor( 3,  [[ 0, 11, 0, 2], [ 0, 11, 0, 2], [18, 29, 2, 0]])
+        d4 = self._make_descriptor( 4,  [[ 0, 11, 0, 2], [ 8, 21, 2, 2], [ 0, 11, 0, 2]])
+        d5 = self._make_descriptor( 5,  [[ 0, 11, 0, 2], [ 8, 21, 2, 2], [ 8, 21, 2, 2]])
+        d6 = self._make_descriptor( 6,  [[ 0, 11, 0, 2], [ 8, 21, 2, 2], [18, 29, 2, 0]])
+        d7 = self._make_descriptor( 7,  [[ 0, 11, 0, 2], [18, 29, 2, 0], [ 0, 11, 0, 2]])
+        d8 = self._make_descriptor( 8,  [[ 0, 11, 0, 2], [18, 29, 2, 0], [ 8, 21, 2, 2]])
+        d9 = self._make_descriptor( 9,  [[ 0, 11, 0, 2], [18, 29, 2, 0], [18, 29, 2, 0]])
 
-        d11 = self._make_descriptor(11, [[10, 19, 0, 2], [0,  9,  0, 2], [0,  9,  0, 2]])
-        d12 = self._make_descriptor(12, [[10, 19, 0, 2], [0,  9,  0, 2], [10, 19, 0, 2]])
-        d13 = self._make_descriptor(13, [[10, 19, 0, 2], [0,  9,  0, 2], [20, 29, 0, 2]])
-        d14 = self._make_descriptor(14, [[10, 19, 0, 2], [10, 19, 2, 2], [0,  9,  2, 2]])
-        d15 = self._make_descriptor(15, [[10, 19, 0, 2], [10, 19, 2, 2], [10, 19, 2, 2]])
-        d16 = self._make_descriptor(16, [[10, 19, 0, 2], [10, 19, 2, 2], [20, 29, 2, 2]])
-        d17 = self._make_descriptor(17, [[10, 19, 0, 2], [20, 29, 2, 0], [0,  9,  2, 0]])
-        d18 = self._make_descriptor(18, [[10, 19, 0, 2], [20, 29, 2, 0], [10, 19, 2, 0]])
-        d19 = self._make_descriptor(19, [[10, 19, 0, 2], [20, 29, 2, 0], [20, 29, 2, 0]])
+        d11 = self._make_descriptor(11, [[ 8, 21, 2, 2], [ 0, 11, 0, 2], [ 0, 11, 0, 2]])
+        d12 = self._make_descriptor(12, [[ 8, 21, 2, 2], [ 0, 11, 0, 2], [ 8, 21, 2, 2]])
+        d13 = self._make_descriptor(13, [[ 8, 21, 2, 2], [ 0, 11, 0, 2], [18, 29, 2, 0]])
+        d14 = self._make_descriptor(14, [[ 8, 21, 2, 2], [ 8, 21, 2, 2], [ 0, 11, 0, 2]])
+        d15 = self._make_descriptor(15, [[ 8, 21, 2, 2], [ 8, 21, 2, 2], [ 8, 21, 2, 2]])
+        d16 = self._make_descriptor(16, [[ 8, 21, 2, 2], [ 8, 21, 2, 2], [18, 29, 2, 0]])
+        d17 = self._make_descriptor(17, [[ 8, 21, 2, 2], [18, 29, 2, 0], [ 0, 11, 0, 2]])
+        d18 = self._make_descriptor(18, [[ 8, 21, 2, 2], [18, 29, 2, 0], [ 8, 21, 2, 2]])
+        d19 = self._make_descriptor(19, [[ 8, 21, 2, 2], [18, 29, 2, 0], [18, 29, 2, 0]])
 
-        d21 = self._make_descriptor(21, [[20, 29, 0, 2], [0,  9,  0, 2], [0,  9,  0, 2]])
-        d22 = self._make_descriptor(22, [[20, 29, 0, 2], [0,  9,  0, 2], [10, 19, 0, 2]])
-        d23 = self._make_descriptor(23, [[20, 29, 0, 2], [0,  9,  0, 2], [20, 29, 0, 2]])
-        d24 = self._make_descriptor(24, [[20, 29, 0, 2], [10, 19, 2, 2], [0,  9,  2, 2]])
-        d25 = self._make_descriptor(25, [[20, 29, 0, 2], [10, 19, 2, 2], [10, 19, 2, 2]])
-        d26 = self._make_descriptor(26, [[20, 29, 0, 2], [10, 19, 2, 2], [20, 29, 2, 2]])
-        d27 = self._make_descriptor(27, [[20, 29, 0, 2], [20, 29, 2, 0], [0,  9,  2, 0]])
-        d28 = self._make_descriptor(28, [[20, 29, 0, 2], [20, 29, 2, 0], [10, 19, 2, 0]])
-        d29 = self._make_descriptor(29, [[20, 29, 0, 2], [20, 29, 2, 0], [20, 29, 2, 0]])
+        d21 = self._make_descriptor(21, [[18, 29, 2, 0], [ 0, 11, 0, 2], [ 0, 11, 0, 2]])
+        d22 = self._make_descriptor(22, [[18, 29, 2, 0], [ 0, 11, 0, 2], [ 8, 21, 2, 2]])
+        d23 = self._make_descriptor(23, [[18, 29, 2, 0], [ 0, 11, 0, 2], [18, 29, 2, 0]])
+        d24 = self._make_descriptor(24, [[18, 29, 2, 0], [ 8, 21, 2, 2], [ 0, 11, 0, 2]])
+        d25 = self._make_descriptor(25, [[18, 29, 2, 0], [ 8, 21, 2, 2], [ 8, 21, 2, 2]])
+        d26 = self._make_descriptor(26, [[18, 29, 2, 0], [ 8, 21, 2, 2], [18, 29, 2, 0]])
+        d27 = self._make_descriptor(27, [[18, 29, 2, 0], [18, 29, 2, 0], [ 0, 11, 0, 2]])
+        d28 = self._make_descriptor(28, [[18, 29, 2, 0], [18, 29, 2, 0], [ 8, 21, 2, 2]])
+        d29 = self._make_descriptor(29, [[18, 29, 2, 0], [18, 29, 2, 0], [18, 29, 2, 0]])
 
         descriptors = [d1, d2, d3, d4, d5, d6, d7, d8, d9,
                        d11, d12, d13, d14, d15, d16, d17, d18, d19,
                        d21, d22, d23, d24, d25, d26, d27, d28, d29]
 
-        file_factory = FakeFileFactory()
+        image = create_dummy_image([30, 30, 30])
+        file_factory = FakeFileFactory(image=image)
 
         ci = CombinedImage(descriptors, file_factory)
         source = Mock()
+        self.assertEquals(len(file_factory.write_files), 0)
         ci.write_image(source)
         self.assertEquals(len(file_factory.write_files), 27)
         for descriptor, write_file in zip(descriptors, file_factory.write_files):
             self.assertEquals(descriptor.ranges, write_file.descriptor.ranges)
             self.assertFalse(write_file.open)
 
-        # ToDo: test read and close
+        self.assertEquals(len(file_factory.read_files), 0)
+        read_image = ci.read_image([0, 0, 0], [30, 30, 30])
+        np.testing.assert_array_equal(image.image, read_image.image)
+
+        # Test file closing
+        self.assertEquals(len(file_factory.read_files), 27)
+        for read_file in file_factory.read_files:
+            self.assertTrue(read_file.open)
+        ci.close()
+        for read_file in file_factory.read_files:
+            self.assertFalse(read_file.open)
 
     def _make_descriptor(self, index, ranges):
         return SubImageDescriptor({"filename": 'TestFileName',
@@ -139,7 +160,7 @@ class TestSubImage(TestCase):
         self.assertFalse(file_factory.read_files[0].open)
 
         # Check that file is closed after writing
-        source = FakeImageFile([])
+        source = FakeImageFile(descriptor)
         self.assertEqual(len(file_factory.write_files), 0)
         si.write_image(source)
         self.assertEqual(len(file_factory.write_files), 1)
@@ -276,3 +297,58 @@ class TestSubImage(TestCase):
         else:
             # For values out of bounds, the actual values are irrelevant but at least one of the size dimensions must be <= 0
             self.assertTrue(np.any(np.less(size_test, np.zeros_like(size_test))))
+
+
+class TestGlobalSource(TestCase):
+    @parameterized.expand([
+        param(origin=[0, 0, 0], global_size=[50, 50, 50], dim_order=[0, 1, 2], dim_flip=[0, 0, 0], start=[0, 0, 0], size=[10, 10, 10]),
+        param(origin=[1, 2, 3], global_size=[50, 60, 70], dim_order=[0, 2, 1], dim_flip=[0, 1, 1], start=[1, 0, 8], size=[10, 11, 13]),
+        param(origin=[1, 0, 0], global_size=[50, 50, 50], dim_order=[0, 1, 2], dim_flip=[0, 0, 0], start=[50, 0, 0], size=[10, 17, 30]),
+        param(origin=[0, 20, 0], global_size=[50, 50, 50], dim_order=[0, 1, 2], dim_flip=[0, 0, 0], start=[0, 0, 0], size=[10, 10, 10]),
+        param(origin=[5], global_size=[50], dim_order=[0], dim_flip=[1], start=[11], size=[11]),
+        param(origin=[2, 1], global_size=[30, 40], dim_order=[1, 0], dim_flip=[1, 0], start=[5, 8], size=[10, 11]),
+        param(origin=[1, 2, 3, 4], global_size=[50, 60, 70, 80], dim_order=[0, 2, 1, 3], dim_flip=[0, 1, 0, 1], start=[2, 4, 6, 8], size=[10, 11, 12,13])
+    ])
+    def test_global_source(self, origin, global_size, dim_order, dim_flip, start, size):
+        transformer = CoordinateTransformer(origin, global_size, dim_order, dim_flip)
+        data_source = Mock()
+        source = GlobalSource(data_source, transformer)
+        source.read_image(start, size)
+        local_start, local_size = transformer.to_local(start, size)
+        np.testing.assert_array_equal(data_source.read_image.call_args[0][0], local_start)
+        np.testing.assert_array_equal(data_source.read_image.call_args[0][1], local_size)
+
+        self.assertEquals(data_source.close.call_count, 0)
+        source.close()
+        self.assertEquals(data_source.close.call_count, 1)
+
+
+class TestLocalSource(TestCase):
+    @parameterized.expand([
+        param(origin=[0, 0, 0], global_size=[50, 50, 50], dim_order=[0, 1, 2], dim_flip=[0, 0, 0], start=[0, 0, 0], size=[10, 10, 10]),
+        param(origin=[1, 2, 3], global_size=[50, 60, 70], dim_order=[0, 2, 1], dim_flip=[0, 1, 1], start=[1, 0, 8], size=[10, 11, 13]),
+        param(origin=[1, 0, 0], global_size=[50, 50, 50], dim_order=[0, 1, 2], dim_flip=[0, 0, 0], start=[50, 0, 0], size=[10, 17, 30]),
+        param(origin=[0, 20, 0], global_size=[50, 50, 50], dim_order=[0, 1, 2], dim_flip=[0, 0, 0], start=[0, 0, 0], size=[10, 10, 10]),
+        param(origin=[5], global_size=[50], dim_order=[0], dim_flip=[1], start=[11], size=[11]),
+        param(origin=[2, 1], global_size=[30, 40], dim_order=[1, 0], dim_flip=[1, 0], start=[5, 8], size=[10, 11]),
+        param(origin=[1, 2, 3, 4], global_size=[50, 60, 70, 80], dim_order=[0, 2, 1, 3], dim_flip=[0, 1, 0, 1], start=[2, 4, 6, 8], size=[10, 11, 12, 13])
+    ])
+    def test_global_source(self, origin, global_size, dim_order, dim_flip, start, size):
+        transformer = CoordinateTransformer(origin, global_size, dim_order,
+                                            dim_flip)
+        data_source = Mock()
+        source = LocalSource(data_source, transformer)
+        source.read_image(start, size)
+        global_start, t_global_size = transformer.to_global(start, size)
+        np.testing.assert_array_equal(data_source.read_image.call_args[0][0],
+                                      global_start)
+        np.testing.assert_array_equal(data_source.read_image.call_args[0][1],
+                                      t_global_size)
+
+        self.assertEquals(data_source.close.call_count, 0)
+        source.close()
+        self.assertEquals(data_source.close.call_count, 1)
+
+
+def create_dummy_image(size):
+    return ImageWrapper([0, 0, 0], image=np.arange(0, np.prod(size)).reshape(size))
