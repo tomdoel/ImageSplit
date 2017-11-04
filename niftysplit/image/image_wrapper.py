@@ -10,7 +10,7 @@ class ImageWrapper(object):
     def __init__(self, origin, image_size=None, image=None):
         self.origin = origin
         if image is not None:
-            self.size = list(image.shape)
+            self.size = list(np.shape(image))
         else:
             self.size = image_size
         self.image = image
@@ -21,12 +21,12 @@ class ImageWrapper(object):
         start_indices = np.subtract(start, self.origin)
         end_indices = np.add(start_indices, np.array(size))
         if np.any(np.less(start_indices,
-                          np.zeros(shape=start_indices.shape))) \
+                          np.zeros(shape=np.shape(start_indices)))) \
                 or np.any(np.greater(end_indices, self.size)):
             raise ValueError("Subimage is not contained within the main image")
         selector = tuple([slice(start, end) for start, end in
                           zip(start_indices, end_indices)])
-        return self.image[selector]
+        return ImageWrapper(origin=start, image=self.image[selector])
 
     def set_sub_image(self, sub_image):
         """Replaces part of the image with the corresponding subimage"""
@@ -36,7 +36,7 @@ class ImageWrapper(object):
         start_indices = np.subtract(sub_image.origin, self.origin)
         end_indices = np.add(start_indices, np.array(sub_image.size))
         if np.any(np.less(start_indices,
-                          np.zeros(shape=start_indices.shape))) \
+                          np.zeros(shape=np.shape(start_indices)))) \
                 or np.any(np.greater(end_indices, self.size)):
             raise ValueError("Subimage is not contained within the main image")
         selector = tuple([slice(start, end) for start, end in
