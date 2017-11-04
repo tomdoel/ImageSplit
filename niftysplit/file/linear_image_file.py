@@ -43,7 +43,8 @@ class AbstractLinearImageFile(AbstractImageFile):
         image = np.zeros(shape=size_local)
 
         # Compute coordinate ranges
-        ranges = [range(st, st + sz) for st, sz in zip(start_local, size_local)]
+        ranges = [range(st, st + sz) for st, sz in
+                  zip(start_local, size_local)]
 
         # Exclude first coordinate and get others in reverse order
         ranges_to_iterate = ranges[:0:-1]

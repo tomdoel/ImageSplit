@@ -113,7 +113,8 @@ class SubImage(Source):
 
     def _get_read_source(self):
         if not self._read_source:
-            local_source = self._file_factory.create_read_file(self._descriptor)
+            local_source = \
+                self._file_factory.create_read_file(self._descriptor)
             self._read_source = GlobalSource(local_source, self._transformer)
         return self._read_source
 
