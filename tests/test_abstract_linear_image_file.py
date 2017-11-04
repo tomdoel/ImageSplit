@@ -2,10 +2,10 @@ from unittest import TestCase
 
 from parameterized import parameterized, param
 
-from common_test_functions import create_dummy_image, FakeImageFile, \
+from tests.common_test_functions import create_dummy_image, \
     SimpleMockSource, create_empty_image
-from file.linear_image_file import AbstractLinearImageFile
-from image.image_wrapper import ImageWrapper
+from niftysplit.file.linear_image_file import AbstractLinearImageFile
+from niftysplit.image.image_wrapper import ImageWrapper
 import numpy as np
 
 

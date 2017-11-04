@@ -1,8 +1,8 @@
 import numpy as np
 
-from file.linear_image_file import AbstractImageFile
-from image.combined_image import Source, CoordinateTransformer
-from image.image_wrapper import ImageWrapper
+from niftysplit.file.linear_image_file import AbstractImageFile
+from niftysplit.image.combined_image import Source, CoordinateTransformer
+from niftysplit.image.image_wrapper import ImageWrapper
 
 
 class FakeImageFile(AbstractImageFile, Source):

@@ -4,7 +4,7 @@ import numpy as np
 from mock import Mock
 from parameterized import parameterized, param
 
-from common_test_functions import FakeImageFile, create_dummy_image
+from tests.common_test_functions import FakeImageFile, create_dummy_image
 from niftysplit.image.combined_image import SubImage, CoordinateTransformer, \
     CombinedImage, GlobalSource, LocalSource
 from niftysplit.image.image_wrapper import ImageWrapper
