@@ -80,7 +80,7 @@ class TestCombinedImage(TestCase):
         ci.write_image(source)
         self.assertEquals(len(file_factory.write_files), 27)
         for descriptor, write_file in zip(descriptors, file_factory.write_files):
-            self.assertEquals(descriptor.ranges, write_file.descriptor.ranges)
+            self.assertEquals(descriptor.ranges.ranges, write_file.descriptor.ranges.ranges)
             self.assertFalse(write_file.open)
 
         self.assertEquals(len(file_factory.read_files), 0)
@@ -181,7 +181,7 @@ class TestSubImage(TestCase):
         # transformations are correct, since the CoordinateTransformer test
         # should do this
         transformer = CoordinateTransformer(
-            descriptor.origin_start, descriptor.image_size,
+            descriptor.ranges.origin_start, descriptor.image_size,
             descriptor.dim_order, descriptor.dim_flip)
         expected_start, expected_size = transformer.to_local(start, size)
         test_image = si.read_image(start, size)
@@ -227,7 +227,7 @@ class TestSubImage(TestCase):
 
         # CoordinateTransforer is tested elsewhere.
         transformer = CoordinateTransformer(
-            descriptor.origin_start, descriptor.image_size,
+            descriptor.ranges.origin_start, descriptor.image_size,
             descriptor.dim_order, descriptor.dim_flip)
         local_start, local_size = transformer.to_local(start, size)
 

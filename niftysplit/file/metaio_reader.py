@@ -68,7 +68,7 @@ class MetaIoFile(AbstractLinearImageFile):
         if subimage_descriptor.data_type:
             header_template["ElementType"] = subimage_descriptor.data_type
         header_template["DimSize"] = subimage_descriptor.image_size
-        header_template["Origin"] = subimage_descriptor.origin_start
+        header_template["Origin"] = subimage_descriptor.ranges.origin_start
         filename = subimage_descriptor.filename
         return MetaIoFile(subimage_descriptor, filename, file_handle_factory,
                           header_template)

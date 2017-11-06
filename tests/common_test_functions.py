@@ -13,7 +13,7 @@ class FakeImageFile(AbstractImageFile, Source):
         self.descriptor = descriptor
         self.open = True
         self.transformer = CoordinateTransformer(
-            self.descriptor.origin_start, self.descriptor.image_size,
+            self.descriptor.ranges.origin_start, self.descriptor.image_size,
             self.descriptor.dim_order, self.descriptor.dim_flip)
 
     def read_image(self, start, size):

@@ -69,13 +69,11 @@ class SubImage(Source):
         self._descriptor = descriptor
         self._read_source = None
 
-        self._roi_start = self._descriptor.roi_start
-        self._roi_size = np.add(
-            np.subtract(self._descriptor.roi_end, self._descriptor.roi_start),
-            np.ones_like(self._roi_start))
+        self._roi_start = self._descriptor.ranges.roi_start
+        self._roi_size = self._descriptor.ranges.roi_size
 
         self._transformer = CoordinateTransformer(
-            self._descriptor.origin_start,
+            self._descriptor.ranges.origin_start,
             self._descriptor.image_size,
             self._descriptor.dim_order,
             self._descriptor.dim_flip)
