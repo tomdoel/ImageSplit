@@ -39,8 +39,8 @@ class AbstractLinearImageFile(AbstractImageFile):
     def read_image(self, start_local, size_local):
         """Read the specified part of the image"""
 
-        # Initialise the output array
-        image = np.zeros(shape=size_local)
+        # Initialise the output array only when we know the data tyoe
+        image = None
 
         # Compute coordinate ranges
         ranges = [range(st, st + sz) for st, sz in
@@ -52,7 +52,7 @@ class AbstractLinearImageFile(AbstractImageFile):
         # Iterate over each line (equivalent to multiple for loops)
         for start_points in itertools.product(*ranges_to_iterate):
             start = [start_local[0]] + list(reversed(start_points))
-            size = np.ones(shape=np.shape(size_local))
+            size = np.ones_like(size_local)
             size[0] = size_local[0]
 
             # Read one image line from the file
@@ -61,6 +61,11 @@ class AbstractLinearImageFile(AbstractImageFile):
             # Replace image line
             start_in_image = np.subtract(start, start_local)
             line_coords = (Ellipsis,) + tuple(start_in_image[1:])
+
+            # Initialise the output array
+            if not image:
+                image = np.zeros(shape=size_local, dtype=image_line.dtype)
+
             image[line_coords] = image_line
 
         return image
@@ -81,7 +86,7 @@ class AbstractLinearImageFile(AbstractImageFile):
             size[0] = self.size[0]
 
             # Read one image line from the transformed source
-            image_line = data_source.read_image(start, size)
+            image_line = data_source.read_image(start, size).image
 
             # Write out the image data to the file
             self.write_line(start, image_line)

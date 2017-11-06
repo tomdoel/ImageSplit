@@ -14,7 +14,7 @@ class FileFactory(object):
     def create_read_file(self, subimage_descriptor):
         """Create a class for reading"""
 
-        data_format = subimage_descriptor.lower()
+        data_format = subimage_descriptor.file_format.lower()
         if data_format == "mhd":
             return MetaIoFile.create_read_file(subimage_descriptor,
                                                self._file_handle_factory)
@@ -24,7 +24,7 @@ class FileFactory(object):
     def create_write_file(self, subimage_descriptor):
         """Create a class for writing"""
 
-        data_format = subimage_descriptor.lower()
+        data_format = subimage_descriptor.file_format.lower()
         if data_format == "mhd":
             return MetaIoFile.create_write_file(subimage_descriptor,
                                                 self._file_handle_factory)

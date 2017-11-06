@@ -165,10 +165,10 @@ def generate_output_descriptors(filename_out_base, max_block_size_voxels,
                                "index": index,
                                "dim_order": dim_order,
                                "data_type": output_type,
-                               "header": copy.deepcopy(header)}
+                               "template": copy.deepcopy(header)}
         descriptors_out.append(file_descriptor_out)
         index += 1
-    return descriptors_out
+    return convert_to_descriptors(descriptors_out)
 
 
 def convert_to_array(scalar_or_list, parameter_name, num_dims):
@@ -239,6 +239,7 @@ def generate_input_descriptors(input_file_base, start_index):
         combined_header = load_mhd_header(header_filename)
         current_image_size = combined_header["DimSize"]
         data_type = combined_header["ElementType"]
+        dim_order = [1, 2, 3]  # ToDo
         current_ranges = [[0, current_image_size[0] - 1, 0, 0],
                           [0, current_image_size[1] - 1, 0, 0],
                           [0, current_image_size[2] - 1, 0, 0]]
@@ -246,7 +247,7 @@ def generate_input_descriptors(input_file_base, start_index):
         # Create a descriptor for this subimage
         descriptor = {"index": 0, "suffix": "", "filename": header_filename,
                       "ranges": current_ranges, "template": combined_header,
-                      "data_type": data_type}
+                      "data_type": data_type, "dim_order": dim_order}
         descriptors.append(descriptor)
         descriptors = convert_to_descriptors(descriptors)
         return combined_header, descriptors
