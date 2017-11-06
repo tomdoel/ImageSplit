@@ -56,26 +56,6 @@ class SubImageDescriptor(object):
 
         return self._descriptor
 
-    # def from_dict(self, descriptor_dict):
-    #     self._descriptor = descriptor_dict
-    #
-    #     self.filename = descriptor_dict["filename"]
-    #     self.file_format = "mhd"  # ToDo
-    #     self.data_type = descriptor_dict["data_type"]
-    #     self.template = descriptor_dict["template"]
-    #
-    #     self.ranges = descriptor_dict["ranges"]
-    #     self.image_size = self._get_image_size()
-    #     self.origin_start = self._get_origin_start()
-    #     self.origin_end = self._get_origin_end()
-    #     self.roi_start = self._get_roi_start()
-    #     self.roi_end = self._get_roi_end()
-    #
-    #     self.dim_order_and_flip = descriptor_dict["dim_order"]
-    #     self.dim_order = [abs(d) - 1 for d in self.dim_order_and_flip]
-    #     self.dim_flip = [d < 0 for d in self.dim_order_and_flip]
-
-
 
 def get_number_of_blocks(image_size, max_block_size):
     """Returns a list containing the number of blocks in each dimension
