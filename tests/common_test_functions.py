@@ -1,11 +1,11 @@
 import numpy as np
 
-from niftysplit.file.linear_image_file import AbstractImageFile
+from niftysplit.file.image_file_reader import ImageFileReader
 from niftysplit.image.combined_image import Source, CoordinateTransformer
 from niftysplit.image.image_wrapper import ImageWrapper
 
 
-class FakeImageFile(AbstractImageFile, Source):
+class FakeImageFileReader(ImageFileReader, Source):
     """Fake data source"""
 
     def __init__(self, descriptor, global_image=None):

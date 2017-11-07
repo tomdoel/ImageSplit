@@ -46,7 +46,7 @@ class CombinedImage(Source):
             if np.all(np.greater(sub_size, np.zeros_like(sub_size))):
                 part_image = subimage.read_image(sub_start, sub_size)
                 combined_image.set_sub_image(part_image)
-        return combined_image
+        return combined_image.image
 
     def close(self):
         """Closes all streams and files"""

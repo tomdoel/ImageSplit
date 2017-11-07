@@ -5,8 +5,10 @@ from abc import ABCMeta, abstractmethod
 import itertools
 import numpy as np
 
+from niftysplit.image.image_wrapper import ImageWrapper
 
-class AbstractImageFile(object):
+
+class ImageFileReader(object):
     """Base class for writing data from source to destination"""
     __metaclass__ = ABCMeta
 
@@ -16,8 +18,11 @@ class AbstractImageFile(object):
         pass
 
 
-class AbstractLinearImageFile(AbstractImageFile):
+class LinearImageFileReader(ImageFileReader):
     """Base class for writing data from source to destination line by line"""
+
+    def __init__(self, image_size):
+        self.size = image_size
 
     @abstractmethod
     def write_line(self, start, image_line):
@@ -32,9 +37,6 @@ class AbstractLinearImageFile(AbstractImageFile):
     def close_file(self):
         """Close the file"""
         pass
-
-    def __init__(self, image_size):
-        self.size = image_size
 
     def read_image(self, start_local, size_local):
         """Read the specified part of the image"""
@@ -63,7 +65,7 @@ class AbstractLinearImageFile(AbstractImageFile):
             line_coords = (Ellipsis,) + tuple(start_in_image[1:])
 
             # Initialise the output array
-            if not image:
+            if image is None:
                 image = np.zeros(shape=size_local, dtype=image_line.dtype)
 
             image[line_coords] = image_line
@@ -86,9 +88,49 @@ class AbstractLinearImageFile(AbstractImageFile):
             size[0] = self.size[0]
 
             # Read one image line from the transformed source
-            image_line = data_source.read_image(start, size).image
+            image_line = data_source.read_image(start, size)
 
             # Write out the image data to the file
             self.write_line(start, image_line)
 
+        self.close_file()
+
+
+class BlockImageFileReader(ImageFileReader):
+    """Base class for writing data from source to destination as a  2d block"""
+
+    @abstractmethod
+    def save(self, image):
+        """Write the image to the file"""
+
+    @abstractmethod
+    def load(self):
+        """Reads an image from the file"""
+        pass
+
+    @abstractmethod
+    def close_file(self):
+        """Close the file"""
+        pass
+
+    def __init__(self, image_size):
+        self.size = image_size
+
+    def read_image(self, start_local, size_local):
+        """Read the specified part of the image"""
+
+        image_data = self.load()
+        if not image_data.shape == self.size:
+            raise ValueError("Image is not the expected size")
+
+        image = ImageWrapper(origin=np.zeros_like(start_local),
+                             image=image_data)
+
+        return image.get_sub_image(start_local, size_local).image
+
+    def write_image(self, data_source):
+        """Create and write out this file, using data from this image source"""
+
+        image_data = data_source.read_image(np.zeros_like(self.size), self.size)
+        self.save(image_data)
         self.close_file()

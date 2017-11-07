@@ -11,10 +11,10 @@ import os
 from collections import OrderedDict
 
 from niftysplit.file.file_wrapper import FileWrapper, FileStreamer
-from niftysplit.file.linear_image_file import AbstractLinearImageFile
+from niftysplit.file.image_file_reader import LinearImageFileReader
 
 
-class MetaIoFile(AbstractLinearImageFile):
+class MetaIoFile(LinearImageFileReader):
     """A class for reading or writing 3D imaging data to/from a MetaIO file
     pair (.mhd and .raw). """
 

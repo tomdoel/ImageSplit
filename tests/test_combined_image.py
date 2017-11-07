@@ -4,7 +4,7 @@ import numpy as np
 from mock import Mock
 from parameterized import parameterized, param
 
-from tests.common_test_functions import FakeImageFile, create_dummy_image
+from tests.common_test_functions import FakeImageFileReader, create_dummy_image
 from niftysplit.image.combined_image import SubImage, CoordinateTransformer, \
     CombinedImage, GlobalSource, LocalSource
 from niftysplit.image.image_wrapper import ImageWrapper
@@ -22,14 +22,14 @@ class FakeFileFactory(object):
     def create_read_file(self, descriptor):
         """Create a class for reading"""
 
-        read_file = FakeImageFile(descriptor, self.image)
+        read_file = FakeImageFileReader(descriptor, self.image)
         self.read_files.append(read_file)
         return read_file
 
     def create_write_file(self, descriptor):
         """Create a class for writing"""
 
-        write_file = FakeImageFile(descriptor)
+        write_file = FakeImageFileReader(descriptor)
         self.write_files.append(write_file)
         return write_file
 
@@ -85,7 +85,7 @@ class TestCombinedImage(TestCase):
 
         self.assertEquals(len(file_factory.read_files), 0)
         read_image = ci.read_image([0, 0, 0], [30, 30, 30])
-        np.testing.assert_array_equal(image.image, read_image.image)
+        np.testing.assert_array_equal(image.image, read_image)
 
         # Test file closing
         self.assertEquals(len(file_factory.read_files), 27)
@@ -135,7 +135,7 @@ class TestSubImage(TestCase):
         self.assertFalse(file_factory.read_files[0].open)
 
         # Check that file is closed after writing
-        source = FakeImageFile(descriptor)
+        source = FakeImageFileReader(descriptor)
         self.assertEqual(len(file_factory.write_files), 0)
         si.write_image(source)
         self.assertEqual(len(file_factory.write_files), 1)

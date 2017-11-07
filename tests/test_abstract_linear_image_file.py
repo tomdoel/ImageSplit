@@ -4,12 +4,12 @@ from parameterized import parameterized, param
 
 from tests.common_test_functions import create_dummy_image, \
     SimpleMockSource, create_empty_image
-from niftysplit.file.linear_image_file import AbstractLinearImageFile
+from niftysplit.file.image_file_reader import LinearImageFileReader
 from niftysplit.image.image_wrapper import ImageWrapper
 import numpy as np
 
 
-class MockAbstractLinearImageFile(AbstractLinearImageFile):
+class MockAbstractLinearImageFile(LinearImageFileReader):
     def __init__(self, image):
         super(MockAbstractLinearImageFile, self).__init__(image.size)
         self.image = image
