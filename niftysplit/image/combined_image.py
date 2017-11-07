@@ -191,6 +191,18 @@ class CoordinateTransformer(object):
 
         return start, size
 
+    def image_to_local(self, global_image):
+        """Transform image to local coordinate system"""
+
+        local_image = np.transpose(global_image, self._dim_ordering)
+
+        # Flip dimensions where necessary
+        for index, flip in enumerate(self._dim_flip):
+            if flip:
+                local_image = np.flip(local_image, index)
+
+        return local_image
+
     def to_global(self, local_start, local_size):
         """Convert local coordinates to global coordinates"""
 
@@ -213,3 +225,16 @@ class CoordinateTransformer(object):
         size = np.array(size)  # Make sure global_size is a numpy array
 
         return start, size
+
+    def image_to_global(self, local_image):
+        """Convert local coordinates to global coordinates"""
+
+        # Flip dimensions where necessary
+        for index, flip in enumerate(self._dim_flip):
+            if flip:
+                local_image = np.flip(local_image, index)
+
+        # Reverse permute dimensions of local coordinates
+        global_image = np.transpose(local_image, np.argsort(self._dim_ordering))
+
+        return global_image

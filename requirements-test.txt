@@ -1,6 +1,6 @@
+numpy
 libtiff
 pyfakefs
-numpy
 parameterized
 coverage
 mock
