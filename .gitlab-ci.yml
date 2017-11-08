@@ -1,10 +1,14 @@
 stages:
-  - dev_test
   - pylint_test
+  - dev_test
 
 pylintjob:
   stage: pylint_test
   script:
+
+    # save current folder path just in case
+    - export niftysplit_dir=$(pwd)
+
     # create a virtual env so that pylint can import
     - pyl_venv_name="niftysplit-test-pyl"
     - py3_bin=$(which python3)
