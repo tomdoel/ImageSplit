@@ -5,7 +5,22 @@ stages:
 pylintjob:
   stage: pylint_test
   script:
-    - pylint --rcfile=tests/pylintrc niftysplit
+    # create a virtual env so that pylint can import
+    - pyl_venv_name="niftysplit-test-pyl"
+    - py3_bin=$(which python3)
+    - virtualenv -p $py3_bin $pyl_venv_name
+    - cd $pyl_venv_name/bin
+    - pyl_venv_bin=$(pwd)
+
+    # print Python version to CI output
+    - $pyl_venv_bin/python --version
+
+    # Install requirements
+    - cd $niftysplit_dir
+    - $pyl_venv_bin/pip install -r requirements.txt
+
+    # Run pylint
+    - $pyl_venv_bin/pylint --rcfile=tests/pylintrc niftysplit
   tags:
     - gift-linux
 
