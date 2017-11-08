@@ -1,9 +1,7 @@
 # coding=utf-8
 
 """Read and write data to TIFF files"""
-
-from libtiff import TIFF
-
+from tifffile import imread, imsave
 from niftysplit.file.image_file_reader import BlockImageFileReader
 
 
@@ -21,14 +19,9 @@ class TiffFileReader(BlockImageFileReader):
     def load(self):
         """Load image data from TIFF file"""
         if not self.read_image:
-            # noinspection PyArgumentEqualDefault
-            tif = TIFF.open('filename.tif', mode='r')
-            self.read_image = tif.read_image()
-            tif.close()
+            self.read_image = imread(self.filename)
         return self.read_image
 
     def save(self, image):
         """Save out image data into TIFF file"""
-        tif = TIFF.open(self.filename, mode='w')
-        tif.write_image(image)
-        tif.close()
+        imsave(self.filename, image)
