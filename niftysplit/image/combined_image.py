@@ -131,7 +131,9 @@ class GlobalSource(Source):
         start, size = self._converter.to_local(start_global, size_global)
 
         # Get the image data from the data source
-        return self._data_source.read_image(start, size)
+        image_local = self._data_source.read_image(start, size)
+        image_global = self._converter.image_to_global(image_local)
+        return image_global
 
     def close(self):
         """Close all streams and files"""

@@ -114,7 +114,7 @@ class TestSubImage(TestCase):
             "template": []})
 
         # Check that reading creates only one read file and it is left open
-        file_factory = FakeFileFactory()
+        file_factory = FakeFileFactory(create_dummy_image([11, 11, 11]))
         self.assertEqual(len(file_factory.read_files), 0)
         self.assertEqual(len(file_factory.write_files), 0)
         si = SubImage(descriptor, file_factory)
@@ -165,8 +165,8 @@ class TestSubImage(TestCase):
 
         read_file = Mock()
         global_image_size = len(dim_order)*[50]
-        image = np.arange(0, np.prod(global_image_size)).reshape(global_image_size)
-        image_wrapper = ImageWrapper(len(dim_order)*[0], image=image)
+        image = create_dummy_image(global_image_size)
+        image_wrapper = image
         sub_image = image_wrapper.get_sub_image(start, size)
         read_file.read_image.return_value = sub_image.image
 
@@ -185,8 +185,7 @@ class TestSubImage(TestCase):
             descriptor.dim_order, descriptor.dim_flip)
         expected_start, expected_size = transformer.to_local(start, size)
         test_image = si.read_image(start, size)
-        # ranges = (range(st, st+sz) for st, sz in zip(start, size))
-        np.testing.assert_array_equal(test_image.image, sub_image.image)
+        np.testing.assert_array_equal(transformer.image_to_local(test_image.image), sub_image.image)
         np.testing.assert_array_equal(read_file.read_image.call_args[0][0], expected_start)
         np.testing.assert_array_equal(read_file.read_image.call_args[0][1], expected_size)
 
@@ -287,6 +286,8 @@ class TestGlobalSource(TestCase):
     def test_global_source(self, origin, global_size, dim_order, dim_flip, start, size):
         transformer = CoordinateTransformer(origin, global_size, dim_order, dim_flip)
         data_source = Mock()
+        test_image = np.reshape(np.arange(0, np.prod(global_size)), global_size)
+        data_source.read_image.return_value = test_image
         source = GlobalSource(data_source, transformer)
         source.read_image(start, size)
         local_start, local_size = transformer.to_local(start, size)
