@@ -132,8 +132,7 @@ class GlobalSource(Source):
 
         # Get the image data from the data source
         image_local = self._data_source.read_image(start, size)
-        image_global = self._converter.image_to_global(image_local)
-        return image_global
+        return self._converter.image_to_global(image_local)
 
     def close(self):
         """Close all streams and files"""
@@ -151,7 +150,8 @@ class LocalSource(Source):
         """Returns a partial image using the specified local coordinates"""
 
         start, size = self._converter.to_global(start_local, size_local)
-        return self._data_source.read_image(start, size)
+        image_global = self._data_source.read_image(start, size)
+        return self._converter.image_to_local(image_global)
 
     def close(self):
         """Close all streams and files"""

@@ -73,7 +73,7 @@ class TestCoordinateTransformer(TestCase):
                         [[20, 21, 22], [23, 24, 25], [26, 27, 28], [29, 30, 31]]])
 
         ct = CoordinateTransformer(np.zeros_like(dim), np.shape(global_image), dim, flip)
-        local_image = ct.image_to_local(global_image)
+        local_image = ct.image_to_local(global_image.copy())
         np.testing.assert_array_equal(local_image, np.array(expected))
         np.testing.assert_array_equal(local_image, np.array(expected))
 

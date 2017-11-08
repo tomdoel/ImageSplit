@@ -76,7 +76,7 @@ class TestCombinedImage(TestCase):
 
         ci = CombinedImage(descriptors, file_factory)
         source = Mock()
-        self.assertEquals(len(file_factory.write_files), 0)
+        self.assertEqual(len(file_factory.write_files), 0)
         ci.write_image(source)
         self.assertEquals(len(file_factory.write_files), 27)
         for descriptor, write_file in zip(descriptors, file_factory.write_files):
@@ -219,7 +219,8 @@ class TestSubImage(TestCase):
         # correctly converts from the file coordinate system to the global
         # coordinate system
         source = Mock()
-        source.read_image.return_value = None  # Doesn't matter
+        dummy_image = create_dummy_image(len(size)*[20]).image
+        source.read_image.return_value = dummy_image
 
         si = SubImage(descriptor, file_factory)
         si.write_image(source)
@@ -286,10 +287,10 @@ class TestGlobalSource(TestCase):
     def test_global_source(self, origin, global_size, dim_order, dim_flip, start, size):
         transformer = CoordinateTransformer(origin, global_size, dim_order, dim_flip)
         data_source = Mock()
-        test_image = np.reshape(np.arange(0, np.prod(global_size)), global_size)
+        test_image = create_dummy_image(global_size).image.copy()
         data_source.read_image.return_value = test_image
         source = GlobalSource(data_source, transformer)
-        source.read_image(start, size)
+        global_image = source.read_image(start, size)
         local_start, local_size = transformer.to_local(start, size)
         np.testing.assert_array_equal(data_source.read_image.call_args[0][0], local_start)
         np.testing.assert_array_equal(data_source.read_image.call_args[0][1], local_size)
@@ -297,6 +298,9 @@ class TestGlobalSource(TestCase):
         self.assertEquals(data_source.close.call_count, 0)
         source.close()
         self.assertEquals(data_source.close.call_count, 1)
+
+        local_image = transformer.image_to_local(global_image)
+        np.testing.assert_array_equal(local_image, test_image)
 
 
 class TestLocalSource(TestCase):
@@ -309,12 +313,14 @@ class TestLocalSource(TestCase):
         param(origin=[2, 1], global_size=[30, 40], dim_order=[1, 0], dim_flip=[1, 0], start=[5, 8], size=[10, 11]),
         param(origin=[1, 2, 3, 4], global_size=[50, 60, 70, 80], dim_order=[0, 2, 1, 3], dim_flip=[0, 1, 0, 1], start=[2, 4, 6, 8], size=[10, 11, 12, 13])
     ])
-    def test_global_source(self, origin, global_size, dim_order, dim_flip, start, size):
+    def test_local_source(self, origin, global_size, dim_order, dim_flip, start, size):
         transformer = CoordinateTransformer(origin, global_size, dim_order,
                                             dim_flip)
         data_source = Mock()
+        test_image = create_dummy_image(global_size).image
+        data_source.read_image.return_value = test_image.copy()
         source = LocalSource(data_source, transformer)
-        source.read_image(start, size)
+        local_image = source.read_image(start, size)
         global_start, t_global_size = transformer.to_global(start, size)
         np.testing.assert_array_equal(data_source.read_image.call_args[0][0],
                                       global_start)
@@ -324,3 +330,6 @@ class TestLocalSource(TestCase):
         self.assertEquals(data_source.close.call_count, 0)
         source.close()
         self.assertEquals(data_source.close.call_count, 1)
+
+        global_image = transformer.image_to_global(local_image)
+        np.testing.assert_array_equal(global_image, test_image)
