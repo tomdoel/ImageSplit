@@ -1,6 +1,3 @@
-numpy
-libtiff
-pyfakefs
-parameterized
+-r requirements.txt
 coverage
 mock
