@@ -21,7 +21,7 @@ pylintjob:
 
     # Install requirements
     - cd $niftysplit_dir
-    - $pyl_venv_bin/pip install -r requirements.txt
+    - $pyl_venv_bin/pip install -r requirements-test.txt
 
     # Run pylint
     - $pyl_venv_bin/pylint --rcfile=tests/pylintrc niftysplit

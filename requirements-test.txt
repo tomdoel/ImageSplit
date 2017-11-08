@@ -3,3 +3,4 @@ coverage
 mock
 pyfakefs
 parameterized
+pylint
