@@ -78,17 +78,17 @@ class TestCombinedImage(TestCase):
         source = Mock()
         self.assertEqual(len(file_factory.write_files), 0)
         ci.write_image(source)
-        self.assertEquals(len(file_factory.write_files), 27)
+        self.assertEqual(len(file_factory.write_files), 27)
         for descriptor, write_file in zip(descriptors, file_factory.write_files):
-            self.assertEquals(descriptor.ranges.ranges, write_file.descriptor.ranges.ranges)
+            self.assertEqual(descriptor.ranges.ranges, write_file.descriptor.ranges.ranges)
             self.assertFalse(write_file.open)
 
-        self.assertEquals(len(file_factory.read_files), 0)
+        self.assertEqual(len(file_factory.read_files), 0)
         read_image = ci.read_image([0, 0, 0], [30, 30, 30])
         np.testing.assert_array_equal(image.image, read_image)
 
         # Test file closing
-        self.assertEquals(len(file_factory.read_files), 27)
+        self.assertEqual(len(file_factory.read_files), 27)
         for read_file in file_factory.read_files:
             self.assertTrue(read_file.open)
         ci.close()
@@ -295,9 +295,9 @@ class TestGlobalSource(TestCase):
         np.testing.assert_array_equal(data_source.read_image.call_args[0][0], local_start)
         np.testing.assert_array_equal(data_source.read_image.call_args[0][1], local_size)
 
-        self.assertEquals(data_source.close.call_count, 0)
+        self.assertEqual(data_source.close.call_count, 0)
         source.close()
-        self.assertEquals(data_source.close.call_count, 1)
+        self.assertEqual(data_source.close.call_count, 1)
 
         local_image = transformer.image_to_local(global_image)
         np.testing.assert_array_equal(local_image, test_image)
@@ -327,9 +327,9 @@ class TestLocalSource(TestCase):
         np.testing.assert_array_equal(data_source.read_image.call_args[0][1],
                                       t_global_size)
 
-        self.assertEquals(data_source.close.call_count, 0)
+        self.assertEqual(data_source.close.call_count, 0)
         source.close()
-        self.assertEquals(data_source.close.call_count, 1)
+        self.assertEqual(data_source.close.call_count, 1)
 
         global_image = transformer.image_to_global(local_image)
         np.testing.assert_array_equal(global_image, test_image)
