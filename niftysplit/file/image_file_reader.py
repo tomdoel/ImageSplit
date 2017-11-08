@@ -120,7 +120,7 @@ class BlockImageFileReader(ImageFileReader):
         """Read the specified part of the image"""
 
         image_data = self.load()
-        if not image_data.shape == self.size:
+        if image_data.shape != self.size:
             raise ValueError("Image is not the expected size")
 
         image = ImageWrapper(origin=np.zeros_like(start_local),
