@@ -164,21 +164,22 @@ def load_mhd_header(filename):
             (key, val) = [x.strip() for x in line.split("=")]
             if key in ['ElementSpacing', 'Offset', 'CenterOfRotation',
                        'TransformMatrix']:
-                val = [float(s) for s in val.split()]
+                new_val = [float(s) for s in val.split()]
             elif key in ['NDims', 'ElementNumberOfChannels']:
-                val = int(val)
+                new_val = int(val)
             elif key in ['DimSize']:
-                val = [int(s) for s in val.split()]
+                new_val = [int(s) for s in val.split()]
             elif key in ['BinaryData', 'BinaryDataByteOrderMSB',
                          'CompressedData']:
                 # pylint: disable=simplifiable-if-statement
-                # pylint: disable=redefined-variable-type
                 if val.lower() == "true":
-                    val = True
+                    new_val = True
                 else:
-                    val = False
+                    new_val = False
+            else:
+                new_val = val
 
-            metadata[key] = val
+            metadata[key] = new_val
 
     return metadata
 
