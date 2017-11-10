@@ -72,11 +72,13 @@ class SubImage(Source):
         self._roi_start = self._descriptor.ranges.roi_start
         self._roi_size = self._descriptor.ranges.roi_size
 
+        self._axis = Axis(dim_order=self._descriptor.dim_order,
+                          dim_flip=self._descriptor.dim_flip)
+
         self._transformer = CoordinateTransformer(
             self._descriptor.ranges.origin_start,
             self._descriptor.image_size,
-            self._descriptor.dim_order,
-            self._descriptor.dim_flip)
+            self._axis)
 
     def read_image(self, start, size):
         """Returns a subimage containing any overlap from the ROI"""
@@ -161,7 +163,7 @@ class LocalSource(Source):
 class CoordinateTransformer(object):
     """Convert coordinates between orthogonal systems"""
 
-    def __init__(self, origin, size, dim_ordering, dim_flip):
+    def __init__(self, origin, size, axis):
         """Create a transformer object for converting between systems
 
         :param origin: local coordinate origin in global coordinates
@@ -171,7 +173,7 @@ class CoordinateTransformer(object):
         """
         self._origin = origin
         self._size = size
-        self._axis = Axis(dim_order=dim_ordering, dim_flip=dim_flip)
+        self._axis = axis
 
     def to_local(self, global_start, global_size):
         """Convert global coordinates to local coordinates"""

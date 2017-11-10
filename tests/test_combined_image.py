@@ -6,7 +6,7 @@ from parameterized import parameterized, param
 
 from tests.common_test_functions import FakeImageFileReader, create_dummy_image
 from niftysplit.image.combined_image import SubImage, CoordinateTransformer, \
-    CombinedImage, GlobalSource, LocalSource
+    CombinedImage, GlobalSource, LocalSource, Axis
 from niftysplit.image.image_wrapper import ImageWrapper
 from niftysplit.utils.file_descriptor import SubImageDescriptor
 
@@ -182,7 +182,7 @@ class TestSubImage(TestCase):
         # should do this
         transformer = CoordinateTransformer(
             descriptor.ranges.origin_start, descriptor.image_size,
-            descriptor.dim_order, descriptor.dim_flip)
+            Axis(descriptor.dim_order, descriptor.dim_flip))
         expected_start, expected_size = transformer.to_local(start, size)
         test_image = si.read_image(start, size)
         np.testing.assert_array_equal(transformer.image_to_local(test_image.image), sub_image.image)
@@ -228,7 +228,7 @@ class TestSubImage(TestCase):
         # CoordinateTransforer is tested elsewhere.
         transformer = CoordinateTransformer(
             descriptor.ranges.origin_start, descriptor.image_size,
-            descriptor.dim_order, descriptor.dim_flip)
+            Axis(descriptor.dim_order, descriptor.dim_flip))
         local_start, local_size = transformer.to_local(start, size)
 
 
@@ -285,7 +285,7 @@ class TestGlobalSource(TestCase):
         param(origin=[1, 2, 3, 4], global_size=[50, 60, 70, 80], dim_order=[0, 2, 1, 3], dim_flip=[0, 1, 0, 1], start=[2, 4, 6, 8], size=[10, 11, 12,13])
     ])
     def test_global_source(self, origin, global_size, dim_order, dim_flip, start, size):
-        transformer = CoordinateTransformer(origin, global_size, dim_order, dim_flip)
+        transformer = CoordinateTransformer(origin, global_size, Axis(dim_order, dim_flip))
         data_source = Mock()
         test_image = create_dummy_image(global_size).image.copy()
         data_source.read_image.return_value = test_image
@@ -314,8 +314,7 @@ class TestLocalSource(TestCase):
         param(origin=[1, 2, 3, 4], global_size=[50, 60, 70, 80], dim_order=[0, 2, 1, 3], dim_flip=[0, 1, 0, 1], start=[2, 4, 6, 8], size=[10, 11, 12, 13])
     ])
     def test_local_source(self, origin, global_size, dim_order, dim_flip, start, size):
-        transformer = CoordinateTransformer(origin, global_size, dim_order,
-                                            dim_flip)
+        transformer = CoordinateTransformer(origin, global_size, Axis(dim_order, dim_flip))
         data_source = Mock()
         test_image = create_dummy_image(global_size).image
         data_source.read_image.return_value = test_image.copy()

@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from niftysplit.image.combined_image import CoordinateTransformer
+from niftysplit.image.combined_image import CoordinateTransformer, Axis
 from parameterized import parameterized, param
 import numpy as np
 
@@ -19,7 +19,7 @@ class TestCoordinateTransformer(TestCase):
         param(origin=[6, 3, 1], size=[20, 25, 35], order=[2, 0, 1], flip=[1, 0, 0], g_start=[7, 9, 11], g_size=[5, 6, 7], l_start=[24, 1, 6], l_size=[7, 5, 6])
     ])
     def test_local_global(self, origin, size, order, flip, g_start, g_size, l_start, l_size):
-        ct = CoordinateTransformer(origin, size, order, flip)
+        ct = CoordinateTransformer(origin, size, Axis(order, flip))
 
         o_l_start, o_l_size = ct.to_local(g_start, g_size)
         self.assertTrue(np.array_equal(o_l_start, l_start))
@@ -42,7 +42,7 @@ class TestCoordinateTransformer(TestCase):
         param(origin=[6, 3, 1], size=[20, 25, 35], order=[2, 0, 1], flip=[1, 0, 0], g_start=[7, 9, 11], g_size=[5, 6, 7], l_start=[24, 1, 6], l_size=[7, 5, 6])
     ])
     def test_image(self, origin, size, order, flip, g_start, g_size, l_start, l_size):
-        ct = CoordinateTransformer(origin, size, order, flip)
+        ct = CoordinateTransformer(origin, size, Axis(order, flip))
 
         transformed_start, transformed_size = ct.to_local(g_start, size)
         global_image = np.reshape(np.arange(0, np.prod(size)), size)
@@ -72,7 +72,7 @@ class TestCoordinateTransformer(TestCase):
         global_image = np.array([[[0, 1, 2], [3, 4, 5], [6, 7, 8], [9, 10, 11]],
                         [[20, 21, 22], [23, 24, 25], [26, 27, 28], [29, 30, 31]]])
 
-        ct = CoordinateTransformer(np.zeros_like(dim), np.shape(global_image), dim, flip)
+        ct = CoordinateTransformer(np.zeros_like(dim), np.shape(global_image), Axis(dim, flip))
         local_image = ct.image_to_local(global_image.copy())
         np.testing.assert_array_equal(local_image, np.array(expected))
         np.testing.assert_array_equal(local_image, np.array(expected))

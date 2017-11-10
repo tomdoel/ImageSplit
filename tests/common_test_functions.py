@@ -1,7 +1,7 @@
 import numpy as np
 
 from niftysplit.file.image_file_reader import ImageFileReader
-from niftysplit.image.combined_image import Source, CoordinateTransformer
+from niftysplit.image.combined_image import Source, CoordinateTransformer, Axis
 from niftysplit.image.image_wrapper import ImageWrapper
 
 
@@ -14,7 +14,7 @@ class FakeImageFileReader(ImageFileReader, Source):
         self.open = True
         self.transformer = CoordinateTransformer(
             self.descriptor.ranges.origin_start, self.descriptor.image_size,
-            self.descriptor.dim_order, self.descriptor.dim_flip)
+            Axis(self.descriptor.dim_order, self.descriptor.dim_flip))
 
     def read_image(self, start, size):
         if self.global_image:
