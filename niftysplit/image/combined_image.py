@@ -67,7 +67,7 @@ class SubImage(Source):
     def __init__(self, descriptor, file_factory):
         self._file_factory = file_factory
         self._descriptor = descriptor
-        self._read_source = None
+        self._read_file = None
 
         self._roi_start = self._descriptor.ranges.roi_start
         self._roi_size = self._descriptor.ranges.roi_size
@@ -83,16 +83,22 @@ class SubImage(Source):
     def read_image(self, start, size):
         """Returns a subimage containing any overlap from the ROI"""
 
-        # Wrap the image data in an ImageWrapper
-        return ImageWrapper(
-            start, image=self._get_read_source().read_image(start, size))
+        # Convert to local coordinates for the data source
+        start_local, size_local = self._transformer.to_local(start, size)
+
+        # Get the image data from the data source
+        local_source = self._get_read_file()
+        image_local = local_source.read_image(start_local, size_local)
+
+        image = SmartImage(image_local, self._transformer)
+        return ImageWrapper(start, image=image.transform_to_global())
 
     def close(self):
         """Close all streams and files"""
 
-        if self._read_source:
-            self._read_source.close()
-            self._read_source = None
+        if self._read_file:
+            self._read_file.close()
+            self._read_file = None
 
     def write_image(self, global_source):
         """Write out SubImage using data from the specified source"""
@@ -111,12 +117,11 @@ class SubImage(Source):
         size = np.subtract(end, start)
         return start, size
 
-    def _get_read_source(self):
-        if not self._read_source:
-            local_source = \
-                self._file_factory.create_read_file(self._descriptor)
-            self._read_source = GlobalSource(local_source, self._transformer)
-        return self._read_source
+    def _get_read_file(self):
+        if not self._read_file:
+            self._read_file = self._file_factory.create_read_file(
+                self._descriptor)
+        return self._read_file
 
 
 class GlobalSource(Source):
@@ -139,6 +144,19 @@ class GlobalSource(Source):
     def close(self):
         """Close all streams and files"""
         self._data_source.close()
+
+
+class SmartImage(object):
+    """Image wrapper which converts between Axes"""
+
+    def __init__(self, image, converter):
+        self._image = image
+        self._converter = converter
+
+    def transform_to_global(self):
+        """Returns a partial image using the specified global coordinates"""
+
+        return self._converter.image_to_global(self._image)
 
 
 class LocalSource(Source):
@@ -250,4 +268,3 @@ class Axis(object):
     def __init__(self, dim_order, dim_flip):
         self.dim_order = dim_order
         self.dim_flip = dim_flip
-
