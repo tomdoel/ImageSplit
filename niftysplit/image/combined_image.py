@@ -171,8 +171,7 @@ class CoordinateTransformer(object):
         """
         self._origin = origin
         self._size = size
-        self._dim_ordering = dim_ordering
-        self._dim_flip = dim_flip
+        self._axis = Axis(dim_order=dim_ordering, dim_flip=dim_flip)
 
     def to_local(self, global_start, global_size):
         """Convert global coordinates to local coordinates"""
@@ -182,12 +181,12 @@ class CoordinateTransformer(object):
         size = np.array(global_size)  # Make sure global_size is a numpy array
 
         # Permute dimensions of local coordinates
-        start = start[self._dim_ordering]
-        size = size[self._dim_ordering]
-        size_t = np.array(self._size)[self._dim_ordering]
+        start = start[self._axis.dim_order]
+        size = size[self._axis.dim_order]
+        size_t = np.array(self._size)[self._axis.dim_order]
 
         # Flip dimensions where necessary
-        for index, flip in enumerate(self._dim_flip):
+        for index, flip in enumerate(self._axis.dim_flip):
             if flip:
                 start[index] = size_t[index] - start[index] - 1
 
@@ -196,10 +195,10 @@ class CoordinateTransformer(object):
     def image_to_local(self, global_image):
         """Transform image to local coordinate system"""
 
-        local_image = np.transpose(global_image, self._dim_ordering)
+        local_image = np.transpose(global_image, self._axis.dim_order)
 
         # Flip dimensions where necessary
-        for index, flip in enumerate(self._dim_flip):
+        for index, flip in enumerate(self._axis.dim_flip):
             if flip:
                 local_image = np.flip(local_image, index)
 
@@ -211,16 +210,16 @@ class CoordinateTransformer(object):
         start = np.array(local_start)
         size = np.array(local_size)
 
-        size_t = np.array(self._size)[self._dim_ordering]
+        size_t = np.array(self._size)[self._axis.dim_order]
 
         # Flip dimensions where necessary
-        for index, flip in enumerate(self._dim_flip):
+        for index, flip in enumerate(self._axis.dim_flip):
             if flip:
                 start[index] = size_t[index] - start[index] - 1
 
         # Reverse permute dimensions of local coordinates
-        start = start[np.argsort(self._dim_ordering)]
-        size = size[np.argsort(self._dim_ordering)]
+        start = start[np.argsort(self._axis.dim_order)]
+        size = size[np.argsort(self._axis.dim_order)]
 
         # Translate coordinates to the global origin
         start = np.add(start, self._origin)
@@ -232,11 +231,21 @@ class CoordinateTransformer(object):
         """Convert local coordinates to global coordinates"""
 
         # Flip dimensions where necessary
-        for index, flip in enumerate(self._dim_flip):
+        for index, flip in enumerate(self._axis.dim_flip):
             if flip:
                 local_image = np.flip(local_image, index)
 
         # Reverse permute dimensions of local coordinates
-        global_image = np.transpose(local_image, np.argsort(self._dim_ordering))
+        global_image = np.transpose(local_image,
+                                    np.argsort(self._axis.dim_order))
 
         return global_image
+
+
+class Axis(object):
+    """Defines coordinate system used by imaeg coordinates"""
+
+    def __init__(self, dim_order, dim_flip):
+        self.dim_order = dim_order
+        self.dim_flip = dim_flip
+
