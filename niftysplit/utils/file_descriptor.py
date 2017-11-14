@@ -65,15 +65,11 @@ class SubImageDescriptor(object):
     def to_dict(self):
         """Get a dictionary for the metadata for this subimage"""
 
-        return {"index": self.index,
-                "suffix": self.suffix,
-                "filename": self.filename,
-                "data_type": self.data_type,
-                "file_format": self.file_format,
-                "template": self.template,
+        return {"index": self.index, "suffix": self.suffix,
+                "filename": self.filename, "data_type": self.data_type,
+                "file_format": self.file_format, "template": self.template,
                 "dim_order": self.axis.to_condensed_format(),
-                "ranges": self.ranges.ranges
-                }
+                "ranges": self.ranges.ranges}
 
 
 def get_number_of_blocks(image_size, max_block_size):
@@ -239,9 +235,8 @@ def generate_descriptor_from_header(filename_out_base, original_header,
         suffix="",
         index=0,
         ranges=[[0, output_image_size[0] - 1, 0, 0],
-            [0, output_image_size[1] - 1, 0, 0],
-            [0, output_image_size[2] - 1, 0, 0]]
-    )]
+                [0, output_image_size[1] - 1, 0, 0],
+                [0, output_image_size[2] - 1, 0, 0]])]
 
 
 def header_from_descriptor(descriptor_filename):
