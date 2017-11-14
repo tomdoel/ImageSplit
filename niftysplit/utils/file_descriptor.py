@@ -163,9 +163,9 @@ def generate_output_descriptors(filename_out_base, max_block_size_voxels,
                                "dim_order": dim_order,
                                "data_type": output_type,
                                "template": copy.deepcopy(header)}
-        descriptors_out.append(file_descriptor_out)
+        descriptors_out.append(SubImageDescriptor(file_descriptor_out))
         index += 1
-    return convert_to_descriptors(descriptors_out)
+    return descriptors_out
 
 
 def convert_to_array(scalar_or_list, parameter_name, num_dims):
@@ -197,7 +197,6 @@ def generate_descriptor_from_header(filename_out_base, original_header,
     """Load a header and uses to define a file descriptor"""
     output_image_size = original_header["DimSize"]
     dim_order = [1, 2, 3]  # ToDo: get from header
-    descriptors_out = []
     descriptor_out = {"index": 0,
                       "suffix": "",
                       "filename": filename_out_base + '.mhd',
@@ -207,8 +206,7 @@ def generate_descriptor_from_header(filename_out_base, original_header,
                       "ranges": [[0, output_image_size[0] - 1, 0, 0],
                                  [0, output_image_size[1] - 1, 0, 0],
                                  [0, output_image_size[2] - 1, 0, 0]]}
-    descriptors_out.append(descriptor_out)
-    return convert_to_descriptors(descriptors_out)
+    return [SubImageDescriptor(descriptor_out)]
 
 
 def header_from_descriptor(descriptor_filename):
