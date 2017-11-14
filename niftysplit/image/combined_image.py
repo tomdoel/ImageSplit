@@ -201,25 +201,6 @@ class CoordinateTransformer(object):
         self._size = size
         self._axis = axis
 
-    def other_to_local(self, global_start, global_size, transformer):
-        """Convert global coordinates to local coordinates"""
-
-        # Translate coordinates to the local origin
-        start = np.subtract(global_start, self._origin)
-        size = np.array(global_size)  # Make sure global_size is a numpy array
-
-        # Permute dimensions of local coordinates
-        start = start[self._axis.dim_order]
-        size = size[self._axis.dim_order]
-        size_t = np.array(self._size)[self._axis.dim_order]
-
-        # Flip dimensions where necessary
-        for index, flip in enumerate(self._axis.dim_flip):
-            if flip:
-                start[index] = size_t[index] - start[index] - 1
-
-        return start, size
-
     def to_local(self, global_start, global_size):
         """Convert global coordinates to local coordinates"""
 
@@ -238,24 +219,6 @@ class CoordinateTransformer(object):
                 start[index] = size_t[index] - start[index] - 1
 
         return start, size
-
-    def image_to_local(self, global_image):
-        """Transform global image to local coordinate system"""
-
-        local_image = np.transpose(global_image, self._axis.dim_order)
-
-        # Flip dimensions where necessary
-        for index, flip in enumerate(self._axis.dim_flip):
-            if flip:
-                local_image = np.flip(local_image, index)
-
-        return local_image
-
-    def image_to_other(self, local_image, other_transformer):
-        """Transform image to a different local coordinate system"""
-
-        global_subimage = self.image_to_global(local_image)
-        return other_transformer.image_to_local(global_subimage)
 
     def to_other(self, local_start, local_size, other_transformer):
         """Convert local coordinates to a different local system"""
@@ -285,6 +248,24 @@ class CoordinateTransformer(object):
         size = np.array(size)  # Make sure global_size is a numpy array
 
         return start, size
+
+    def image_to_local(self, global_image):
+        """Transform global image to local coordinate system"""
+
+        local_image = np.transpose(global_image, self._axis.dim_order)
+
+        # Flip dimensions where necessary
+        for index, flip in enumerate(self._axis.dim_flip):
+            if flip:
+                local_image = np.flip(local_image, index)
+
+        return local_image
+
+    def image_to_other(self, local_image, other_transformer):
+        """Transform image to a different local coordinate system"""
+
+        global_subimage = self.image_to_global(local_image)
+        return other_transformer.image_to_local(global_subimage)
 
     def image_to_global(self, local_image):
         """Convert local coordinates to global coordinates"""
