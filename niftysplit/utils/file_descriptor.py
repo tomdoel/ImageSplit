@@ -12,6 +12,7 @@ import os
 from math import ceil
 
 from niftysplit.file.metaio_reader import load_mhd_header
+from niftysplit.image.combined_image import Axis
 from niftysplit.utils.json_reader import write_json, read_json
 
 
@@ -47,9 +48,7 @@ class SubImageDescriptor(object):
 
         self.image_size = self.ranges.image_size
 
-        self.dim_order_and_flip = descriptor_dict["dim_order"]
-        self.dim_order = [abs(d) - 1 for d in self.dim_order_and_flip]
-        self.dim_flip = [d < 0 for d in self.dim_order_and_flip]
+        self.axis = Axis.from_condensed_format(descriptor_dict["dim_order"])
 
     def to_dict(self):
         """Get a dictionary for the metadata for this subimage"""

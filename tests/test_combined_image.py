@@ -191,7 +191,7 @@ class TestSubImage(TestCase):
         # should do this
         transformer = CoordinateTransformer(
             descriptor.ranges.origin_start, descriptor.image_size,
-            Axis(descriptor.dim_order, descriptor.dim_flip))
+            descriptor.axis)
         expected_start, expected_size = transformer.to_local(start, size)
         test_image = si.read_image(start, size)
         np.testing.assert_array_equal(test_image.image, sub_image.image)
@@ -237,7 +237,7 @@ class TestSubImage(TestCase):
         # CoordinateTransforer is tested elsewhere.
         transformer = CoordinateTransformer(
             descriptor.ranges.origin_start, descriptor.image_size,
-            Axis(descriptor.dim_order, descriptor.dim_flip))
+            descriptor.axis)
         local_start, local_size = transformer.to_local(start, size)
 
         # Fetch the local data source provided to the file write method

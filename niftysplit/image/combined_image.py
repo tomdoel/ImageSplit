@@ -81,8 +81,7 @@ class SubImage(Source):
         self._roi_start = self._descriptor.ranges.roi_start
         self._roi_size = self._descriptor.ranges.roi_size
 
-        self._axis = Axis(dim_order=self._descriptor.dim_order,
-                          dim_flip=self._descriptor.dim_flip)
+        self._axis = self._descriptor.axis
 
         self._transformer = CoordinateTransformer(
             self._descriptor.ranges.origin_start,
@@ -286,3 +285,10 @@ class Axis(object):
     def __init__(self, dim_order, dim_flip):
         self.dim_order = dim_order
         self.dim_flip = dim_flip
+
+    @staticmethod
+    def from_condensed_format(dim_order_and_flip):
+        """Creates an Axis from a condensed axis string"""
+        dim_order = [abs(d) - 1 for d in dim_order_and_flip]
+        dim_flip = [d < 0 for d in dim_order_and_flip]
+        return Axis(dim_order=dim_order, dim_flip=dim_flip)
