@@ -36,17 +36,29 @@ class SubImageDescriptor(object):
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, descriptor_dict):
+    def __init__(self, descriptor_dict, filename, file_format, data_type,
+                 template, ranges, dim_order_condensed):
         self._descriptor = descriptor_dict
+        self.filename = filename
+        self.file_format = file_format
+        self.data_type = data_type
+        self.template = template
+        self.ranges = SubImageRanges(ranges)
+        self.axis = Axis.from_condensed_format(dim_order_condensed)
 
-        self.filename = descriptor_dict["filename"]
-        self.file_format = "mhd"  # ToDo
-        self.data_type = descriptor_dict["data_type"]
-        self.template = descriptor_dict["template"]
+    @staticmethod
+    def from_dict(descriptor_dict):
+        """Create SubImageDescriptor from dictionary entries"""
+        return SubImageDescriptor(
+            descriptor_dict=descriptor_dict,
+            filename=descriptor_dict["filename"],
+            file_format="mhd",  # ToDo
+            data_type=descriptor_dict["data_type"],
+            template=descriptor_dict["template"],
+            ranges=descriptor_dict["ranges"],
+            dim_order_condensed=descriptor_dict["dim_order"]
+        )
 
-        self.ranges = SubImageRanges(descriptor_dict["ranges"])
-
-        self.axis = Axis.from_condensed_format(descriptor_dict["dim_order"])
 
     def to_dict(self):
         """Get a dictionary for the metadata for this subimage"""
@@ -163,7 +175,8 @@ def generate_output_descriptors(filename_out_base, max_block_size_voxels,
                                "dim_order": dim_order,
                                "data_type": output_type,
                                "template": copy.deepcopy(header)}
-        descriptors_out.append(SubImageDescriptor(file_descriptor_out))
+        descriptors_out.append(SubImageDescriptor.from_dict(
+            file_descriptor_out))
         index += 1
     return descriptors_out
 
@@ -206,7 +219,7 @@ def generate_descriptor_from_header(filename_out_base, original_header,
                       "ranges": [[0, output_image_size[0] - 1, 0, 0],
                                  [0, output_image_size[1] - 1, 0, 0],
                                  [0, output_image_size[2] - 1, 0, 0]]}
-    return [SubImageDescriptor(descriptor_out)]
+    return [SubImageDescriptor.from_dict(descriptor_out)]
 
 
 def header_from_descriptor(descriptor_filename):
@@ -243,7 +256,7 @@ def generate_input_descriptors(input_file_base, start_index):
         descriptor = {"index": 0, "suffix": "", "filename": header_filename,
                       "ranges": current_ranges, "template": combined_header,
                       "data_type": data_type, "dim_order": dim_order}
-        descriptors.append(SubImageDescriptor(descriptor))
+        descriptors.append(SubImageDescriptor.from_dict(descriptor))
         return combined_header, descriptors
 
     else:
@@ -297,7 +310,7 @@ def generate_input_descriptors(input_file_base, start_index):
                           "filename": header_filename,
                           "ranges": ranges_to_write,
                           "template": combined_header}
-            descriptors.append(SubImageDescriptor(descriptor))
+            descriptors.append(SubImageDescriptor.from_dict(descriptor))
 
             file_index += 1
 
@@ -305,7 +318,7 @@ def generate_input_descriptors(input_file_base, start_index):
 def convert_to_descriptors(descriptors_dict):
     """Convert descriptor dictionary to list of SubImageDescriptor objects"""
     descriptors_sorted = sorted(descriptors_dict, key=lambda k: k['index'])
-    desc = [SubImageDescriptor(d) for d in descriptors_sorted]
+    desc = [SubImageDescriptor.from_dict(d) for d in descriptors_sorted]
     return desc
 
 

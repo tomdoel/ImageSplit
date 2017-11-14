@@ -101,7 +101,7 @@ class TestCombinedImage(TestCase):
             self.assertFalse(read_file.open)
 
     def _make_descriptor(self, index, ranges):
-        return SubImageDescriptor({"filename": 'TestFileName',
+        return SubImageDescriptor.from_dict({"filename": 'TestFileName',
             "ranges": ranges, "suffix": "SUFFIX", "dim_order": [1, 2, 3],
             "data_type": "XXXX", "index": index, "template": []})
 
@@ -113,7 +113,7 @@ def global_coordinate_transformer(size):
 class TestSubImage(TestCase):
 
     def test_close(self):
-        descriptor = SubImageDescriptor({
+        descriptor = SubImageDescriptor.from_dict({
             "filename": 'TestFileName',
             "ranges": [[0, 10, 0, 0], [0, 10, 0, 0], [0, 10, 0, 0]],
             "suffix": "SUFFIX",
@@ -167,7 +167,7 @@ class TestSubImage(TestCase):
         param(dim_order=[3, 2, -1], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]], start=[15, 16, 17], size=[10, 10, 10])
     ])
     def test_read_image(self, dim_order, ranges, start, size):
-        descriptor = SubImageDescriptor({
+        descriptor = SubImageDescriptor.from_dict({
             "filename": 'TestFileName', "suffix": "SUFFIX", "index": 0,
             "data_type": "XXXX", "template": [], "dim_order": dim_order,
             "ranges": ranges})
@@ -215,7 +215,7 @@ class TestSubImage(TestCase):
         param(dim_order=[3, 2, -1], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]], start=[15, 16, 17], size=[10, 10, 10])
     ])
     def test_write_image(self, dim_order, ranges, start, size):
-        descriptor = SubImageDescriptor({
+        descriptor = SubImageDescriptor.from_dict({
             "filename": 'TestFileName', "suffix": "SUFFIX", "index": 0,
             "data_type": "XXXX", "template": [], "dim_order": dim_order,
             "ranges": ranges})
@@ -265,7 +265,7 @@ class TestSubImage(TestCase):
         param(ranges=[[0, 10, 0, 0], [0, 10, 0, 0]], start=[-15, -16], size=[10, 10], valid=False, valid_start=[5, 6], valid_size=[0, 0])
     ])
     def test_bind_by_roi(self, ranges, start, size, valid, valid_start, valid_size):
-        descriptor = SubImageDescriptor({
+        descriptor = SubImageDescriptor.from_dict({
             "filename": 'TestFileName', "suffix": "SUFFIX", "index": 0,
             "data_type": "XXXX", "template": [], "dim_order": np.arange(1, len(start) + 1),
             "ranges": ranges})
