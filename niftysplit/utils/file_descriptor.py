@@ -38,7 +38,6 @@ class SubImageDescriptor(object):
 
     def __init__(self, descriptor_dict, filename, file_format, data_type,
                  template, ranges, dim_order_condensed, suffix, index):
-        self._descriptor = descriptor_dict
         self.suffix = suffix
         self.index = index
         self.filename = filename
