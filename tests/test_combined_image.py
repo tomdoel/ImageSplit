@@ -185,7 +185,7 @@ class TestSubImage(TestCase):
             Axis(descriptor.dim_order, descriptor.dim_flip))
         expected_start, expected_size = transformer.to_local(start, size)
         test_image = si.read_image(start, size)
-        np.testing.assert_array_equal(transformer.image_to_local(test_image.image), sub_image.image)
+        np.testing.assert_array_equal(transformer.image_to_local(test_image.transform_to_global().image), sub_image.image)
         np.testing.assert_array_equal(read_file.read_image.call_args[0][0], expected_start)
         np.testing.assert_array_equal(read_file.read_image.call_args[0][1], expected_size)
 

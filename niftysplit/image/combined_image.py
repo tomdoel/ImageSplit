@@ -44,7 +44,7 @@ class CombinedImage(Source):
 
             # If any part overlapped, copy this into the combined image
             if part_image:
-                combined_image.set_sub_image(part_image)
+                combined_image.set_sub_image(part_image.transform_to_global())
 
         return combined_image.image
 
@@ -90,8 +90,10 @@ class SubImage(Source):
         local_source = self._get_read_file()
         image_local = local_source.read_image(start_local, size_local)
 
-        image = SmartImage(image_local, self._transformer)
-        return ImageWrapper(start, image=image.transform_to_global())
+        return SmartImage(start=start_local,
+                          size=size_local,
+                          image=image_local,
+                          converter=self._transformer)
 
     def read_image_bound_by_roi(self, start, size):
         """Returns a subimage containing any overlap from the ROI"""
@@ -161,14 +163,20 @@ class GlobalSource(Source):
 class SmartImage(object):
     """Image wrapper which converts between Axes"""
 
-    def __init__(self, image, converter):
+    def __init__(self, start, size, image, converter):
+        self._size = size
+        self._start = start
         self._image = image
         self._converter = converter
 
     def transform_to_global(self):
         """Returns a partial image using the specified global coordinates"""
 
-        return self._converter.image_to_global(self._image)
+        transformed_origin, transformed_size = self._converter.to_global(
+            self._start, self._size)
+        transformed_image = self._converter.image_to_global(self._image)
+
+        return ImageWrapper(origin=transformed_origin, image=transformed_image)
 
 
 class LocalSource(Source):
