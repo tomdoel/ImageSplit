@@ -4,7 +4,7 @@
 from abc import ABCMeta, abstractmethod
 
 import numpy as np
-from niftysplit.image.image_wrapper import ImageWrapper, SmartImage
+from niftysplit.image.image_wrapper import SmartImage
 
 
 class Source(object):
@@ -113,8 +113,9 @@ class SubImage(Source):
         # Check if any of region is contained in this subimage
         if np.all(np.greater(sub_size, np.zeros_like(sub_size))):
             return self.read_image(sub_start, sub_size)
-        else:
-            return None
+
+        # Otherwise return None to indicate that the subimage is out of range
+        return None
 
     def close(self):
         """Close all streams and files"""
@@ -145,28 +146,6 @@ class SubImage(Source):
             self._read_file = self._file_factory.create_read_file(
                 self._descriptor)
         return self._read_file
-
-
-# class GlobalSource(Source):
-#     """Data source allowing use of a local source with global coordinates"""
-#
-#     def __init__(self, data_source, transformer):
-#         self._data_source = data_source
-#         self._transformer = transformer
-#
-#     def read_image(self, start_global, size_global):
-#         """Returns a partial image using the specified global coordinates"""
-#
-#         # Convert to local coordinates for the data source
-#         start, size = self._transformer.to_local(start_global, size_global)
-#
-#         # Get the image data from the data source
-#         image_local = self._data_source.read_image(start, size)
-#         return self._transformer.image_to_global(image_local)
-#
-#     def close(self):
-#         """Close all streams and files"""
-#         self._data_source.close()
 
 
 class LocalSource(Source):
