@@ -328,6 +328,7 @@ def generate_input_descriptors(input_file_base, start_index):
             # Update the combined image size
             combined_header["DimSize"] = full_image_size
             file_format = "mhd"
+            dim_order = [1, 2, 3]  # ToDo
             data_type = current_header["ElementType"]
 
             # Create a descriptor for this subimage
@@ -339,7 +340,8 @@ def generate_input_descriptors(input_file_base, start_index):
                 file_format=file_format,
                 ranges=ranges_to_write,
                 template=combined_header,
-                data_type=data_type
+                data_type=data_type,
+                dim_order_condensed=dim_order
             ))
 
             file_index += 1
