@@ -11,6 +11,7 @@ import copy
 import os
 from math import ceil
 
+from niftysplit.file.file_factory import FileFactory
 from niftysplit.file.metaio_reader import load_mhd_header
 from niftysplit.image.combined_image import Axis
 from niftysplit.utils.json_reader import write_json, read_json
@@ -160,12 +161,16 @@ def write_descriptor_file(descriptors_in, descriptors_out, filename_out_base):
     write_json(descriptor_output_filename, descriptor)
 
 
-def generate_output_descriptors(filename_out_base, max_block_size_voxels,
-                                overlap_size_voxels, dim_order, header,
-                                output_type):
+def generate_output_descriptors(filename_out_base,
+                                max_block_size_voxels,
+                                overlap_size_voxels,
+                                dim_order,
+                                header,
+                                output_type,
+                                output_file_format,
+                                num_dims,
+                                image_size):
     """Creates descriptors represeting file output"""
-    image_size = header["DimSize"]
-    num_dims = header["NDims"]
     max_block_size_voxels_array = convert_to_array(max_block_size_voxels,
                                                    "block size", num_dims)
     overlap_voxels_size_array = convert_to_array(overlap_size_voxels,
@@ -177,11 +182,11 @@ def generate_output_descriptors(filename_out_base, max_block_size_voxels,
     index = 0
     for subimage_range in ranges:
         suffix = "_" + str(index)
-        output_filename_header = filename_out_base + suffix + ".mhd"
-        file_format = "mhd"
+        extension = FileFactory.get_extension_for_format(output_file_format)
+        output_filename_header = filename_out_base + suffix + extension
         file_descriptor_out = SubImageDescriptor(
             filename=output_filename_header,
-            file_format=file_format,
+            file_format=output_file_format,
             ranges=subimage_range,
             suffix=suffix,
             index=index,
@@ -264,6 +269,7 @@ def generate_input_descriptors(input_file_base, start_index):
         combined_header = load_mhd_header(header_filename)
         current_image_size = combined_header["DimSize"]
         data_type = combined_header["ElementType"]
+        ndims = combined_header["NDims"]
         dim_order = [1, 2, 3]  # ToDo
         file_format = "mhd"  # ToDo
         current_ranges = [[0, current_image_size[0] - 1, 0, 0],
@@ -281,7 +287,7 @@ def generate_input_descriptors(input_file_base, start_index):
             dim_order_condensed=dim_order,
             file_format=file_format
         ))
-        return combined_header, descriptors
+        return combined_header, descriptors, ndims, current_image_size
 
     else:
         # Load a series of files starting with the specified prefix
@@ -294,14 +300,17 @@ def generate_input_descriptors(input_file_base, start_index):
                 'No file series found starting with ' + header_filename)
 
         current_ranges = None
+        current_image_size = None
+        ndims = None
         combined_header = None
         full_image_size = None
         while True:
             suffix = str(file_index)
             header_filename = input_file_base + suffix + '.mhd'
             if not os.path.isfile(header_filename):
-                return combined_header, descriptors
+                return combined_header, descriptors, ndims, current_image_size
             current_header = load_mhd_header(header_filename)
+            ndims = current_header["NDims"]
             current_image_size = current_header["DimSize"]
             if not current_ranges:
                 full_image_size = copy.deepcopy(current_image_size)

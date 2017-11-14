@@ -30,3 +30,13 @@ class FileFactory(object):
                                                 self._file_handle_factory)
         else:
             raise ValueError("Format " + data_format + " not supported")
+
+    @staticmethod
+    def get_extension_for_format(file_format):
+        """Returns the file extension for this file format"""
+        file_format = file_format.lower()
+        if file_format == "mhd":
+            return ".mhd"
+
+        else:
+            raise ValueError("Format " + file_format + " not supported")

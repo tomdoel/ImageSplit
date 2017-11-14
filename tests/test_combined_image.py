@@ -103,7 +103,8 @@ class TestCombinedImage(TestCase):
     def _make_descriptor(self, index, ranges):
         return SubImageDescriptor.from_dict({"filename": 'TestFileName',
             "ranges": ranges, "suffix": "SUFFIX", "dim_order": [1, 2, 3],
-            "data_type": "XXXX", "index": index, "template": []})
+            "data_type": "XXXX", "index": index, "template": [],
+            "file_format": "mhd"})
 
 
 def global_coordinate_transformer(size):
@@ -120,7 +121,8 @@ class TestSubImage(TestCase):
             "index": 0,
             "dim_order": [1, 2, 3],
             "data_type": "XXXX",
-            "template": []})
+            "template": [],
+            "file_format": "mhd"})
 
         # Check that reading creates only one read file and it is left open
         file_factory = FakeFileFactory(create_dummy_image([11, 11, 11]))
@@ -170,7 +172,7 @@ class TestSubImage(TestCase):
         descriptor = SubImageDescriptor.from_dict({
             "filename": 'TestFileName', "suffix": "SUFFIX", "index": 0,
             "data_type": "XXXX", "template": [], "dim_order": dim_order,
-            "ranges": ranges})
+            "ranges": ranges, "file_format": "mhd"})
 
         read_file = Mock()
         global_image_size = len(dim_order)*[50]
@@ -218,7 +220,7 @@ class TestSubImage(TestCase):
         descriptor = SubImageDescriptor.from_dict({
             "filename": 'TestFileName', "suffix": "SUFFIX", "index": 0,
             "data_type": "XXXX", "template": [], "dim_order": dim_order,
-            "ranges": ranges})
+            "ranges": ranges, "file_format": "mhd"})
 
         file_factory = Mock()
         out_file = Mock()
@@ -268,7 +270,7 @@ class TestSubImage(TestCase):
         descriptor = SubImageDescriptor.from_dict({
             "filename": 'TestFileName', "suffix": "SUFFIX", "index": 0,
             "data_type": "XXXX", "template": [], "dim_order": np.arange(1, len(start) + 1),
-            "ranges": ranges})
+            "ranges": ranges, "file_format": "mhd"})
         file_factory = FakeFileFactory()
         si = SubImage(descriptor, file_factory)
         start_test, size_test = si.bind_by_roi(start_global=start, size_global=size)
