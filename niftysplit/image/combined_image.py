@@ -33,10 +33,19 @@ class CombinedImage(Source):
         for subimage_descriptor in descriptors:
             self._subimages.append(SubImage(subimage_descriptor, file_factory))
 
-    def read_image(self, start, size):
+    def read_image(self, start_local, size_local, transformer):
         """Assembles an image range from subimages"""
 
-        combined_image = ImageWrapper(start, image_size=size)
+        # Create the output image wrapper
+        combined_image = SmartImage(start=start_local,
+                                    size=size_local,
+                                    image=None,
+                                    transformer=transformer)
+
+        # Compute global coordinates to match with subimage descriptors
+        start, size = transformer.to_global(start_local, size_local)
+
+        # Check each subimage for overlaps
         for subimage in self._subimages:
 
             # Fetch any part of the image which overlaps this subimage's ROI
@@ -44,9 +53,9 @@ class CombinedImage(Source):
 
             # If any part overlapped, copy this into the combined image
             if part_image:
-                combined_image.set_sub_image(part_image.transform_to_global())
+                combined_image.set_sub_image(part_image)
 
-        return combined_image.image
+        return combined_image
 
     def close(self):
         """Closes all streams and files"""
@@ -160,42 +169,21 @@ class GlobalSource(Source):
         self._data_source.close()
 
 
-class SmartImage(object):
-    """Image wrapper which converts between Axes"""
-
-    def __init__(self, start, size, image, transformer):
-        self._size = size
-        self._start = start
-        self._image = image
-        self._transformer = transformer
-
-    def transform_to_global(self):
-        """Returns a partial image using the specified global coordinates"""
-
-        transformed_origin, transformed_size = self._transformer.to_global(
-            self._start, self._size)
-        transformed_image = self._transformer.image_to_global(self._image)
-
-        return ImageWrapper(origin=transformed_origin, image=transformed_image)
-
-
 class LocalSource(Source):
-    """Data source allowing use of a global source with local coordinates"""
+    """Fetch and transform data using local coordinates"""
 
-    def __init__(self, data_source, transformer):
-        self._data_source = data_source
+    def __init__(self, source, transformer):
+        self._source = source
         self._transformer = transformer
 
-    def read_image(self, start_local, size_local):
+    def read_image(self, start, size):
         """Returns a partial image using the specified local coordinates"""
 
-        start, size = self._transformer.to_global(start_local, size_local)
-        image_global = self._data_source.read_image(start, size)
-        return self._transformer.image_to_local(image_global)
+        return self._source.read_image(start, size, self._transformer).image
 
     def close(self):
         """Close all streams and files"""
-        self._data_source.close()
+        self._source.close()
 
 
 class CoordinateTransformer(object):

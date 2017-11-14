@@ -6,7 +6,7 @@ from parameterized import parameterized, param
 
 from tests.common_test_functions import FakeImageFileReader, create_dummy_image
 from niftysplit.image.combined_image import SubImage, CoordinateTransformer, \
-    CombinedImage, GlobalSource, LocalSource, Axis
+    CombinedImage, GlobalSource, LocalSource, Axis, SmartImage
 from niftysplit.image.image_wrapper import ImageWrapper
 from niftysplit.utils.file_descriptor import SubImageDescriptor
 
@@ -84,8 +84,8 @@ class TestCombinedImage(TestCase):
             self.assertFalse(write_file.open)
 
         self.assertEqual(len(file_factory.read_files), 0)
-        read_image = ci.read_image([0, 0, 0], [30, 30, 30])
-        np.testing.assert_array_equal(image.image, read_image)
+        read_image = ci.read_image([0, 0, 0], [30, 30, 30], global_coordinate_transformer([30, 30, 30]))
+        np.testing.assert_array_equal(image.image, read_image.image)
 
         # Test file closing
         self.assertEqual(len(file_factory.read_files), 27)
@@ -99,6 +99,10 @@ class TestCombinedImage(TestCase):
         return SubImageDescriptor({"filename": 'TestFileName',
             "ranges": ranges, "suffix": "SUFFIX", "dim_order": [1, 2, 3],
             "data_type": "XXXX", "index": index, "template": []})
+
+
+def global_coordinate_transformer(size):
+    return CoordinateTransformer(np.zeros_like(size), size, Axis(np.arange(0, len(size)), np.zeros_like(size)))
 
 
 class TestSubImage(TestCase):
@@ -219,7 +223,7 @@ class TestSubImage(TestCase):
         # correctly converts from the file coordinate system to the global
         # coordinate system
         source = Mock()
-        dummy_image = create_dummy_image(len(size)*[20]).image
+        dummy_image = create_dummy_image(len(size)*[20])
         source.read_image.return_value = dummy_image
 
         si = SubImage(descriptor, file_factory)
@@ -242,8 +246,8 @@ class TestSubImage(TestCase):
         test_start = source.read_image.call_args[0][0]
         test_size = source.read_image.call_args[0][1]
 
-        np.testing.assert_array_equal(test_start, start)
-        np.testing.assert_array_equal(test_size, size)
+        np.testing.assert_array_equal(test_start, local_start)
+        np.testing.assert_array_equal(test_size, local_size)
 
     @parameterized.expand([
         param(ranges=[[0, 10, 0, 0], [0, 10, 0, 0], [0, 10, 0, 0]], start=[0, 0, 0], size=[10, 10, 10], valid=True, valid_start=[0, 0, 0], valid_size=[10, 10, 10]),
@@ -316,19 +320,19 @@ class TestLocalSource(TestCase):
     def test_local_source(self, origin, global_size, dim_order, dim_flip, start, size):
         transformer = CoordinateTransformer(origin, global_size, Axis(dim_order, dim_flip))
         data_source = Mock()
-        test_image = create_dummy_image(global_size).image
-        data_source.read_image.return_value = test_image.copy()
+        test_image = create_dummy_image(global_size)
+        data_source.read_image.return_value = test_image
         source = LocalSource(data_source, transformer)
         local_image = source.read_image(start, size)
         global_start, t_global_size = transformer.to_global(start, size)
         np.testing.assert_array_equal(data_source.read_image.call_args[0][0],
-                                      global_start)
+                                      start)
         np.testing.assert_array_equal(data_source.read_image.call_args[0][1],
-                                      t_global_size)
+                                      size)
 
         self.assertEqual(data_source.close.call_count, 0)
         source.close()
         self.assertEqual(data_source.close.call_count, 1)
 
         global_image = transformer.image_to_global(local_image)
-        np.testing.assert_array_equal(global_image, test_image)
+        np.testing.assert_array_equal(local_image, test_image.image)
