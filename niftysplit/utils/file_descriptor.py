@@ -36,7 +36,7 @@ class SubImageDescriptor(object):
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, descriptor_dict, filename, file_format, data_type,
+    def __init__(self, filename, file_format, data_type,
                  template, ranges, dim_order_condensed, suffix, index):
         self.suffix = suffix
         self.index = index
@@ -51,7 +51,6 @@ class SubImageDescriptor(object):
     def from_dict(descriptor_dict):
         """Create SubImageDescriptor from dictionary entries"""
         return SubImageDescriptor(
-            descriptor_dict=descriptor_dict,
             filename=descriptor_dict["filename"],
             file_format="mhd",  # ToDo
             data_type=descriptor_dict["data_type"],
