@@ -52,7 +52,7 @@ class SubImageDescriptor(object):
         """Create SubImageDescriptor from dictionary entries"""
         return SubImageDescriptor(
             filename=descriptor_dict["filename"],
-            file_format="mhd",  # ToDo
+            file_format=descriptor_dict["file_format"],
             data_type=descriptor_dict["data_type"],
             template=descriptor_dict["template"],
             ranges=descriptor_dict["ranges"],
