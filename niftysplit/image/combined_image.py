@@ -22,7 +22,7 @@ class Source(object):
         raise NotImplementedError
 
 
-class CombinedImage(Source):
+class CombinedImage(object):
     """A kind of virtual file for writing where the data are distributed
         across multiple real files. """
 
@@ -147,26 +147,26 @@ class SubImage(Source):
         return self._read_file
 
 
-class GlobalSource(Source):
-    """Data source allowing use of a local source with global coordinates"""
-
-    def __init__(self, data_source, transformer):
-        self._data_source = data_source
-        self._transformer = transformer
-
-    def read_image(self, start_global, size_global):
-        """Returns a partial image using the specified global coordinates"""
-
-        # Convert to local coordinates for the data source
-        start, size = self._transformer.to_local(start_global, size_global)
-
-        # Get the image data from the data source
-        image_local = self._data_source.read_image(start, size)
-        return self._transformer.image_to_global(image_local)
-
-    def close(self):
-        """Close all streams and files"""
-        self._data_source.close()
+# class GlobalSource(Source):
+#     """Data source allowing use of a local source with global coordinates"""
+#
+#     def __init__(self, data_source, transformer):
+#         self._data_source = data_source
+#         self._transformer = transformer
+#
+#     def read_image(self, start_global, size_global):
+#         """Returns a partial image using the specified global coordinates"""
+#
+#         # Convert to local coordinates for the data source
+#         start, size = self._transformer.to_local(start_global, size_global)
+#
+#         # Get the image data from the data source
+#         image_local = self._data_source.read_image(start, size)
+#         return self._transformer.image_to_global(image_local)
+#
+#     def close(self):
+#         """Close all streams and files"""
+#         self._data_source.close()
 
 
 class LocalSource(Source):
@@ -179,7 +179,8 @@ class LocalSource(Source):
     def read_image(self, start, size):
         """Returns a partial image using the specified local coordinates"""
 
-        return self._source.read_image(start, size, self._transformer).image
+        return self._source.read_image(
+            start, size, self._transformer).image
 
     def close(self):
         """Close all streams and files"""
@@ -199,7 +200,7 @@ class CoordinateTransformer(object):
         """
         self._origin = origin
         self._size = size
-        self._axis = axis
+        self.axis = axis
 
     def to_local(self, global_start, global_size):
         """Convert global coordinates to local coordinates"""
@@ -209,12 +210,12 @@ class CoordinateTransformer(object):
         size = np.array(global_size)  # Make sure global_size is a numpy array
 
         # Permute dimensions of local coordinates
-        start = start[self._axis.dim_order]
-        size = size[self._axis.dim_order]
-        size_t = np.array(self._size)[self._axis.dim_order]
+        start = start[self.axis.dim_order]
+        size = size[self.axis.dim_order]
+        size_t = np.array(self._size)[self.axis.dim_order]
 
         # Flip dimensions where necessary
-        for index, flip in enumerate(self._axis.dim_flip):
+        for index, flip in enumerate(self.axis.dim_flip):
             if flip:
                 start[index] = size_t[index] - start[index] - 1
 
@@ -232,16 +233,16 @@ class CoordinateTransformer(object):
         start = np.array(local_start)
         size = np.array(local_size)
 
-        size_t = np.array(self._size)[self._axis.dim_order]
+        size_t = np.array(self._size)[self.axis.dim_order]
 
         # Flip dimensions where necessary
-        for index, flip in enumerate(self._axis.dim_flip):
+        for index, flip in enumerate(self.axis.dim_flip):
             if flip:
                 start[index] = size_t[index] - start[index] - 1
 
         # Reverse permute dimensions of local coordinates
-        start = start[np.argsort(self._axis.dim_order)]
-        size = size[np.argsort(self._axis.dim_order)]
+        start = start[np.argsort(self.axis.dim_order)]
+        size = size[np.argsort(self.axis.dim_order)]
 
         # Translate coordinates to the global origin
         start = np.add(start, self._origin)
@@ -252,10 +253,10 @@ class CoordinateTransformer(object):
     def image_to_local(self, global_image):
         """Transform global image to local coordinate system"""
 
-        local_image = np.transpose(global_image, self._axis.dim_order)
+        local_image = np.transpose(global_image, self.axis.dim_order)
 
         # Flip dimensions where necessary
-        for index, flip in enumerate(self._axis.dim_flip):
+        for index, flip in enumerate(self.axis.dim_flip):
             if flip:
                 local_image = np.flip(local_image, index)
 
@@ -264,20 +265,38 @@ class CoordinateTransformer(object):
     def image_to_other(self, local_image, other_transformer):
         """Transform image to a different local coordinate system"""
 
-        global_subimage = self.image_to_global(local_image)
-        return other_transformer.image_to_local(global_subimage)
+        # Flip dimensions where necessary
+        for index, flip in enumerate(self.axis.dim_flip):
+            if flip:
+                local_image = np.flip(local_image, index)
+
+        # Reverse permute dimensions of local coordinates
+        global_dim_order = np.argsort(self.axis.dim_order)
+        global_flip = np.array(self.axis.dim_flip)[global_dim_order]
+        local_dim_order = global_dim_order[other_transformer.axis.dim_order]
+        local_image = np.transpose(local_image, local_dim_order)
+        local_flip = global_flip[other_transformer.axis.dim_order]
+        local_flip = np.logical_xor(local_flip,
+                                    other_transformer.axis.dim_flip)
+
+        # Flip dimensions where necessary
+        for index, flip in enumerate(local_flip):
+            if flip:
+                local_image = np.flip(local_image, index)
+
+        return local_image
 
     def image_to_global(self, local_image):
         """Convert local coordinates to global coordinates"""
 
         # Flip dimensions where necessary
-        for index, flip in enumerate(self._axis.dim_flip):
+        for index, flip in enumerate(self.axis.dim_flip):
             if flip:
                 local_image = np.flip(local_image, index)
 
         # Reverse permute dimensions of local coordinates
         global_image = np.transpose(local_image,
-                                    np.argsort(self._axis.dim_order))
+                                    np.argsort(self.axis.dim_order))
 
         return global_image
 
