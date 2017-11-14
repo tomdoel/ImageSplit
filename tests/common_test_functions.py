@@ -13,7 +13,7 @@ class FakeImageFileReader(ImageFileReader, Source):
         self.descriptor = descriptor
         self.open = True
         self.transformer = CoordinateTransformer(
-            self.descriptor.ranges.origin_start, self.descriptor.image_size,
+            self.descriptor.ranges.origin_start, self.descriptor.ranges.image_size,
             self.descriptor.axis)
 
     def read_image(self, start, size):

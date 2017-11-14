@@ -85,7 +85,7 @@ class SubImage(Source):
 
         self._transformer = CoordinateTransformer(
             self._descriptor.ranges.origin_start,
-            self._descriptor.image_size,
+            self._descriptor.ranges.image_size,
             self._axis)
 
     def read_image(self, start, size):

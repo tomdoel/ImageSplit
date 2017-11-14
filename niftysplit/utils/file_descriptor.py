@@ -46,8 +46,6 @@ class SubImageDescriptor(object):
 
         self.ranges = SubImageRanges(descriptor_dict["ranges"])
 
-        self.image_size = self.ranges.image_size
-
         self.axis = Axis.from_condensed_format(descriptor_dict["dim_order"])
 
     def to_dict(self):

@@ -190,7 +190,7 @@ class TestSubImage(TestCase):
         # transformations are correct, since the CoordinateTransformer test
         # should do this
         transformer = CoordinateTransformer(
-            descriptor.ranges.origin_start, descriptor.image_size,
+            descriptor.ranges.origin_start, descriptor.ranges.image_size,
             descriptor.axis)
         expected_start, expected_size = transformer.to_local(start, size)
         test_image = si.read_image(start, size)
@@ -236,7 +236,7 @@ class TestSubImage(TestCase):
 
         # CoordinateTransforer is tested elsewhere.
         transformer = CoordinateTransformer(
-            descriptor.ranges.origin_start, descriptor.image_size,
+            descriptor.ranges.origin_start, descriptor.ranges.image_size,
             descriptor.axis)
         local_start, local_size = transformer.to_local(start, size)
 

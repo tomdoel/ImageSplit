@@ -22,7 +22,7 @@ class MetaIoFile(LinearImageFileReader):
 
     def __init__(self, subimage_descriptor, header_filename,
                  file_handle_factory, header_template):
-        super(MetaIoFile, self).__init__(subimage_descriptor.image_size)
+        super(MetaIoFile, self).__init__(subimage_descriptor.ranges.image_size)
         self._file_handle_factory = file_handle_factory
         self._header_filename = header_filename
         self._input_path = os.path.dirname(os.path.abspath(header_filename))
@@ -67,7 +67,7 @@ class MetaIoFile(LinearImageFileReader):
         header_template = copy.deepcopy(subimage_descriptor.template)
         if subimage_descriptor.data_type:
             header_template["ElementType"] = subimage_descriptor.data_type
-        header_template["DimSize"] = subimage_descriptor.image_size
+        header_template["DimSize"] = subimage_descriptor.ranges.image_size
         header_template["Origin"] = subimage_descriptor.ranges.origin_start
         filename = subimage_descriptor.filename
         return MetaIoFile(subimage_descriptor, filename, file_handle_factory,
