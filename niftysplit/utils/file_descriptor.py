@@ -178,15 +178,18 @@ def generate_output_descriptors(filename_out_base, max_block_size_voxels,
     for subimage_range in ranges:
         suffix = "_" + str(index)
         output_filename_header = filename_out_base + suffix + ".mhd"
-        file_descriptor_out = {"filename": output_filename_header,
-                               "ranges": subimage_range,
-                               "suffix": suffix,
-                               "index": index,
-                               "dim_order": dim_order,
-                               "data_type": output_type,
-                               "template": copy.deepcopy(header)}
-        descriptors_out.append(SubImageDescriptor.from_dict(
-            file_descriptor_out))
+        file_format = "mhd"
+        file_descriptor_out = SubImageDescriptor(
+            filename=output_filename_header,
+            file_format=file_format,
+            ranges=subimage_range,
+            suffix=suffix,
+            index=index,
+            dim_order_condensed=dim_order,
+            data_type=output_type,
+            template=copy.deepcopy(header)
+        )
+        descriptors_out.append(file_descriptor_out)
         index += 1
     return descriptors_out
 
@@ -217,19 +220,23 @@ def load_descriptor(descriptor_filename):
 
 def generate_descriptor_from_header(filename_out_base, original_header,
                                     output_type):
-    """Load a header and uses to define a file descriptor"""
+    """Use a header to define a file descriptor"""
     output_image_size = original_header["DimSize"]
     dim_order = [1, 2, 3]  # ToDo: get from header
-    descriptor_out = {"index": 0,
-                      "suffix": "",
-                      "filename": filename_out_base + '.mhd',
-                      "dim_order": dim_order,
-                      "data_type": output_type,
-                      "template": copy.deepcopy(original_header),
-                      "ranges": [[0, output_image_size[0] - 1, 0, 0],
-                                 [0, output_image_size[1] - 1, 0, 0],
-                                 [0, output_image_size[2] - 1, 0, 0]]}
-    return [SubImageDescriptor.from_dict(descriptor_out)]
+    file_format = "mhd"
+
+    return [SubImageDescriptor(
+        filename=filename_out_base + '.mhd',
+        file_format=file_format,
+        data_type=output_type,
+        template=copy.deepcopy(original_header),
+        dim_order_condensed=dim_order,
+        suffix="",
+        index=0,
+        ranges=[[0, output_image_size[0] - 1, 0, 0],
+            [0, output_image_size[1] - 1, 0, 0],
+            [0, output_image_size[2] - 1, 0, 0]]
+    )]
 
 
 def header_from_descriptor(descriptor_filename):
@@ -258,15 +265,22 @@ def generate_input_descriptors(input_file_base, start_index):
         current_image_size = combined_header["DimSize"]
         data_type = combined_header["ElementType"]
         dim_order = [1, 2, 3]  # ToDo
+        file_format = "mhd"  # ToDo
         current_ranges = [[0, current_image_size[0] - 1, 0, 0],
                           [0, current_image_size[1] - 1, 0, 0],
                           [0, current_image_size[2] - 1, 0, 0]]
 
         # Create a descriptor for this subimage
-        descriptor = {"index": 0, "suffix": "", "filename": header_filename,
-                      "ranges": current_ranges, "template": combined_header,
-                      "data_type": data_type, "dim_order": dim_order}
-        descriptors.append(SubImageDescriptor.from_dict(descriptor))
+        descriptors.append(SubImageDescriptor(
+            index=0,
+            suffix="",
+            filename=header_filename,
+            ranges=current_ranges,
+            template=combined_header,
+            data_type=data_type,
+            dim_order_condensed=dim_order,
+            file_format=file_format
+        ))
         return combined_header, descriptors
 
     else:
@@ -313,14 +327,20 @@ def generate_input_descriptors(input_file_base, start_index):
 
             # Update the combined image size
             combined_header["DimSize"] = full_image_size
+            file_format = "mhd"
+            data_type = current_header["ElementType"]
 
             # Create a descriptor for this subimage
             ranges_to_write = copy.deepcopy(current_ranges)
-            descriptor = {"index": file_index, "suffix": suffix,
-                          "filename": header_filename,
-                          "ranges": ranges_to_write,
-                          "template": combined_header}
-            descriptors.append(SubImageDescriptor.from_dict(descriptor))
+            descriptors.append(SubImageDescriptor(
+                index=file_index,
+                suffix=suffix,
+                filename=header_filename,
+                file_format=file_format,
+                ranges=ranges_to_write,
+                template=combined_header,
+                data_type=data_type
+            ))
 
             file_index += 1
 
