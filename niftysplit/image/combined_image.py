@@ -240,7 +240,7 @@ class CoordinateTransformer(object):
         return start, size
 
     def image_to_local(self, global_image):
-        """Transform image to local coordinate system"""
+        """Transform global image to local coordinate system"""
 
         local_image = np.transpose(global_image, self._axis.dim_order)
 
@@ -250,6 +250,12 @@ class CoordinateTransformer(object):
                 local_image = np.flip(local_image, index)
 
         return local_image
+
+    def image_to_other(self, local_image, other_transformer):
+        """Transform image to a different local coordinate system"""
+
+        global_subimage = self.image_to_global(local_image)
+        return other_transformer.image_to_local(global_subimage)
 
     def to_other(self, local_start, local_size, other_transformer):
         """Convert local coordinates to a different local system"""

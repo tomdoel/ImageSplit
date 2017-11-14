@@ -13,18 +13,13 @@ class SmartImage(object):
         self.image = image
         self._transformer = transformer
 
-    def transform_to_global(self):
-        """Returns a partial image using the specified global coordinates"""
+    def transform_to_other(self, transformer):
+        """Returns this image transformed to a different local system"""
 
         if self.image is None:
             raise ValueError("Image has not been created")
 
-        transformed_origin, transformed_size = self._transformer.to_global(
-            self._start, self._size)
-        transformed_image = \
-            self._transformer.image_to_global(self.image)
-
-        return ImageWrapper(origin=transformed_origin, image=transformed_image)
+        return self._transformer.image_to_other(self.image, transformer)
 
     def coords_to_other(self, transformer):
         """Converts coordinates to another system"""
@@ -38,18 +33,18 @@ class SmartImage(object):
             self.image = np.zeros(shape=self._size,
                                   dtype=sub_image.image.dtype)
 
-        global_subimage = sub_image.transform_to_global()
-        local_subimage = self._transformer.image_to_local(global_subimage.image)
+        # Transform the image to our local coordinate system
+        local_subimage = sub_image.transform_to_other(self._transformer)
+        start, size = sub_image.coords_to_other(self._transformer)
 
-        start, size = sub_image.coords_to_other(self._transformer)\
-
-        start_indices = np.array(start)
-        end_indices = np.add(start_indices, np.array(size))
-        if np.any(np.less(start_indices, np.zeros_like(start_indices))) \
-                or np.any(np.greater(end_indices, self._size)):
+        # Test if image is in bounds
+        end = np.add(start, size)
+        if np.any(np.less(start, np.zeros_like(start))) \
+                or np.any(np.greater(end, self._size)):
             raise ValueError("Subimage is not contained within the main image")
-        selector = tuple([slice(start, end) for start, end in
-                          zip(start_indices, end_indices)])
+
+        # Set the part of the image to this subimage
+        selector = tuple([slice(s, e) for s, e in zip(start, end)])
         self.image[selector] = local_subimage
 
 
