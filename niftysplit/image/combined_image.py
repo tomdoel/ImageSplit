@@ -39,13 +39,13 @@ class CombinedImage(Source):
         combined_image = ImageWrapper(start, image_size=size)
         for subimage in self._subimages:
 
-            # Find the part of the requested region that fits in the ROI
-            sub_start, sub_size = subimage.bind_by_roi(start, size)
+            # Fetch any part of the image which overlaps this subimage's ROI
+            part_image = subimage.read_image_bound_by_roi(start, size)
 
-            # Check if any of region is contained in this subimage
-            if np.all(np.greater(sub_size, np.zeros_like(sub_size))):
-                part_image = subimage.read_image(sub_start, sub_size)
+            # If any part overlapped, copy this into the combined image
+            if part_image:
                 combined_image.set_sub_image(part_image)
+
         return combined_image.image
 
     def close(self):
@@ -81,7 +81,7 @@ class SubImage(Source):
             self._axis)
 
     def read_image(self, start, size):
-        """Returns a subimage containing any overlap from the ROI"""
+        """Returns a subimage containing any overlap from the image"""
 
         # Convert to local coordinates for the data source
         start_local, size_local = self._transformer.to_local(start, size)
@@ -92,6 +92,18 @@ class SubImage(Source):
 
         image = SmartImage(image_local, self._transformer)
         return ImageWrapper(start, image=image.transform_to_global())
+
+    def read_image_bound_by_roi(self, start, size):
+        """Returns a subimage containing any overlap from the ROI"""
+
+        # Find the part of the requested region that fits in the ROI
+        sub_start, sub_size = self.bind_by_roi(start, size)
+
+        # Check if any of region is contained in this subimage
+        if np.all(np.greater(sub_size, np.zeros_like(sub_size))):
+            return self.read_image(sub_start, sub_size)
+        else:
+            return None
 
     def close(self):
         """Close all streams and files"""
