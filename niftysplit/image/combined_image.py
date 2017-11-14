@@ -4,7 +4,7 @@
 from abc import ABCMeta, abstractmethod
 
 import numpy as np
-from niftysplit.image.image_wrapper import ImageWrapper
+from niftysplit.image.image_wrapper import ImageWrapper, SmartImage
 
 
 class Source(object):
@@ -201,6 +201,25 @@ class CoordinateTransformer(object):
         self._size = size
         self._axis = axis
 
+    def other_to_local(self, global_start, global_size, transformer):
+        """Convert global coordinates to local coordinates"""
+
+        # Translate coordinates to the local origin
+        start = np.subtract(global_start, self._origin)
+        size = np.array(global_size)  # Make sure global_size is a numpy array
+
+        # Permute dimensions of local coordinates
+        start = start[self._axis.dim_order]
+        size = size[self._axis.dim_order]
+        size_t = np.array(self._size)[self._axis.dim_order]
+
+        # Flip dimensions where necessary
+        for index, flip in enumerate(self._axis.dim_flip):
+            if flip:
+                start[index] = size_t[index] - start[index] - 1
+
+        return start, size
+
     def to_local(self, global_start, global_size):
         """Convert global coordinates to local coordinates"""
 
@@ -231,6 +250,12 @@ class CoordinateTransformer(object):
                 local_image = np.flip(local_image, index)
 
         return local_image
+
+    def to_other(self, local_start, local_size, other_transformer):
+        """Convert local coordinates to a different local system"""
+
+        global_start, global_size = self.to_global(local_start, local_size)
+        return other_transformer.to_local(global_start, global_size)
 
     def to_global(self, local_start, local_size):
         """Convert local coordinates to global coordinates"""

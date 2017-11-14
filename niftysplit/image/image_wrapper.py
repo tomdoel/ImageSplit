@@ -26,13 +26,10 @@ class SmartImage(object):
 
         return ImageWrapper(origin=transformed_origin, image=transformed_image)
 
-    def coords_to_global(self):
-        """Returns a partial image using the specified global coordinates"""
+    def coords_to_other(self, transformer):
+        """Converts coordinates to another system"""
 
-        transformed_origin, transformed_size = self._transformer.to_global(
-            self._start, self._size)
-
-        return transformed_origin, transformed_size
+        return self._transformer.to_other(self._start, self._size, transformer)
 
     def set_sub_image(self, sub_image):
         """Replaces part of the image with the corresponding subimage"""
@@ -44,8 +41,7 @@ class SmartImage(object):
         global_subimage = sub_image.transform_to_global()
         local_subimage = self._transformer.image_to_local(global_subimage.image)
 
-        global_start, global_size = sub_image.coords_to_global()
-        start, size = self._transformer.to_local(global_start, global_size)
+        start, size = sub_image.coords_to_other(self._transformer)\
 
         start_indices = np.array(start)
         end_indices = np.add(start_indices, np.array(size))
