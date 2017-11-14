@@ -38,13 +38,15 @@ class SmartImage(object):
         start, size = sub_image.coords_to_other(self._transformer)
 
         # Test if image is in bounds
-        end = np.add(start, size)
-        if np.any(np.less(start, np.zeros_like(start))) \
-                or np.any(np.greater(end, self._size)):
+        start_indices = np.subtract(start, self._start)
+        end_indices = np.add(start_indices, size)
+        if np.any(np.less(start_indices, np.zeros_like(start_indices))) \
+                or np.any(np.greater(end_indices, self._size)):
             raise ValueError("Subimage is not contained within the main image")
 
         # Set the part of the image to this subimage
-        selector = tuple([slice(s, e) for s, e in zip(start, end)])
+        selector = tuple([slice(s, e) for s, e in
+                          zip(start_indices, end_indices)])
         self.image[selector] = local_subimage
 
 
