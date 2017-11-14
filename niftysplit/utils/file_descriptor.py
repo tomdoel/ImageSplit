@@ -245,8 +245,7 @@ def generate_input_descriptors(input_file_base, start_index):
         descriptor = {"index": 0, "suffix": "", "filename": header_filename,
                       "ranges": current_ranges, "template": combined_header,
                       "data_type": data_type, "dim_order": dim_order}
-        descriptors.append(descriptor)
-        descriptors = convert_to_descriptors(descriptors)
+        descriptors.append(SubImageDescriptor(descriptor))
         return combined_header, descriptors
 
     else:
@@ -266,7 +265,6 @@ def generate_input_descriptors(input_file_base, start_index):
             suffix = str(file_index)
             header_filename = input_file_base + suffix + '.mhd'
             if not os.path.isfile(header_filename):
-                descriptors = convert_to_descriptors(descriptors)
                 return combined_header, descriptors
             current_header = load_mhd_header(header_filename)
             current_image_size = current_header["DimSize"]
@@ -301,7 +299,7 @@ def generate_input_descriptors(input_file_base, start_index):
                           "filename": header_filename,
                           "ranges": ranges_to_write,
                           "template": combined_header}
-            descriptors.append(descriptor)
+            descriptors.append(SubImageDescriptor(descriptor))
 
             file_index += 1
 
