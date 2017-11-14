@@ -83,8 +83,14 @@ class TestCombinedImage(TestCase):
             self.assertFalse(write_file.open)
 
         self.assertEqual(len(file_factory.read_files), 0)
+
+        # Test reading and assembling the whole image
         read_image = ci.read_image([0, 0, 0], [30, 30, 30], global_coordinate_transformer([30, 30, 30]))
         np.testing.assert_array_equal(image.image, read_image.image)
+
+        # Test reading part of the image excluding some of the subimages
+        read_image = ci.read_image([0, 0, 0], [5, 5, 5], global_coordinate_transformer([30, 30, 30]))
+        np.testing.assert_array_equal(image.get_sub_image([0, 0, 0], [5, 5, 5]).image, read_image.image)
 
         # Test file closing
         self.assertEqual(len(file_factory.read_files), 27)
