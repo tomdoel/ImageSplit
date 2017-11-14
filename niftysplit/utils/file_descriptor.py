@@ -37,8 +37,10 @@ class SubImageDescriptor(object):
     # pylint: disable=too-many-instance-attributes
 
     def __init__(self, descriptor_dict, filename, file_format, data_type,
-                 template, ranges, dim_order_condensed):
+                 template, ranges, dim_order_condensed, suffix, index):
         self._descriptor = descriptor_dict
+        self.suffix = suffix
+        self.index = index
         self.filename = filename
         self.file_format = file_format
         self.data_type = data_type
@@ -56,14 +58,23 @@ class SubImageDescriptor(object):
             data_type=descriptor_dict["data_type"],
             template=descriptor_dict["template"],
             ranges=descriptor_dict["ranges"],
-            dim_order_condensed=descriptor_dict["dim_order"]
+            dim_order_condensed=descriptor_dict["dim_order"],
+            suffix=descriptor_dict["suffix"],
+            index=descriptor_dict["index"]
         )
-
 
     def to_dict(self):
         """Get a dictionary for the metadata for this subimage"""
 
-        return self._descriptor
+        return {"index": self.index,
+                "suffix": self.suffix,
+                "filename": self.filename,
+                "data_type": self.data_type,
+                "file_format": self.file_format,
+                "template": self.template,
+                "dim_order": self.axis.to_condensed_format(),
+                "ranges": self.ranges.ranges
+                }
 
 
 def get_number_of_blocks(image_size, max_block_size):
@@ -170,7 +181,8 @@ def generate_output_descriptors(filename_out_base, max_block_size_voxels,
         suffix = "_" + str(index)
         output_filename_header = filename_out_base + suffix + ".mhd"
         file_descriptor_out = {"filename": output_filename_header,
-                               "ranges": subimage_range, "suffix": suffix,
+                               "ranges": subimage_range,
+                               "suffix": suffix,
                                "index": index,
                                "dim_order": dim_order,
                                "data_type": output_type,

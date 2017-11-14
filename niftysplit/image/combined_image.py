@@ -286,9 +286,14 @@ class Axis(object):
         self.dim_order = dim_order
         self.dim_flip = dim_flip
 
+    def to_condensed_format(self):
+        """Creates a condensed Axis array for this Axis"""
+        return [-1 - dim if flip else 1 + dim for dim, flip in
+                zip(self.dim_order, self.dim_flip)]
+
     @staticmethod
     def from_condensed_format(dim_order_and_flip):
-        """Creates an Axis from a condensed axis string"""
+        """Creates an Axis from a condensed axis array"""
         dim_order = [abs(d) - 1 for d in dim_order_and_flip]
         dim_flip = [d < 0 for d in dim_order_and_flip]
         return Axis(dim_order=dim_order, dim_flip=dim_flip)

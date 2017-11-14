@@ -340,3 +340,17 @@ class TestLocalSource(TestCase):
 
         global_image = transformer.image_to_global(local_image)
         np.testing.assert_array_equal(local_image, test_image.image)
+
+
+class TestAxis(TestCase):
+    @parameterized.expand([
+        param(condensed=[1, 2, 3], dim=[0, 1, 2], flip=[False, False, False]),
+        param(condensed=[1, 2, 3], dim=[0, 1, 2], flip=[False, False, False])
+    ])
+    def test_to_from_condensed(self, condensed, dim, flip):
+        axis = Axis.from_condensed_format(condensed)
+        self.assertSequenceEqual(axis.dim_order, dim)
+        self.assertSequenceEqual(axis.dim_flip, flip)
+        self.assertSequenceEqual(axis.to_condensed_format(), condensed)
+
+
