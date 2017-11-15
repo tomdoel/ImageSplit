@@ -14,6 +14,7 @@ from __future__ import division, print_function
 import argparse
 import os
 import sys
+import numpy as np
 
 from niftysplit.file.file_factory import FileFactory
 from niftysplit.file.file_wrapper import FileHandleFactory
@@ -33,6 +34,12 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
 
     [header, descriptors_in, num_dims, image_size] = \
         generate_input_descriptors(input_file_base, start_index)
+
+    if output_format is None:
+        output_format = descriptors_in[0].file_format
+
+    if dim_order is None:
+        dim_order = np.arange(1, descriptors_in[0].num_dims + 1)
 
     descriptors_out = generate_output_descriptors(
         filename_out_base=filename_out_base,
@@ -75,24 +82,37 @@ def main(args):
     parser.add_argument("-t", "--type", required=False, default=None, type=str,
                         help="Output data type (default: same as input file "
                              "datatype)")
+    parser.add_argument("-r", "--format", required=False, default=None,
+                        type=str,
+                        help="Output file format such as mhd, tiff "
+                             "(default: same as input file format)")
 
-    dim_order = [1, 2, 3]  # ToDo: Specify as a command line parameter
-    output_format = "mhd"  # ToDo: Specify as a command line parameter
+    parser.add_argument("-a", "--axis", nargs='+', required=False,
+                        default=None, type=int,
+                        help="Axis ordering (default 1 2 3). Specifies the "
+                             "global axis corresponding to each dimension "
+                             "in the imnage file. The first value is the "
+                             "global axis represented by the first dimension "
+                             "in the file, and so on. One value for each "
+                             "dimension, dimensions are numbered 1,2,3,"
+                             "... and a negative value means that axis is "
+                             "flipped.")
+
     args = parser.parse_args(args)
 
     if args.filename == '_no_filename_specified':
         raise ValueError('No filename was specified')
     else:
-        assert sys.version_info >= (3, 0)
+        assert sys.version_info >= (2, 7)
         split_file(input_file=args.filename,
                    filename_out_base=args.out,
                    max_block_size_voxels=args.max,
                    overlap_size_voxels=args.overlap,
                    start_index=args.startindex,
                    output_type=args.type,
-                   dim_order=dim_order,
+                   dim_order=args.axis,
                    file_handle_factory=FileHandleFactory(),
-                   output_format=output_format)
+                   output_format=args.format)
 
 
 if __name__ == '__main__':
