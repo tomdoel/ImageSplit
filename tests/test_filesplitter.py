@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from utils.utilities import get_number_of_blocks, get_block_coordinate_range, \
+from niftysplit.utils.utilities import get_number_of_blocks, get_block_coordinate_range, \
     get_suggested_block_size, get_image_block_ranges
 
 import unittest
