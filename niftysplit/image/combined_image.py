@@ -219,8 +219,8 @@ class CoordinateTransformer(object):
                 start[index] = size_t[index] - start[index] - 1
 
         # Reverse permute dimensions of local coordinates
-        start = start[np.argsort(self.axis.dim_order)]
-        size = size[np.argsort(self.axis.dim_order)]
+        start = start[self.axis.reverse_dim_order]
+        size = size[self.axis.reverse_dim_order]
 
         # Translate coordinates to the global origin
         start = np.add(start, self._origin)
@@ -249,7 +249,7 @@ class CoordinateTransformer(object):
                 local_image = np.flip(local_image, index)
 
         # Reverse permute dimensions of local coordinates
-        global_dim_order = np.argsort(self.axis.dim_order)
+        global_dim_order = self.axis.reverse_dim_order
         global_flip = np.array(self.axis.dim_flip)[global_dim_order]
         local_dim_order = global_dim_order[other_transformer.axis.dim_order]
         local_image = np.transpose(local_image, local_dim_order)
@@ -273,8 +273,7 @@ class CoordinateTransformer(object):
                 local_image = np.flip(local_image, index)
 
         # Reverse permute dimensions of local coordinates
-        global_image = np.transpose(local_image,
-                                    np.argsort(self.axis.dim_order))
+        global_image = np.transpose(local_image, self.axis.reverse_dim_order)
 
         return global_image
 
@@ -285,6 +284,7 @@ class Axis(object):
     def __init__(self, dim_order, dim_flip):
         self.dim_order = dim_order
         self.dim_flip = dim_flip
+        self.reverse_dim_order = np.argsort(dim_order)
 
     def to_condensed_format(self):
         """Creates a condensed Axis array for this Axis"""
