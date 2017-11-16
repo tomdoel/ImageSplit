@@ -10,6 +10,9 @@ import copy
 import os
 from collections import OrderedDict
 
+import numpy as np
+
+from niftysplit.image.combined_image import Axis
 from niftysplit.file.file_wrapper import FileWrapper, FileStreamer
 from niftysplit.file.image_file_reader import LinearImageFileReader
 
@@ -263,8 +266,7 @@ def get_dimension_ordering(header):
     The first element in the array contains the index of the global dimension
     which is represented by the first dimension in the file, and so on
     """
-    # pylint: disable=unused-argument
-    return [1, 2, 3]  # ToDo
+    return get_dim_order(header)
 
 
 def get_default_metadata():
@@ -282,3 +284,116 @@ def get_default_metadata():
          ('Comment', []), ('SeriesDescription', []), ('AcquisitionDate', []),
          ('AcquisitionTime', []),
          ('StudyDate', []), ('StudyTime', [])])
+
+
+def get_dim_order(header):
+    """Return the condensed dimension order and flip string for this header"""
+    if header.TransformMatrix:
+        transform = header.TransformMatrix
+        new_dimension_order, flip_orientation = \
+            mhd_comsines_to_permutation(
+                transform[0:2], transform[3:5], transform[6:8])
+    elif header.AnatomicalOrientation:
+        new_dimension_order, flip_orientation = \
+            anatomical_to_permutation(
+                header.AnatomicalOrientation)
+    else:
+        new_dimension_order = [0, 1, 2]
+        flip_orientation = [False, False, False]
+
+    return Axis(new_dimension_order, flip_orientation).to_condensed_format()
+
+
+def anatomical_to_permutation(anatomical_orientation_string):
+    """Dimension permutation vector corresponding to this orientation string"""
+
+    direction_cosine_1 = \
+        anatomical_to_cosine(anatomical_orientation_string[0])
+    direction_cosine_2 = \
+        anatomical_to_cosine(anatomical_orientation_string[1])
+    direction_cosine_3 = \
+        anatomical_to_cosine(anatomical_orientation_string[2])
+
+    permutation_vector, flip_orientation = \
+        mhd_comsines_to_permutation(
+            direction_cosine_1, direction_cosine_2, direction_cosine_3)
+
+    return permutation_vector, flip_orientation
+
+
+def anatomical_to_cosine(anatomical_orientation_char):
+    """Get Dicom direction cosine for this orientation string"""
+    if anatomical_orientation_char == 'R':
+        return [1, 0, 0]
+    elif anatomical_orientation_char == 'L':
+        return [-1, 0, 0]
+    elif anatomical_orientation_char == 'A':
+        return [0, 1, 0]
+    elif anatomical_orientation_char == 'P':
+        return [0, -1, 0]
+    elif anatomical_orientation_char == 'I':
+        return [0, 0, 1]
+    elif anatomical_orientation_char == 'S':
+        return [0, 0, -1]
+    else:
+        raise ValueError('No implementation yet for anatomical orientation ' +
+                         anatomical_orientation_char + '.')
+
+
+def mhd_comsines_to_permutation(direction_cosine_1,
+                                direction_cosine_2,
+                                direction_cosine_3):
+    """Get dimension permutation vectors for these mhd direction cosines"""
+    orientation_1 = direction_cosine_1
+    orientation_2 = direction_cosine_2
+    orientation_3 = direction_cosine_3
+
+    permutation_vector, dimension_1, dimension_2, dimension_3 = \
+        permutation_from_orientations(orientation_1, orientation_2)
+
+    flip_orientation = get_flip_from_orientations(
+        orientation_1, orientation_2, orientation_3, dimension_1, dimension_2,
+        dimension_3)
+    if np.sum(permutation_vector == 0) != 1 or \
+            np.sum(permutation_vector == 1) != 1 or \
+            np.sum(permutation_vector == 2) != 1 or \
+            np.size(np.setdiff1d(permutation_vector, [0, 1, 2])) != 0:
+        raise ValueError('Invalid permutation vector')
+
+    return permutation_vector, flip_orientation
+
+
+def permutation_from_orientations(orientation_1, orientation_2):
+    """Get dimension permutation vectors for these orientation vectors"""
+    dimension_1, dimension_2, dimension_3 = \
+        dimensions_from_orientations(orientation_1, orientation_2)
+
+    permutation_vector = [2, 2, 2]
+    permutation_vector[dimension_1] = 0
+    permutation_vector[dimension_2] = 1
+    return permutation_vector, dimension_1, dimension_2, dimension_3
+
+
+def dimensions_from_orientations(orientation_vector_1,
+                                 orientation_vector_2):
+    """Get dimension permutation vectors for these orientation vectors"""
+
+    dimension_number_1 = np.argmax(np.abs(orientation_vector_1))
+    remaining_dimensions = np.setdiff1d([0, 1, 2], dimension_number_1)
+    reduced_orientation_vector_2 = orientation_vector_2(remaining_dimensions)
+    dim2_from_reduced_set = np.argmax(np.abs(reduced_orientation_vector_2))
+    dimension_number_2 = remaining_dimensions[dim2_from_reduced_set]
+    dimension_number_3 = np.setdiff1d([0, 1, 2],
+                                      [dimension_number_1, dimension_number_2])
+    return dimension_number_1, dimension_number_2, dimension_number_3
+
+
+def get_flip_from_orientations(orientation_1, orientation_2, orientation_3,
+                               dimension_1, dimension_2, dimension_3):
+    """Get dimension flip vectors for these orientation vectors"""
+
+    flip = [False, False, False]
+    flip[dimension_1] = orientation_1(dimension_1) < 0
+    flip[dimension_2] = orientation_2(dimension_2) < 0
+    flip[dimension_3] = orientation_3(dimension_3) < 0
+    return flip

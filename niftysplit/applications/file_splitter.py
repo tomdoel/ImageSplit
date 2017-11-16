@@ -14,7 +14,6 @@ from __future__ import division, print_function
 import argparse
 import os
 import sys
-import numpy as np
 
 from niftysplit.file.file_factory import FileFactory
 from niftysplit.file.file_wrapper import FileHandleFactory
@@ -32,14 +31,14 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
     if not filename_out_base:
         filename_out_base = input_file_base + "_split"
 
-    [header, descriptors_in, num_dims, image_size] = \
+    [header, descriptors_in, global_descriptor] = \
         generate_input_descriptors(input_file_base, start_index)
 
     if output_format is None:
-        output_format = descriptors_in[0].file_format
+        output_format = global_descriptor.file_format
 
     if dim_order is None:
-        dim_order = np.arange(1, descriptors_in[0].num_dims + 1)
+        dim_order = global_descriptor.dim_order
 
     descriptors_out = generate_output_descriptors(
         filename_out_base=filename_out_base,
@@ -49,8 +48,8 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
         header=header,
         output_type=output_type,
         output_file_format=output_format,
-        num_dims=num_dims,
-        image_size=image_size)
+        num_dims=global_descriptor.num_dims,
+        image_size=global_descriptor.size)
 
     file_factory = FileFactory(file_handle_factory)
 

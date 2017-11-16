@@ -29,8 +29,9 @@ def combine_file(input_file_base, descriptor_filename, filename_out_base,
         filename_out_base = os.path.splitext(input_file_base)[0] + "_combined"
 
     if not descriptor_filename:
-        [original_header, descriptors_in] = generate_input_descriptors(
-            input_file_base, start_index)
+        # pylint: disable=unused-variable
+        [original_header, descriptors_in, global_descriptor] = \
+            generate_input_descriptors(input_file_base, start_index)
     else:
         [original_header,
          descriptors_in] = header_from_descriptor(descriptor_filename)

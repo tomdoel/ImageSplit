@@ -10,6 +10,9 @@ Copyright UCL 2017
 import copy
 import os
 
+import numpy as np
+
+from niftysplit.file.metaio_reader import get_dim_order
 from niftysplit.file.file_factory import FileFactory
 from niftysplit.file.metaio_reader import load_mhd_header
 from niftysplit.image.combined_image import Axis
@@ -30,6 +33,17 @@ class SubImageRanges(object):
         self.roi_start = [r[0] + r[2] for r in self.ranges]
         self.roi_end = [r[1] - r[3] for r in self.ranges]
         self.roi_size = [1 + (r[1] - r[3]) - (r[0] + r[2]) for r in self.ranges]
+
+
+class GlobalImageDescriptor(object):
+    """Describes a full combined image"""
+
+    def __init__(self, size, file_format, dim_order):
+        self.file_format = file_format
+        self.size = size
+        self.num_dims = len(size)
+        self.dim_order = dim_order if dim_order \
+            else np.arange(1, self.num_dims + 1)
 
 
 class SubImageDescriptor(object):
@@ -174,11 +188,11 @@ def generate_input_descriptors(input_file_base, start_index):
         # If no start index is specified, load a single header file
         header_filename = input_file_base + '.mhd'
         combined_header = load_mhd_header(header_filename)
-        current_image_size = combined_header["DimSize"]
-        data_type = combined_header["ElementType"]
-        ndims = combined_header["NDims"]
-        dim_order = [1, 2, 3]  # ToDo
-        file_format = "mhd"  # ToDo
+        file_descriptor = parse_header(combined_header)
+        current_image_size = file_descriptor.image_size
+        data_type = file_descriptor.data_type
+        dim_order = file_descriptor.dim_order
+        file_format = file_descriptor.file_format
         current_ranges = [[0, current_image_size[0] - 1, 0, 0],
                           [0, current_image_size[1] - 1, 0, 0],
                           [0, current_image_size[2] - 1, 0, 0]]
@@ -194,7 +208,13 @@ def generate_input_descriptors(input_file_base, start_index):
             dim_order_condensed=dim_order,
             file_format=file_format
         ))
-        return combined_header, descriptors, ndims, current_image_size
+
+        global_descriptor = GlobalImageDescriptor(
+            size=current_image_size,
+            file_format=file_format,
+            dim_order=dim_order)
+
+        return combined_header, descriptors, global_descriptor
 
     else:
         # Load a series of files starting with the specified prefix
@@ -207,18 +227,28 @@ def generate_input_descriptors(input_file_base, start_index):
                 'No file series found starting with ' + header_filename)
 
         current_ranges = None
-        current_image_size = None
-        ndims = None
+
         combined_header = None
         full_image_size = None
+        file_format = None
         while True:
             suffix = str(file_index)
             header_filename = input_file_base + suffix + '.mhd'
             if not os.path.isfile(header_filename):
-                return combined_header, descriptors, ndims, current_image_size
+                global_descriptor = GlobalImageDescriptor(
+                    size=full_image_size,
+                    file_format=file_format,
+                    dim_order=dim_order)
+
+                return combined_header, descriptors, global_descriptor
             current_header = load_mhd_header(header_filename)
-            ndims = current_header["NDims"]
-            current_image_size = current_header["DimSize"]
+
+            file_descriptor = parse_header(current_header)
+            current_image_size = file_descriptor.image_size
+            data_type = file_descriptor.data_type
+            dim_order = file_descriptor.dim_order
+            file_format = file_descriptor.file_format
+
             if not current_ranges:
                 full_image_size = copy.deepcopy(current_image_size)
                 combined_header = copy.deepcopy(current_header)
@@ -243,9 +273,6 @@ def generate_input_descriptors(input_file_base, start_index):
 
             # Update the combined image size
             combined_header["DimSize"] = full_image_size
-            file_format = "mhd"
-            dim_order = [1, 2, 3]  # ToDo
-            data_type = current_header["ElementType"]
 
             # Create a descriptor for this subimage
             ranges_to_write = copy.deepcopy(current_ranges)
@@ -261,6 +288,27 @@ def generate_input_descriptors(input_file_base, start_index):
             ))
 
             file_index += 1
+
+
+class FileImageDescriptor(object):
+    """File metadata"""
+    def __init__(self, file_format, dim_order, data_type, image_size):
+        self.image_size = image_size
+        self.file_format = file_format
+        self.dim_order = dim_order
+        self.data_type = data_type
+
+
+def parse_header(header):
+    """Reads a metaheader and returns a FileImageDescriptor"""
+    file_format = "mhd"
+    dim_order = get_dim_order(header)
+    data_type = header["ElementType"]
+    image_size = header["DimSize"]
+    return FileImageDescriptor(file_format=file_format,
+                               dim_order=dim_order,
+                               data_type=data_type,
+                               image_size=image_size)
 
 
 def convert_to_descriptors(descriptors_dict):
