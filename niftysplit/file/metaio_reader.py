@@ -288,15 +288,15 @@ def get_default_metadata():
 
 def get_dim_order(header):
     """Return the condensed dimension order and flip string for this header"""
-    if header.TransformMatrix:
-        transform = header.TransformMatrix
+    if header["TransformMatrix"]:
+        transform = header["TransformMatrix"]
         new_dimension_order, flip_orientation = \
             mhd_comsines_to_permutation(
-                transform[0:2], transform[3:5], transform[6:8])
-    elif header.AnatomicalOrientation:
+                transform[0:3], transform[3:6], transform[6:9])
+    elif header["AnatomicalOrientation"]:
         new_dimension_order, flip_orientation = \
             anatomical_to_permutation(
-                header.AnatomicalOrientation)
+                header["AnatomicalOrientation"])
     else:
         new_dimension_order = [0, 1, 2]
         flip_orientation = [False, False, False]
@@ -354,9 +354,9 @@ def mhd_comsines_to_permutation(direction_cosine_1,
     flip_orientation = get_flip_from_orientations(
         orientation_1, orientation_2, orientation_3, dimension_1, dimension_2,
         dimension_3)
-    if np.sum(permutation_vector == 0) != 1 or \
-            np.sum(permutation_vector == 1) != 1 or \
-            np.sum(permutation_vector == 2) != 1 or \
+    if np.sum(np.equal(permutation_vector, 0)) != 1 or \
+            np.sum(np.equal(permutation_vector, 1)) != 1 or \
+            np.sum(np.equal(permutation_vector, 2)) != 1 or \
             np.size(np.setdiff1d(permutation_vector, [0, 1, 2])) != 0:
         raise ValueError('Invalid permutation vector')
 
@@ -380,11 +380,12 @@ def dimensions_from_orientations(orientation_vector_1,
 
     dimension_number_1 = np.argmax(np.abs(orientation_vector_1))
     remaining_dimensions = np.setdiff1d([0, 1, 2], dimension_number_1)
-    reduced_orientation_vector_2 = orientation_vector_2(remaining_dimensions)
+    reduced_orientation_vector_2 = np.take(orientation_vector_2, remaining_dimensions)
     dim2_from_reduced_set = np.argmax(np.abs(reduced_orientation_vector_2))
     dimension_number_2 = remaining_dimensions[dim2_from_reduced_set]
     dimension_number_3 = np.setdiff1d([0, 1, 2],
                                       [dimension_number_1, dimension_number_2])
+    dimension_number_3 = dimension_number_3[0]
     return dimension_number_1, dimension_number_2, dimension_number_3
 
 
@@ -393,7 +394,7 @@ def get_flip_from_orientations(orientation_1, orientation_2, orientation_3,
     """Get dimension flip vectors for these orientation vectors"""
 
     flip = [False, False, False]
-    flip[dimension_1] = orientation_1(dimension_1) < 0
-    flip[dimension_2] = orientation_2(dimension_2) < 0
-    flip[dimension_3] = orientation_3(dimension_3) < 0
+    flip[dimension_1] = orientation_1[dimension_1] < 0
+    flip[dimension_2] = orientation_2[dimension_2] < 0
+    flip[dimension_3] = orientation_3[dimension_3] < 0
     return flip
