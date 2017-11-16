@@ -380,7 +380,8 @@ def dimensions_from_orientations(orientation_vector_1,
 
     dimension_number_1 = np.argmax(np.abs(orientation_vector_1))
     remaining_dimensions = np.setdiff1d([0, 1, 2], dimension_number_1)
-    reduced_orientation_vector_2 = np.take(orientation_vector_2, remaining_dimensions)
+    reduced_orientation_vector_2 = np.take(orientation_vector_2,
+                                           remaining_dimensions)
     dim2_from_reduced_set = np.argmax(np.abs(reduced_orientation_vector_2))
     dimension_number_2 = remaining_dimensions[dim2_from_reduced_set]
     dimension_number_3 = np.setdiff1d([0, 1, 2],
