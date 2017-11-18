@@ -211,7 +211,7 @@ def generate_input_descriptors(input_file, start_index):
 
     # Loop through all the input files
     while True:
-        file_descriptor, current_header = parse_header(current_header)
+        file_descriptor, current_header = parse_header(header_filename)
         current_image_size = file_descriptor.image_size
         data_type = file_descriptor.data_type
         dim_order = file_descriptor.dim_order
