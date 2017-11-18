@@ -114,11 +114,11 @@ def generate_output_descriptors(filename_out_base,
     ranges = get_image_block_ranges(image_size, max_block_size_voxels_array,
                                     overlap_voxels_size_array)
 
+    extension = FileFactory.get_extension_for_format(output_file_format)
     descriptors_out = []
     index = 0
     for subimage_range in ranges:
         suffix = "_" + str(index)
-        extension = FileFactory.get_extension_for_format(output_file_format)
         output_filename_header = filename_out_base + suffix + extension
         file_descriptor_out = SubImageDescriptor(
             filename=output_filename_header,
@@ -185,8 +185,9 @@ def generate_input_descriptors(input_file_base, start_index):
     descriptors = []
 
     if start_index is None:
+        suffix = ""
         # If no start index is specified, load a single header file
-        header_filename = input_file_base + '.mhd'
+        header_filename = input_file_base + suffix + '.mhd'
         combined_header = load_mhd_header(header_filename)
         file_descriptor = parse_header(combined_header)
         current_image_size = file_descriptor.image_size
@@ -200,7 +201,7 @@ def generate_input_descriptors(input_file_base, start_index):
         # Create a descriptor for this subimage
         descriptors.append(SubImageDescriptor(
             index=0,
-            suffix="",
+            suffix=suffix,
             filename=header_filename,
             ranges=current_ranges,
             template=combined_header,
@@ -280,11 +281,11 @@ def generate_input_descriptors(input_file_base, start_index):
                 index=file_index,
                 suffix=suffix,
                 filename=header_filename,
-                file_format=file_format,
                 ranges=ranges_to_write,
                 template=combined_header,
                 data_type=data_type,
-                dim_order_condensed=dim_order
+                dim_order_condensed=dim_order,
+                file_format = file_format,
             ))
 
             file_index += 1
