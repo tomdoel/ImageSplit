@@ -1,6 +1,6 @@
 # coding=utf-8
 """
-Wraper for sub images that form part of a larger volume
+Wrapper for sub images that form part of a larger volume
 
 Author: Tom Doel
 Copyright UCL 2017
@@ -12,7 +12,7 @@ import os
 
 import numpy as np
 
-from niftysplit.file.metaio_reader import get_dim_order
+from niftysplit.file.header_reader import parse_header
 from niftysplit.file.file_factory import FileFactory
 from niftysplit.file.metaio_reader import load_mhd_header
 from niftysplit.image.combined_image import Axis
@@ -173,16 +173,20 @@ def header_from_descriptor(descriptor_filename):
         raise ValueError(
             'This function only supports data derived from a single file')
     original_file_descriptor = original_file_list[0]
-    original_header = load_mhd_header(
-        original_file_descriptor["filename"])
+    if original_file_descriptor["file_format"] == "mhd":
+        original_header = load_mhd_header(original_file_descriptor["filename"])
+    else:
+        original_header = None  # ToDo
     input_file_list = descriptor["split_files"]
     descriptors = convert_to_descriptors(input_file_list)
     return original_header, descriptors
 
 
-def generate_input_descriptors(input_file_base, start_index):
+def generate_input_descriptors(input_file, start_index):
     """Create descriptors for one or more input files that do not have a
     descriptor file"""
+
+    input_file_base, extension = os.path.splitext(input_file)
     descriptors = []
     current_ranges = None
     combined_header = None
@@ -199,7 +203,7 @@ def generate_input_descriptors(input_file_base, start_index):
         file_index = start_index
         suffix = str(file_index)
 
-    header_filename = input_file_base + suffix + '.mhd'
+    header_filename = input_file_base + suffix + extension
 
     if not os.path.isfile(header_filename):
         raise ValueError(
@@ -207,8 +211,7 @@ def generate_input_descriptors(input_file_base, start_index):
 
     # Loop through all the input files
     while True:
-        current_header = load_mhd_header(header_filename)
-        file_descriptor = parse_header(current_header)
+        file_descriptor, current_header = parse_header(current_header)
         current_image_size = file_descriptor.image_size
         data_type = file_descriptor.data_type
         dim_order = file_descriptor.dim_order
@@ -249,7 +252,7 @@ def generate_input_descriptors(input_file_base, start_index):
             template=combined_header,
             data_type=data_type,
             dim_order_condensed=dim_order,
-            file_format = file_format,
+            file_format=file_format,
         ))
 
         if start_index is None:
@@ -259,7 +262,7 @@ def generate_input_descriptors(input_file_base, start_index):
             # Search for next file, and if not found terminate the loop
             file_index += 1
             suffix = str(file_index)
-            header_filename = input_file_base + suffix + '.mhd'
+            header_filename = input_file_base + suffix + extension
             if not os.path.isfile(header_filename):
                 break
 
@@ -272,27 +275,6 @@ def generate_input_descriptors(input_file_base, start_index):
     combined_header["DimSize"] = full_image_size
 
     return combined_header, descriptors, global_descriptor
-
-
-class FileImageDescriptor(object):
-    """File metadata"""
-    def __init__(self, file_format, dim_order, data_type, image_size):
-        self.image_size = image_size
-        self.file_format = file_format
-        self.dim_order = dim_order
-        self.data_type = data_type
-
-
-def parse_header(header):
-    """Reads a metaheader and returns a FileImageDescriptor"""
-    file_format = "mhd"
-    dim_order = get_dim_order(header)
-    data_type = header["ElementType"]
-    image_size = header["DimSize"]
-    return FileImageDescriptor(file_format=file_format,
-                               dim_order=dim_order,
-                               data_type=data_type,
-                               image_size=image_size)
 
 
 def convert_to_descriptors(descriptors_dict):

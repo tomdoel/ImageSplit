@@ -27,11 +27,11 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
                dim_order, file_handle_factory, output_format):
     """Saves the specified image file as a number of smaller files"""
 
-    input_file_base = os.path.splitext(input_file)[0]
     [header, descriptors_in, global_descriptor] = \
-        generate_input_descriptors(input_file_base, start_index)
+        generate_input_descriptors(input_file, start_index)
 
     if not filename_out_base:
+        input_file_base = os.path.splitext(input_file)[0]
         filename_out_base = input_file_base + "_split"
 
     if output_format is None:
