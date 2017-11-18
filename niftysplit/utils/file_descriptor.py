@@ -185,25 +185,44 @@ def generate_input_descriptors(input_file_base, start_index):
     descriptors = []
 
     if start_index is None:
-        suffix = ""
         # If no start index is specified, load a single header file
+        file_index = None
+        suffix = ""
         header_filename = input_file_base + suffix + '.mhd'
-        combined_header = load_mhd_header(header_filename)
-        file_descriptor = parse_header(combined_header)
+
+        if not os.path.isfile(header_filename):
+            raise ValueError(
+                'No file series found starting with ' + header_filename)
+
+        current_ranges = None
+        combined_header = None
+        full_image_size = None
+        file_format = None
+
+        current_header = load_mhd_header(header_filename)
+        file_descriptor = parse_header(current_header)
         current_image_size = file_descriptor.image_size
         data_type = file_descriptor.data_type
         dim_order = file_descriptor.dim_order
         file_format = file_descriptor.file_format
-        current_ranges = [[0, current_image_size[0] - 1, 0, 0],
-                          [0, current_image_size[1] - 1, 0, 0],
-                          [0, current_image_size[2] - 1, 0, 0]]
+
+        if not current_ranges:
+            full_image_size = copy.deepcopy(current_image_size)
+            combined_header = copy.deepcopy(current_header)
+            current_ranges = [[0, current_image_size[0] - 1, 0, 0],
+                              [0, current_image_size[1] - 1, 0, 0],
+                              [0, current_image_size[2] - 1, 0, 0]]
+
+        # Update the combined image size
+        combined_header["DimSize"] = full_image_size
 
         # Create a descriptor for this subimage
+        ranges_to_write = copy.deepcopy(current_ranges)
         descriptors.append(SubImageDescriptor(
-            index=0,
+            index=file_index,
             suffix=suffix,
             filename=header_filename,
-            ranges=current_ranges,
+            ranges=ranges_to_write,
             template=combined_header,
             data_type=data_type,
             dim_order_condensed=dim_order,
@@ -228,7 +247,6 @@ def generate_input_descriptors(input_file_base, start_index):
                 'No file series found starting with ' + header_filename)
 
         current_ranges = None
-
         combined_header = None
         full_image_size = None
         file_format = None
