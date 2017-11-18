@@ -181,24 +181,32 @@ def header_from_descriptor(descriptor_filename):
 
 
 def generate_input_descriptors(input_file_base, start_index):
-    """Create descriptors for input files"""
+    """Create descriptors for one or more input files that do not have a
+    descriptor file"""
     descriptors = []
+    current_ranges = None
+    combined_header = None
+    full_image_size = None
+    combined_file_format = None
+    combined_dim_order = None
 
     if start_index is None:
         # If no start index is specified, load a single header file
-        file_index = None
+        file_index = 0
         suffix = ""
-        header_filename = input_file_base + suffix + '.mhd'
+    else:
+        # Load a series of files starting with the specified prefix
+        file_index = start_index
+        suffix = str(file_index)
 
-        if not os.path.isfile(header_filename):
-            raise ValueError(
-                'No file series found starting with ' + header_filename)
+    header_filename = input_file_base + suffix + '.mhd'
 
-        current_ranges = None
-        combined_header = None
-        full_image_size = None
-        file_format = None
+    if not os.path.isfile(header_filename):
+        raise ValueError(
+            'No file series found starting with ' + header_filename)
 
+    # Loop through all the input files
+    while True:
         current_header = load_mhd_header(header_filename)
         file_descriptor = parse_header(current_header)
         current_image_size = file_descriptor.image_size
@@ -209,12 +217,27 @@ def generate_input_descriptors(input_file_base, start_index):
         if not current_ranges:
             full_image_size = copy.deepcopy(current_image_size)
             combined_header = copy.deepcopy(current_header)
+            combined_dim_order = dim_order
+            combined_file_format = file_format
             current_ranges = [[0, current_image_size[0] - 1, 0, 0],
                               [0, current_image_size[1] - 1, 0, 0],
                               [0, current_image_size[2] - 1, 0, 0]]
-
-        # Update the combined image size
-        combined_header["DimSize"] = full_image_size
+        else:
+            # For multiple input files, concatenate volumes
+            if current_image_size[0] != full_image_size[0]:
+                raise ValueError(
+                    'When loading without a descriptor file, the first '
+                    'dimension of each file must '
+                    'match')
+            if current_image_size[1] != full_image_size[1]:
+                raise ValueError(
+                    'When loading without a descriptor file, the second '
+                    'dimension of each file must '
+                    'match')
+            full_image_size[2] = full_image_size[2] + current_image_size[2]
+            current_ranges[2][0] = current_ranges[2][1] + 1
+            current_ranges[2][1] = current_ranges[2][1] + \
+                current_image_size[2]
 
         # Create a descriptor for this subimage
         ranges_to_write = copy.deepcopy(current_ranges)
@@ -226,87 +249,29 @@ def generate_input_descriptors(input_file_base, start_index):
             template=combined_header,
             data_type=data_type,
             dim_order_condensed=dim_order,
-            file_format=file_format
+            file_format = file_format,
         ))
 
-        global_descriptor = GlobalImageDescriptor(
-            size=current_image_size,
-            file_format=file_format,
-            dim_order=dim_order)
-
-        return combined_header, descriptors, global_descriptor
-
-    else:
-        # Load a series of files starting with the specified prefix
-        file_index = start_index
-        suffix = str(file_index)
-        header_filename = input_file_base + suffix + '.mhd'
-
-        if not os.path.isfile(header_filename):
-            raise ValueError(
-                'No file series found starting with ' + header_filename)
-
-        current_ranges = None
-        combined_header = None
-        full_image_size = None
-        file_format = None
-        while True:
+        if start_index is None:
+            # Single file already loaded, so terminate the while True loop
+            break
+        else:
+            # Search for next file, and if not found terminate the loop
+            file_index += 1
             suffix = str(file_index)
             header_filename = input_file_base + suffix + '.mhd'
             if not os.path.isfile(header_filename):
-                global_descriptor = GlobalImageDescriptor(
-                    size=full_image_size,
-                    file_format=file_format,
-                    dim_order=dim_order)
+                break
 
-                return combined_header, descriptors, global_descriptor
-            current_header = load_mhd_header(header_filename)
+    # All input files processed
+    global_descriptor = GlobalImageDescriptor(size=full_image_size,
+                                              file_format=combined_file_format,
+                                              dim_order=combined_dim_order)
 
-            file_descriptor = parse_header(current_header)
-            current_image_size = file_descriptor.image_size
-            data_type = file_descriptor.data_type
-            dim_order = file_descriptor.dim_order
-            file_format = file_descriptor.file_format
+    # Update the combined image size
+    combined_header["DimSize"] = full_image_size
 
-            if not current_ranges:
-                full_image_size = copy.deepcopy(current_image_size)
-                combined_header = copy.deepcopy(current_header)
-                current_ranges = [[0, current_image_size[0] - 1, 0, 0],
-                                  [0, current_image_size[1] - 1, 0, 0],
-                                  [0, current_image_size[2] - 1, 0, 0]]
-            else:
-                if current_image_size[0] != full_image_size[0]:
-                    raise ValueError(
-                        'When loading without a descriptor file, the first '
-                        'dimension of each file must '
-                        'match')
-                if current_image_size[1] != full_image_size[1]:
-                    raise ValueError(
-                        'When loading without a descriptor file, the second '
-                        'dimension of each file must '
-                        'match')
-                full_image_size[2] = full_image_size[2] + current_image_size[2]
-                current_ranges[2][0] = current_ranges[2][1] + 1
-                current_ranges[2][1] = current_ranges[2][1] + \
-                    current_image_size[2]
-
-            # Update the combined image size
-            combined_header["DimSize"] = full_image_size
-
-            # Create a descriptor for this subimage
-            ranges_to_write = copy.deepcopy(current_ranges)
-            descriptors.append(SubImageDescriptor(
-                index=file_index,
-                suffix=suffix,
-                filename=header_filename,
-                ranges=ranges_to_write,
-                template=combined_header,
-                data_type=data_type,
-                dim_order_condensed=dim_order,
-                file_format = file_format,
-            ))
-
-            file_index += 1
+    return combined_header, descriptors, global_descriptor
 
 
 class FileImageDescriptor(object):
