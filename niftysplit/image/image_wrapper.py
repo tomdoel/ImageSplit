@@ -40,7 +40,7 @@ class SmartImage(object):
         # Test if image is in bounds
         start_indices = np.subtract(start, self._start)
         end_indices = np.add(start_indices, size)
-        if np.any(np.less(start_indices, np.zeros_like(start_indices))) \
+        if np.any(np.less(start_indices, 0)) \
                 or np.any(np.greater(end_indices, self._size)):
             raise ValueError("Subimage is not contained within the main image")
 
@@ -81,7 +81,7 @@ class ImageWrapper(object):
             self.image = np.zeros(shape=self.size, dtype=sub_image.image.dtype)
         start_indices = np.subtract(sub_image.origin, self.origin)
         end_indices = np.add(start_indices, np.array(sub_image.size))
-        if np.any(np.less(start_indices, np.zeros_like(start_indices))) \
+        if np.any(np.less(start_indices, 0)) \
                 or np.any(np.greater(end_indices, self.size)):
             raise ValueError("Subimage is not contained within the main image")
         selector = tuple([slice(start, end) for start, end in

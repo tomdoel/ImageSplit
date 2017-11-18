@@ -110,7 +110,7 @@ class SubImage(Source):
         sub_start, sub_size = self.bind_by_roi(start, size)
 
         # Check if any of region is contained in this subimage
-        if np.all(np.greater(sub_size, np.zeros_like(sub_size))):
+        if np.all(np.greater(sub_size, 0)):
             return self.read_image(sub_start, sub_size)
 
         # Otherwise return None to indicate that the subimage is out of range
@@ -180,6 +180,15 @@ class CoordinateTransformer(object):
         self._size = size
         self.axis = axis
 
+        size_t = np.array(self._size)[self.axis.dim_order]
+
+        self._flip_offset = np.zeros_like(self.axis.dim_flip)
+        self._flip_multiple = np.subtract(1, np.multiply(2, self.axis.dim_flip))
+
+        for index, flip in enumerate(self.axis.dim_flip):
+            if flip:
+                self._flip_offset[index] = size_t[index] - 1
+
     def to_local(self, global_start, global_size):
         """Convert global coordinates to local coordinates"""
 
@@ -190,12 +199,10 @@ class CoordinateTransformer(object):
         # Permute dimensions of local coordinates
         start = start[self.axis.dim_order]
         size = size[self.axis.dim_order]
-        size_t = np.array(self._size)[self.axis.dim_order]
 
         # Flip dimensions where necessary
-        for index, flip in enumerate(self.axis.dim_flip):
-            if flip:
-                start[index] = size_t[index] - start[index] - 1
+        start = np.add(np.multiply(start, self._flip_multiple),
+                       self._flip_offset)
 
         return start, size
 
@@ -211,16 +218,13 @@ class CoordinateTransformer(object):
         start = np.array(local_start)
         size = np.array(local_size)
 
-        size_t = np.array(self._size)[self.axis.dim_order]
-
         # Flip dimensions where necessary
-        for index, flip in enumerate(self.axis.dim_flip):
-            if flip:
-                start[index] = size_t[index] - start[index] - 1
+        start = np.add(np.multiply(start, self._flip_multiple),
+                       self._flip_offset)
 
         # Reverse permute dimensions of local coordinates
-        start = start[np.argsort(self.axis.dim_order)]
-        size = size[np.argsort(self.axis.dim_order)]
+        start = start[self.axis.reverse_dim_order]
+        size = size[self.axis.reverse_dim_order]
 
         # Translate coordinates to the global origin
         start = np.add(start, self._origin)
@@ -249,7 +253,7 @@ class CoordinateTransformer(object):
                 local_image = np.flip(local_image, index)
 
         # Reverse permute dimensions of local coordinates
-        global_dim_order = np.argsort(self.axis.dim_order)
+        global_dim_order = self.axis.reverse_dim_order
         global_flip = np.array(self.axis.dim_flip)[global_dim_order]
         local_dim_order = global_dim_order[other_transformer.axis.dim_order]
         local_image = np.transpose(local_image, local_dim_order)
@@ -273,8 +277,7 @@ class CoordinateTransformer(object):
                 local_image = np.flip(local_image, index)
 
         # Reverse permute dimensions of local coordinates
-        global_image = np.transpose(local_image,
-                                    np.argsort(self.axis.dim_order))
+        global_image = np.transpose(local_image, self.axis.reverse_dim_order)
 
         return global_image
 
@@ -285,6 +288,7 @@ class Axis(object):
     def __init__(self, dim_order, dim_flip):
         self.dim_order = dim_order
         self.dim_flip = dim_flip
+        self.reverse_dim_order = np.argsort(dim_order)
 
     def to_condensed_format(self):
         """Creates a condensed Axis array for this Axis"""
