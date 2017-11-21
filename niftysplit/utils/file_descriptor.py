@@ -12,7 +12,7 @@ import os
 
 import numpy as np
 
-from niftysplit.file.header_reader import parse_header
+from niftysplit.file.header_reader import parse_header, get_file_format
 from niftysplit.file.file_factory import FileFactory
 from niftysplit.file.metaio_reader import load_mhd_header
 from niftysplit.image.combined_image import Axis
@@ -173,7 +173,8 @@ def header_from_descriptor(descriptor_filename):
         raise ValueError(
             'This function only supports data derived from a single file')
     original_file_descriptor = original_file_list[0]
-    if original_file_descriptor["file_format"] == "mhd":
+    file_format = get_file_format(original_file_descriptor["file_format"])
+    if file_format == "mhd":
         original_header = load_mhd_header(original_file_descriptor["filename"])
     else:
         original_header = None  # ToDo

@@ -25,3 +25,10 @@ class TiffFileReader(BlockImageFileReader):
     def save(self, image):
         """Save out image data into TIFF file"""
         imsave(self.filename, image)
+
+    @staticmethod
+    def create_write_file(subimage_descriptor, file_handle_factory):
+        """Create a TiffFileReader class for this filename and template"""
+        filename = subimage_descriptor.filename
+        image_size = subimage_descriptor.ranges.image_size
+        return TiffFileReader(filename, image_size)
