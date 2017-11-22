@@ -12,6 +12,7 @@ from collections import OrderedDict
 
 import numpy as np
 
+from niftysplit.file.file_image_descriptor import FileImageDescriptor
 from niftysplit.image.combined_image import Axis
 from niftysplit.file.file_wrapper import FileWrapper, FileStreamer
 from niftysplit.file.image_file_reader import LinearImageFileReader
@@ -55,16 +56,22 @@ class MetaIoFile(LinearImageFileReader):
         self._subimage_size = self._header["DimSize"]
         self._dimension_ordering = get_dimension_ordering(self._header)
 
-    @staticmethod
-    def create_read_file(subimage_descriptor, file_handle_factory):
+    @classmethod
+    def load_and_parse_header(cls, filename):
+        """Reads a MetaIO header file and parses"""
+
+        header = load_mhd_header(filename)
+        return parse_mhd(header)
+
+    @classmethod
+    def create_read_file(cls, subimage_descriptor, file_handle_factory):
         """Create a MetaIoFile class for writing"""
 
         filename = subimage_descriptor.filename
-        return MetaIoFile(subimage_descriptor, filename, file_handle_factory,
-                          None)
+        return cls(subimage_descriptor, filename, file_handle_factory, None)
 
-    @staticmethod
-    def create_write_file(subimage_descriptor, file_handle_factory):
+    @classmethod
+    def create_write_file(cls, subimage_descriptor, file_handle_factory):
         """Create a MetaIoFile class for this filename and template"""
 
         header_template = copy.deepcopy(subimage_descriptor.template)
@@ -73,8 +80,8 @@ class MetaIoFile(LinearImageFileReader):
         header_template["DimSize"] = subimage_descriptor.ranges.image_size
         header_template["Origin"] = subimage_descriptor.ranges.origin_start
         filename = subimage_descriptor.filename
-        return MetaIoFile(subimage_descriptor, filename, file_handle_factory,
-                          header_template)
+        return cls(subimage_descriptor, filename, file_handle_factory,
+                   header_template)
 
     def close_file(self):
         """Close file"""
@@ -155,6 +162,28 @@ class MetaIoFile(LinearImageFileReader):
         if self._file_wrapper:
             self._file_wrapper.close()
             self._file_wrapper = None
+
+#
+# class MetaIoFactory(object):
+#
+#     def create_read_file(self, subimage_descriptor, file_handle_factory):
+#         """Create a file for reading"""
+#
+#         return MetaIoFile.create_read_file(subimage_descriptor,
+#                                            file_handle_factory)
+#
+#     def create_write_file(self, subimage_descriptor, file_handle_factory):
+#         """Create a file class for writing"""
+#
+#         return MetaIoFile.create_write_file(subimage_descriptor,
+#                                             file_handle_factory)
+
+#
+# def load_and_parse_mhd(filename):
+#     """Reads a MetaIO header file and parses"""
+#
+#     header = load_mhd_header(filename)
+#     return parse_mhd(header)
 
 
 def load_mhd_header(filename):
@@ -399,3 +428,16 @@ def get_flip_from_orientations(orientation_1, orientation_2, orientation_3,
     flip[dimension_2] = orientation_2[dimension_2] < 0
     flip[dimension_3] = orientation_3[dimension_3] < 0
     return flip
+
+
+def parse_mhd(header):
+    """Read a metaheader and returns a FileImageDescriptor"""
+
+    file_format = "mhd"
+    dim_order = get_dim_order(header)
+    data_type = header["ElementType"]
+    image_size = header["DimSize"]
+    return (FileImageDescriptor(file_format=file_format,
+                                dim_order=dim_order,
+                                data_type=data_type,
+                                image_size=image_size), header)

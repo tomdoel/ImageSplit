@@ -6,11 +6,10 @@ Author: Tom Doel
 Copyright UCL 2017
 
 """
-import copy
 import os
-from collections import OrderedDict
 from six.moves import configparser
 
+from niftysplit.file.file_image_descriptor import FileImageDescriptor
 from niftysplit.file.file_wrapper import FileWrapper, FileStreamer
 from niftysplit.file.image_file_reader import LinearImageFileReader
 
@@ -31,14 +30,14 @@ class VolFile(LinearImageFileReader):
         self._file_streamer = None
         # File is for reading
         self._mode = 'rb'
-        # self._header = load_mhd_header(header_filename)
+        self._header = load_vge_header(header_filename)
 
-        # self._bytes_per_voxel = compute_bytes_per_voxel(
-        #     self._header["ElementType"])
-        # self._numpy_format = get_numpy_datatype(
-        #     self._header["ElementType"],
-        #     self._header["BinaryDataByteOrderMSB"])
-        # self._subimage_size = self._header["DimSize"]
+        self._bytes_per_voxel = compute_bytes_per_voxel(
+            self._header["VolumeSection0"]["FileDataType"])
+        self._numpy_format = get_numpy_datatype(
+            self._header["VolumeSection0"]["FileDataType"],
+            self._header["VolumeSection0"]["FileEndian"])
+        self._subimage_size = self._header["DimSize"]
         self._dimension_ordering = get_dimension_ordering(self._header)
 
     @staticmethod
@@ -52,6 +51,7 @@ class VolFile(LinearImageFileReader):
         """Close file"""
         self.close()
 
+    # pylint: disable=unused-argument
     def write_line(self, start_coords, image_line):
         """Write consecutive voxels to the raw binary file."""
 
@@ -69,7 +69,7 @@ class VolFile(LinearImageFileReader):
         this image. """
 
         header = self._get_header()
-        return compute_bytes_per_voxel(header["ElementType"])
+        return compute_bytes_per_voxel(header["FileDataType"])
 
     def get_dimension_ordering(self):
         """
@@ -98,8 +98,10 @@ class VolFile(LinearImageFileReader):
 
         if not self._file_wrapper:
             header = self._get_header()
-            filename_raw = os.path.join(self._input_path,
-                                        header["ElementDataFile"])
+            vol_name = header["VolumeSection0\\_FileSection0"]["FileName"]
+            # pylint: disable=unused-variable
+            vol_path, vol_raw = os.path.split(vol_name)
+            filename_raw = os.path.join(self._input_path, '..', vol_raw)
             self._file_wrapper = FileWrapper(filename_raw,
                                              self._file_handle_factory,
                                              self._mode)
@@ -129,6 +131,13 @@ class VolFile(LinearImageFileReader):
             self._file_wrapper = None
 
 
+def load_and_parse_vge(filename):
+    """Load vge header file and parse into FileImageDescriptor"""
+
+    header = load_vge_header(filename)
+    return parse_vge(header)
+
+
 def load_vge_header(filename):
     """Load vge as an ini file"""
 
@@ -136,88 +145,38 @@ def load_vge_header(filename):
     header.read(filename)
 
     # for section in header.sections():
-        
 
     header_dict = {s: dict(header.items(s)) for s in header.sections()}
 
     return header_dict
 
 
-def load_mhd_header(filename):
-    """Return an OrderedDict containing metadata loaded from an mhd file."""
-
-    metadata = OrderedDict()
-
-    # with open(filename) as header_file:
-    #     for line in header_file:
-    #         (key, val) = [x.strip() for x in line.split("=")]
-    #         if key in ['ElementSpacing', 'Offset', 'CenterOfRotation',
-    #                    'TransformMatrix']:
-    #             new_val = [float(s) for s in val.split()]
-    #         elif key in ['NDims', 'ElementNumberOfChannels']:
-    #             new_val = int(val)
-    #         elif key in ['DimSize']:
-    #             new_val = [int(s) for s in val.split()]
-    #         elif key in ['BinaryData', 'BinaryDataByteOrderMSB',
-    #                      'CompressedData']:
-    #             # pylint: disable=simplifiable-if-statement
-    #             if val.lower() == "true":
-    #                 new_val = True
-    #             else:
-    #                 new_val = False
-    #         else:
-    #             new_val = val
-    #
-    #         metadata[key] = new_val
-
-    return metadata
-
-
-def compute_bytes_per_voxel(element_type):
+def compute_bytes_per_voxel(file_data_type):
     """Returns number of bytes required to store one voxel for the given
-    metaIO ElementType """
+    ElementType """
 
     switcher = {
-        'MET_CHAR': 1,
-        'MET_UCHAR': 1,
-        'MET_SHORT': 2,
-        'MET_USHORT': 2,
-        'MET_INT': 4,
-        'MET_UINT': 4,
-        'MET_LONG': 4,
-        'MET_ULONG': 4,
-        'MET_LONG_LONG': 8,
-        'MET_ULONG_LONG': 8,
-        'MET_FLOAT': 4,
-        'MET_DOUBLE': 8,
+        'VolumeDataType_Float': 4
     }
-    return switcher.get(element_type, 2)
+    return switcher.get(file_data_type, 2)
 
 
-def get_numpy_datatype(element_type, byte_order_msb):
+def get_numpy_datatype(element_type, endian):
     """Returns the numpy datatype corresponding to this ElementType"""
 
-    if byte_order_msb and (byte_order_msb or byte_order_msb == "True"):
+    endian_simplified = endian.strip().lower()
+    byte_order_msb = endian_simplified and endian != "VolumeEndian_Little"
+    if byte_order_msb:
         prefix = '>'
     else:
         prefix = '<'
     switcher = {
-        'MET_CHAR': 'i1',
-        'MET_UCHAR': 'u1',
-        'MET_SHORT': 'i2',
-        'MET_USHORT': 'u2',
-        'MET_INT': 'i4',
-        'MET_UINT': 'u4',
-        'MET_LONG': 'i4',
-        'MET_ULONG': 'u4',
-        'MET_LONG_LONG': 'i8',
-        'MET_ULONG_LONG': 'u8',
-        'MET_FLOAT': 'f4',
-        'MET_DOUBLE': 'f8',
+        'FileDataType': 'f4',
     }
     return prefix + switcher.get(element_type, 2)
 
 
+# pylint: disable=unused-argument
 def get_dimension_ordering(header):
     """
     Return the order in which dimensions are stored in the global system.
@@ -225,3 +184,23 @@ def get_dimension_ordering(header):
     which is represented by the first dimension in the file, and so on
     """
     return [1, 2, 3]
+
+
+def parse_vge(header):
+    """Parse vge header file"""
+
+    image_size_string = header.get('VolumeSection0\\_FileSection0', 'FileSize')
+    image_size = [int(i) for i in image_size_string.split()]
+    file_format = header.get('VolumeSection0\\_FileSection0', 'FileFileFormat')
+    dim_order = [1, 2, 3]  # ToDo: parse orientation from header
+    data_type = header.get('VolumeSection0\\_FileSection0', 'FileDataType')
+    if data_type != "VolumeDataType_Float":
+        raise ValueError("Unknown data type " + data_type)
+    data_type = "MET_LONG"
+
+    header_dict = {s: dict(header.items(s)) for s in header.sections()}
+
+    return (FileImageDescriptor(file_format=file_format,
+                                dim_order=dim_order,
+                                data_type=data_type,
+                                image_size=image_size), header_dict)

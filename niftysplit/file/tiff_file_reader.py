@@ -27,6 +27,7 @@ class TiffFileReader(BlockImageFileReader):
         imsave(self.filename, image)
 
     @staticmethod
+    # pylint: disable=unused-argument
     def create_write_file(subimage_descriptor, file_handle_factory):
         """Create a TiffFileReader class for this filename and template"""
         filename = subimage_descriptor.filename
