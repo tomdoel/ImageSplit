@@ -163,28 +163,6 @@ class MetaIoFile(LinearImageFileReader):
             self._file_wrapper.close()
             self._file_wrapper = None
 
-#
-# class MetaIoFactory(object):
-#
-#     def create_read_file(self, subimage_descriptor, file_handle_factory):
-#         """Create a file for reading"""
-#
-#         return MetaIoFile.create_read_file(subimage_descriptor,
-#                                            file_handle_factory)
-#
-#     def create_write_file(self, subimage_descriptor, file_handle_factory):
-#         """Create a file class for writing"""
-#
-#         return MetaIoFile.create_write_file(subimage_descriptor,
-#                                             file_handle_factory)
-
-#
-# def load_and_parse_mhd(filename):
-#     """Reads a MetaIO header file and parses"""
-#
-#     header = load_mhd_header(filename)
-#     return parse_mhd(header)
-
 
 def load_mhd_header(filename):
     """Return an OrderedDict containing metadata loaded from an mhd file."""

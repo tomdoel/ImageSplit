@@ -32,12 +32,14 @@ class VolFile(LinearImageFileReader):
         self._mode = 'rb'
         self._header = load_vge_header(header_filename)
 
+        # vol_section = self._header["VolumeSection0"]
+        file_section = self._header["[VolumeSection0\\_FileSection0]"]
         self._bytes_per_voxel = compute_bytes_per_voxel(
-            self._header["VolumeSection0"]["FileDataType"])
+            file_section["filedatatype"])
         self._numpy_format = get_numpy_datatype(
-            self._header["VolumeSection0"]["FileDataType"],
-            self._header["VolumeSection0"]["FileEndian"])
-        self._subimage_size = self._header["DimSize"]
+            file_section["filedatatype"],
+            file_section["fileendian"])
+        self._subimage_size = file_section["filesize"]
         self._dimension_ordering = get_dimension_ordering(self._header)
 
     @staticmethod
@@ -131,12 +133,12 @@ class VolFile(LinearImageFileReader):
             self._file_wrapper = None
 
 
-def load_and_parse_vge(filename):
-    """Load vge header file and parse into FileImageDescriptor"""
+    @classmethod
+    def load_and_parse_header(cls, filename):
+        """Load vge header file and parse into FileImageDescriptor"""
 
-    header = load_vge_header(filename)
-    return parse_vge(header)
-
+        header = load_vge_header(filename)
+        return parse_vge(header)
 
 def load_vge_header(filename):
     """Load vge as an ini file"""
@@ -189,16 +191,21 @@ def get_dimension_ordering(header):
 def parse_vge(header):
     """Parse vge header file"""
 
-    image_size_string = header.get('VolumeSection0\\_FileSection0', 'FileSize')
+    file_section = header.get('VolumeSection0\\_FileSection0')
+    image_size_string = file_section['filesize']
     image_size = [int(i) for i in image_size_string.split()]
-    file_format = header.get('VolumeSection0\\_FileSection0', 'FileFileFormat')
+    file_format = file_section['filefileformat']
+    if file_format != "VolumeFileFormat_Raw":
+        raise ValueError("Unknown file format " + file_format)
+    file_format = "vol"  # ToDo
+    # file_format = FormatFactory.VOL_FORMAT
     dim_order = [1, 2, 3]  # ToDo: parse orientation from header
-    data_type = header.get('VolumeSection0\\_FileSection0', 'FileDataType')
+    data_type = file_section['filedatatype']
     if data_type != "VolumeDataType_Float":
         raise ValueError("Unknown data type " + data_type)
     data_type = "MET_LONG"
 
-    header_dict = {s: dict(header.items(s)) for s in header.sections()}
+    header_dict = header
 
     return (FileImageDescriptor(file_format=file_format,
                                 dim_order=dim_order,
