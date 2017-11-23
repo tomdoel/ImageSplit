@@ -24,9 +24,9 @@ class MetaIoFile(LinearImageFileReader):
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, subimage_descriptor, header_filename,
+    def __init__(self, local_file_size, header_filename,
                  file_handle_factory, header_template):
-        super(MetaIoFile, self).__init__(subimage_descriptor.ranges.image_size)
+        super(MetaIoFile, self).__init__(local_file_size)
         self._file_handle_factory = file_handle_factory
         self._header_filename = header_filename
         self._input_path = os.path.dirname(os.path.abspath(header_filename))
@@ -68,19 +68,23 @@ class MetaIoFile(LinearImageFileReader):
         """Create a MetaIoFile class for writing"""
 
         filename = subimage_descriptor.filename
-        return cls(subimage_descriptor, filename, file_handle_factory, None)
+        local_file_size = subimage_descriptor.ranges.image_size
+        return cls(local_file_size, filename, file_handle_factory, None)
 
     @classmethod
     def create_write_file(cls, subimage_descriptor, file_handle_factory):
         """Create a MetaIoFile class for this filename and template"""
 
         header_template = copy.deepcopy(subimage_descriptor.template)
+        local_file_size = subimage_descriptor.get_local_size()
+        local_origin = subimage_descriptor.get_local_origin()
+
         if subimage_descriptor.data_type:
             header_template["ElementType"] = subimage_descriptor.data_type
-        header_template["DimSize"] = subimage_descriptor.ranges.image_size
-        header_template["Origin"] = subimage_descriptor.ranges.origin_start
+        header_template["DimSize"] = local_file_size.tolist()
+        header_template["Origin"] = local_origin.tolist()
         filename = subimage_descriptor.filename
-        return cls(subimage_descriptor, filename, file_handle_factory,
+        return cls(local_file_size, filename, file_handle_factory,
                    header_template)
 
     def close_file(self):

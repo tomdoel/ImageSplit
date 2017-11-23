@@ -61,6 +61,14 @@ class SubImageDescriptor(object):
         self.ranges = SubImageRanges(ranges)
         self.axis = Axis.from_condensed_format(dim_order_condensed)
 
+    def get_local_size(self):
+        """Transpose the subimage size to the local coordinate system"""
+        return np.take(self.ranges.image_size, self.axis.dim_order)
+
+    def get_local_origin(self):
+        """Transpose the subimage origin to the local coordinate system"""
+        return np.take(self.ranges.origin_start, self.axis.dim_order)
+
     @staticmethod
     def from_dict(descriptor_dict):
         """Create SubImageDescriptor from dictionary entries"""
@@ -215,10 +223,13 @@ def generate_input_descriptors(input_file, start_index):
     while True:
         file_descriptor, current_header = parse_header(header_filename,
                                                        format_factory)
-        current_image_size = file_descriptor.image_size
         data_type = file_descriptor.data_type
         dim_order = file_descriptor.dim_order
         file_format = file_descriptor.file_format
+        current_image_size = file_descriptor.image_size
+
+        axis = Axis.from_condensed_format(dim_order)
+        current_image_size = np.take(current_image_size, axis.reverse_dim_order)
 
         if not current_ranges:
             full_image_size = copy.deepcopy(current_image_size)

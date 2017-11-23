@@ -297,6 +297,8 @@ class Axis(object):
     @staticmethod
     def from_condensed_format(dim_order_and_flip):
         """Creates an Axis from a condensed axis array"""
+        if np.any(np.equal(dim_order_and_flip, 0)):
+            raise ValueError('Dimensions are numbered from 1')
         dim_order = [abs(d) - 1 for d in dim_order_and_flip]
         dim_flip = [d < 0 for d in dim_order_and_flip]
         return Axis(dim_order=dim_order, dim_flip=dim_flip)

@@ -20,9 +20,9 @@ class VolFile(LinearImageFileReader):
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, subimage_descriptor, header_filename,
+    def __init__(self, local_image_size, header_filename,
                  file_handle_factory):
-        super(VolFile, self).__init__(subimage_descriptor.ranges.image_size)
+        super(VolFile, self).__init__(local_image_size)
         self._file_handle_factory = file_handle_factory
         self._header_filename = header_filename
         self._input_path = os.path.dirname(os.path.abspath(header_filename))
@@ -32,7 +32,6 @@ class VolFile(LinearImageFileReader):
         self._mode = 'rb'
         self._header = load_vge_header(header_filename)
 
-        # vol_section = self._header["VolumeSection0"]
         file_section = self._header["VolumeSection0\\_FileSection0"]
         self._bytes_per_voxel = compute_bytes_per_voxel(
             file_section["filedatatype"])
@@ -40,14 +39,16 @@ class VolFile(LinearImageFileReader):
             file_section["filedatatype"],
             file_section["fileendian"])
         self._subimage_size = [int(s) for s in file_section["filesize"].split()]
-        self._dimension_ordering = get_dimension_ordering(self._header)
+        self._dimension_ordering = get_dimension_ordering_from_header(
+            self._header)
 
     @staticmethod
     def create_read_file(subimage_descriptor, file_handle_factory):
         """Create a MetaIoFile class for writing"""
 
         filename = subimage_descriptor.filename
-        return VolFile(subimage_descriptor, filename, file_handle_factory)
+        local_file_size = subimage_descriptor.ranges.image_size
+        return VolFile(local_file_size, filename, file_handle_factory)
 
     def close_file(self):
         """Close file"""
@@ -182,13 +183,13 @@ def get_numpy_datatype(element_type, endian):
 
 
 # pylint: disable=unused-argument
-def get_dimension_ordering(header):
+def get_dimension_ordering_from_header(header):
     """
     Return the order in which dimensions are stored in the global system.
     The first element in the array contains the index of the global dimension
     which is represented by the first dimension in the file, and so on
     """
-    return [1, 2, 3]
+    return [2, 1, 3]  # ToDo: parse orientation from header
 
 
 def parse_vge(header):
@@ -202,7 +203,8 @@ def parse_vge(header):
         raise ValueError("Unknown file format " + file_format)
     file_format = "vol"  # ToDo
     # file_format = FormatFactory.VOL_FORMAT
-    dim_order = [1, 2, 3]  # ToDo: parse orientation from header
+    dim_order = get_dimension_ordering_from_header(header)
+    # dim_order = [1, 2, 3]  # ToDo: parse orientation from header
     data_type = file_section['filedatatype']
     if data_type != "VolumeDataType_Float":
         raise ValueError("Unknown data type " + data_type)
