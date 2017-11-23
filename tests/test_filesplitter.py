@@ -12,6 +12,8 @@ class TestFileSplitter(unittest.TestCase):
     def test_get_number_of_blocks(self):
         self.assertEqual(get_number_of_blocks([10, 10, 10], [5, 5, 5]),
                          [2, 2, 2])
+        self.assertEqual(get_number_of_blocks([10, 10, 10], [0, 5, 5]),
+                         [1, 2, 2])
         self.assertEqual(get_number_of_blocks([9, 9, 9], [5, 5, 5]), [2, 2, 2])
         self.assertEqual(get_number_of_blocks([11, 11, 11], [5, 5, 5]),
                          [3, 3, 3])
@@ -19,6 +21,9 @@ class TestFileSplitter(unittest.TestCase):
         self.assertEqual(
             get_number_of_blocks([2001, 2000, 1999], [500, 500, 500]),
             [5, 4, 4])
+        self.assertEqual(
+            get_number_of_blocks([2001, 2000, 1999], [500, -1, 500]),
+            [5, 1, 4])
 
     def test_get_block_coordinate_range(self):
         self.assertEqual(get_block_coordinate_range(0, 5, 1, 5), (0, 4, 0, 0))

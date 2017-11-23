@@ -29,8 +29,8 @@ def get_number_of_blocks(image_size, max_block_size):
     required to split the image into blocks that are subject to a maximum
     size limit """
 
-    return [int(ceil(float(image_size_element) /
-                     float(max_block_size_element)))
+    return [1 if max_block_size_element <= 0 else
+            int(ceil(float(image_size_element)/float(max_block_size_element)))
             for image_size_element, max_block_size_element in
             zip(image_size, max_block_size)]
 
