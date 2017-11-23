@@ -129,7 +129,6 @@ class SubImage(Source):
         out_file = self._file_factory.create_write_file(self._descriptor)
         local_source = LocalSource(global_source, self._transformer)
         out_file.write_image(local_source)
-        out_file.close()
 
     def bind_by_roi(self, start_global, size_global):
         """Find the part of the specified region that fits within the ROI"""

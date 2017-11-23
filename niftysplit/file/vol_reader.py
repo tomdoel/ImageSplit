@@ -33,13 +33,13 @@ class VolFile(LinearImageFileReader):
         self._header = load_vge_header(header_filename)
 
         # vol_section = self._header["VolumeSection0"]
-        file_section = self._header["[VolumeSection0\\_FileSection0]"]
+        file_section = self._header["VolumeSection0\\_FileSection0"]
         self._bytes_per_voxel = compute_bytes_per_voxel(
             file_section["filedatatype"])
         self._numpy_format = get_numpy_datatype(
             file_section["filedatatype"],
             file_section["fileendian"])
-        self._subimage_size = file_section["filesize"]
+        self._subimage_size = [int(s) for s in file_section["filesize"].split()]
         self._dimension_ordering = get_dimension_ordering(self._header)
 
     @staticmethod
@@ -100,10 +100,12 @@ class VolFile(LinearImageFileReader):
 
         if not self._file_wrapper:
             header = self._get_header()
-            vol_name = header["VolumeSection0\\_FileSection0"]["FileName"]
+            file_section = header["VolumeSection0\\_FileSection0"]
+            vol_name = file_section["filename"]
             # pylint: disable=unused-variable
             vol_path, vol_raw = os.path.split(vol_name)
-            filename_raw = os.path.join(self._input_path, '..', vol_raw)
+            filename_raw = os.path.realpath(
+                os.path.join(self._input_path, '..', vol_raw))
             self._file_wrapper = FileWrapper(filename_raw,
                                              self._file_handle_factory,
                                              self._mode)
@@ -140,6 +142,7 @@ class VolFile(LinearImageFileReader):
         header = load_vge_header(filename)
         return parse_vge(header)
 
+
 def load_vge_header(filename):
     """Load vge as an ini file"""
 
@@ -173,7 +176,7 @@ def get_numpy_datatype(element_type, endian):
     else:
         prefix = '<'
     switcher = {
-        'FileDataType': 'f4',
+        'VolumeDataType_Float': 'f4',
     }
     return prefix + switcher.get(element_type, 2)
 
