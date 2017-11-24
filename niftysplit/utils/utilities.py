@@ -70,7 +70,8 @@ def get_suggested_block_size(image_size, number_of_blocks):
     specified number of blocks in each dimension, with each block being
     roughly equal in size """
 
-    return [ceil(float(image_size_element) / float(number_of_blocks_element))
+    return [int(ceil(float(image_size_element) /
+                     float(number_of_blocks_element)))
             for image_size_element, number_of_blocks_element in
             zip(image_size, number_of_blocks)]
 
