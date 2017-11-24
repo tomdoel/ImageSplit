@@ -41,9 +41,6 @@ class LinearImageFileReader(ImageFileReader):
     def read_image(self, start_local, size_local):
         """Read the specified part of the image"""
 
-        # Initialise the output array only when we know the data tyoe
-        image = None
-
         # Compute coordinate ranges
         ranges = [range(st, st + sz) for st, sz in
                   zip(start_local, size_local)]
@@ -51,7 +48,9 @@ class LinearImageFileReader(ImageFileReader):
         # Exclude first coordinate and get others in reverse order
         ranges_to_iterate = ranges[:0:-1]
 
-        combined_image = ImageWrapper(origin=start_local, image_size=size_local)
+        # Initialise the output array only when we know the data tyoe
+        combined_image = ImageWrapper(origin=start_local,
+                                      image_size=size_local)
 
         # Iterate over each line (equivalent to multiple for loops)
         for start_points in itertools.product(*ranges_to_iterate):
@@ -64,20 +63,8 @@ class LinearImageFileReader(ImageFileReader):
             sub_image = ImageWrapper(origin=start,
                                      image=image_line.reshape(size))
 
-            # Replace image line
-            start_in_image = np.subtract(start, start_local)
-            line_coords = (Ellipsis,) + tuple(start_in_image[1:])
-
-            # Initialise the output array
-            if image is None:
-                image = np.zeros(shape=size_local, dtype=image_line.dtype)
-
-            image[line_coords] = image_line
-
             combined_image.set_sub_image(sub_image)
 
-        if not np.array_equal(combined_image.image, image):
-            raise ValueError("TEST: Not equal")
         return combined_image.image
 
     def write_image(self, data_source):
