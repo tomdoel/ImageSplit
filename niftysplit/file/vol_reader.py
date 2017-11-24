@@ -39,7 +39,7 @@ class VolFile(LinearImageFileReader):
             file_section["filedatatype"],
             file_section["fileendian"])
         self._subimage_size = [int(s) for s in file_section["filesize"].split()]
-        self._dimension_ordering = get_dimension_ordering_from_header(
+        self._dimension_ordering = dim_order_from_header(
             self._header)
 
     @staticmethod
@@ -183,7 +183,7 @@ def get_numpy_datatype(element_type, endian):
 
 
 # pylint: disable=unused-argument
-def get_dimension_ordering_from_header(header):
+def dim_order_from_header(header):
     """
     Return the order in which dimensions are stored in the global system.
     The first element in the array contains the index of the global dimension
@@ -203,7 +203,7 @@ def parse_vge(header):
         raise ValueError("Unknown file format " + file_format)
     file_format = "vol"  # ToDo
     # file_format = FormatFactory.VOL_FORMAT
-    dim_order = get_dimension_ordering_from_header(header)
+    dim_order = dim_order_from_header(header)
     # dim_order = [1, 2, 3]  # ToDo: parse orientation from header
     data_type = file_section['filedatatype']
     if data_type != "VolumeDataType_Float":
