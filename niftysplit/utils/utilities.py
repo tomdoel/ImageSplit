@@ -9,9 +9,10 @@ Copyright UCL 2017
 from math import ceil
 
 
-def get_linear_byte_offset(image_size, bytes_per_voxel, start_coords):
+def file_linear_byte_offset(image_size, bytes_per_voxel, start_coords):
     """
-    Return the byte offset corresponding to the given coordinates.
+    Return the file byte offset corresponding to the given coordinates.
+    Files generally assumed to have the first dimension most rapidly changing
 
     Assumes you have a stream of bytes representing a multi-dimensional image,
     """
