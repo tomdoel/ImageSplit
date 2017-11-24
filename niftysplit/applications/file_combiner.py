@@ -69,7 +69,7 @@ def main(args):
 
     args = parser.parse_args(args)
 
-    assert sys.version_info >= (3, 0)
+    assert sys.version_info >= (2, 7)
 
     if args.filename == '_no_filename_specified':
         raise ValueError('No filename was specified')
