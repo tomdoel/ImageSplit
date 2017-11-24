@@ -103,6 +103,8 @@ def convert_to_array(scalar_or_list, parameter_name, num_dims):
     """Converts a list or scalar to an array"""
     if not isinstance(scalar_or_list, list):
         array = [scalar_or_list] * num_dims
+    elif len(scalar_or_list) == 1:
+        array = scalar_or_list * num_dims
     elif len(scalar_or_list) == num_dims:
         array = scalar_or_list
     else:
