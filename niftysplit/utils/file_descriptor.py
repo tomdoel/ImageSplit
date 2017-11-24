@@ -155,7 +155,7 @@ def load_descriptor(descriptor_filename):
 def generate_descriptor_from_header(filename_out_base, original_header,
                                     output_type):
     """Use a header to define a file descriptor"""
-    output_image_size = original_header["DimSize"]
+    output_image_size = np.array(original_header["DimSize"]).tolist()
     dim_order = [1, 2, 3]  # ToDo: get from header
     file_format = "mhd"
 
@@ -279,6 +279,8 @@ def generate_input_descriptors(input_file, start_index):
             header_filename = input_file_base + suffix + extension
             if not os.path.isfile(header_filename):
                 break
+
+    full_image_size = np.array(full_image_size).tolist()
 
     # All input files processed
     global_descriptor = GlobalImageDescriptor(size=full_image_size,
