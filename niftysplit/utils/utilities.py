@@ -9,9 +9,10 @@ Copyright UCL 2017
 from math import ceil
 
 
-def get_linear_byte_offset(image_size, bytes_per_voxel, start_coords):
+def file_linear_byte_offset(image_size, bytes_per_voxel, start_coords):
     """
-    Return the byte offset corresponding to the given coordinates.
+    Return the file byte offset corresponding to the given coordinates.
+    Files generally assumed to have the first dimension most rapidly changing
 
     Assumes you have a stream of bytes representing a multi-dimensional image,
     """
@@ -29,8 +30,8 @@ def get_number_of_blocks(image_size, max_block_size):
     required to split the image into blocks that are subject to a maximum
     size limit """
 
-    return [int(ceil(float(image_size_element) /
-                     float(max_block_size_element)))
+    return [1 if max_block_size_element <= 0 else
+            int(ceil(float(image_size_element)/float(max_block_size_element)))
             for image_size_element, max_block_size_element in
             zip(image_size, max_block_size)]
 
@@ -103,6 +104,8 @@ def convert_to_array(scalar_or_list, parameter_name, num_dims):
     """Converts a list or scalar to an array"""
     if not isinstance(scalar_or_list, list):
         array = [scalar_or_list] * num_dims
+    elif len(scalar_or_list) == 1:
+        array = scalar_or_list * num_dims
     elif len(scalar_or_list) == num_dims:
         array = scalar_or_list
     else:

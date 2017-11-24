@@ -129,7 +129,6 @@ class SubImage(Source):
         out_file = self._file_factory.create_write_file(self._descriptor)
         local_source = LocalSource(global_source, self._transformer)
         out_file.write_image(local_source)
-        out_file.close()
 
     def bind_by_roi(self, start_global, size_global):
         """Find the part of the specified region that fits within the ROI"""
@@ -298,6 +297,8 @@ class Axis(object):
     @staticmethod
     def from_condensed_format(dim_order_and_flip):
         """Creates an Axis from a condensed axis array"""
+        if np.any(np.equal(dim_order_and_flip, 0)):
+            raise ValueError('Dimensions are numbered from 1')
         dim_order = [abs(d) - 1 for d in dim_order_and_flip]
         dim_flip = [d < 0 for d in dim_order_and_flip]
         return Axis(dim_order=dim_order, dim_flip=dim_flip)

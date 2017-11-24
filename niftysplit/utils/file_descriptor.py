@@ -12,8 +12,7 @@ import os
 
 import numpy as np
 
-from niftysplit.file.header_reader import parse_header
-from niftysplit.file.file_factory import FileFactory
+from niftysplit.file.file_formats import FormatFactory
 from niftysplit.file.metaio_reader import load_mhd_header
 from niftysplit.image.combined_image import Axis
 from niftysplit.utils.json_reader import write_json, read_json
@@ -61,6 +60,14 @@ class SubImageDescriptor(object):
         self.template = template
         self.ranges = SubImageRanges(ranges)
         self.axis = Axis.from_condensed_format(dim_order_condensed)
+
+    def get_local_size(self):
+        """Transpose the subimage size to the local coordinate system"""
+        return np.take(self.ranges.image_size, self.axis.dim_order)
+
+    def get_local_origin(self):
+        """Transpose the subimage origin to the local coordinate system"""
+        return np.take(self.ranges.origin_start, self.axis.dim_order)
 
     @staticmethod
     def from_dict(descriptor_dict):
@@ -114,7 +121,7 @@ def generate_output_descriptors(filename_out_base,
     ranges = get_image_block_ranges(image_size, max_block_size_voxels_array,
                                     overlap_voxels_size_array)
 
-    extension = FileFactory.get_extension_for_format(output_file_format)
+    extension = FormatFactory.get_extension_for_format(output_file_format)
     descriptors_out = []
     index = 0
     for subimage_range in ranges:
@@ -148,7 +155,7 @@ def load_descriptor(descriptor_filename):
 def generate_descriptor_from_header(filename_out_base, original_header,
                                     output_type):
     """Use a header to define a file descriptor"""
-    output_image_size = original_header["DimSize"]
+    output_image_size = np.array(original_header["DimSize"]).tolist()
     dim_order = [1, 2, 3]  # ToDo: get from header
     file_format = "mhd"
 
@@ -173,7 +180,9 @@ def header_from_descriptor(descriptor_filename):
         raise ValueError(
             'This function only supports data derived from a single file')
     original_file_descriptor = original_file_list[0]
-    if original_file_descriptor["file_format"] == "mhd":
+    file_format = FormatFactory.simplify_format(
+        original_file_descriptor["file_format"])
+    if file_format == "mhd":
         original_header = load_mhd_header(original_file_descriptor["filename"])
     else:
         original_header = None  # ToDo
@@ -186,6 +195,7 @@ def generate_input_descriptors(input_file, start_index):
     """Create descriptors for one or more input files that do not have a
     descriptor file"""
 
+    format_factory = FormatFactory()
     input_file_base, extension = os.path.splitext(input_file)
     descriptors = []
     current_ranges = None
@@ -211,11 +221,15 @@ def generate_input_descriptors(input_file, start_index):
 
     # Loop through all the input files
     while True:
-        file_descriptor, current_header = parse_header(header_filename)
-        current_image_size = file_descriptor.image_size
+        file_descriptor, current_header = parse_header(header_filename,
+                                                       format_factory)
         data_type = file_descriptor.data_type
         dim_order = file_descriptor.dim_order
         file_format = file_descriptor.file_format
+        current_image_size = file_descriptor.image_size
+
+        axis = Axis.from_condensed_format(dim_order)
+        current_image_size = np.take(current_image_size, axis.reverse_dim_order)
 
         if not current_ranges:
             full_image_size = copy.deepcopy(current_image_size)
@@ -266,6 +280,8 @@ def generate_input_descriptors(input_file, start_index):
             if not os.path.isfile(header_filename):
                 break
 
+    full_image_size = np.array(full_image_size).tolist()
+
     # All input files processed
     global_descriptor = GlobalImageDescriptor(size=full_image_size,
                                               file_format=combined_file_format,
@@ -288,3 +304,13 @@ def convert_to_dict(descriptors):
     """Convert SubImageDescriptor objects to descriptor dictionary"""
 
     return [d.to_dict() for d in descriptors]
+
+
+def parse_header(filename, factory):
+    """Read metadata from any suported header type"""
+
+    # pylint: disable=unused-variable
+    header_base, extension = os.path.splitext(filename)
+
+    format_string = factory.extension_to_format(extension)
+    return factory.get_factory(format_string).load_and_parse_header(filename)

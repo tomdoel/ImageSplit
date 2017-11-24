@@ -13,7 +13,7 @@ import os
 
 import numpy as np
 
-from niftysplit.utils.utilities import get_linear_byte_offset
+from niftysplit.utils.utilities import file_linear_byte_offset
 
 
 class FileStreamer(object):
@@ -31,9 +31,9 @@ class FileStreamer(object):
         """Read a line of image data from a binary file at the specified
         image location """
 
-        offset = get_linear_byte_offset(self._image_size,
-                                        self._bytes_per_voxel,
-                                        start_coords)
+        offset = file_linear_byte_offset(self._image_size,
+                                         self._bytes_per_voxel,
+                                         start_coords)
         self._file_wrapper.get_handle().seek(offset)
 
         data_type = np.dtype(self._numpy_format)
@@ -45,9 +45,9 @@ class FileStreamer(object):
         """Write a line of image data to a binary file at the specified image
         location """
 
-        offset = get_linear_byte_offset(self._image_size,
-                                        self._bytes_per_voxel,
-                                        start_coords)
+        offset = file_linear_byte_offset(self._image_size,
+                                         self._bytes_per_voxel,
+                                         start_coords)
         self._file_wrapper.get_handle().seek(offset)
 
         data_type = np.dtype(self._numpy_format)

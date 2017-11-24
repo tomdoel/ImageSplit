@@ -24,7 +24,7 @@ class FakeImageFileReader(ImageFileReader, Source):
             return None
 
     def write_image(self, data_source):
-        pass
+        self.close()  # Note: we generally expect file classes to close themselves after writing the file
 
     def close(self):
         self.open = False
