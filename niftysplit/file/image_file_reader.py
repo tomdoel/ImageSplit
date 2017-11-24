@@ -51,6 +51,8 @@ class LinearImageFileReader(ImageFileReader):
         # Exclude first coordinate and get others in reverse order
         ranges_to_iterate = ranges[:0:-1]
 
+        combined_image = ImageWrapper(origin=start_local, image_size=size_local)
+
         # Iterate over each line (equivalent to multiple for loops)
         for start_points in itertools.product(*ranges_to_iterate):
             start = [start_local[0]] + list(reversed(start_points))
@@ -59,6 +61,8 @@ class LinearImageFileReader(ImageFileReader):
 
             # Read one image line from the file
             image_line = self.read_line(start, size[0])
+            sub_image = ImageWrapper(origin=start,
+                                     image=image_line.reshape(size))
 
             # Replace image line
             start_in_image = np.subtract(start, start_local)
@@ -70,7 +74,11 @@ class LinearImageFileReader(ImageFileReader):
 
             image[line_coords] = image_line
 
-        return image
+            combined_image.set_sub_image(sub_image)
+
+        if not np.array_equal(combined_image.image, image):
+            raise ValueError("TEST: Not equal")
+        return combined_image.image
 
     def write_image(self, data_source):
         """Create and write out this file, using data from this image source"""
