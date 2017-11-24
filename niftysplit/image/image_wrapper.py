@@ -8,8 +8,8 @@ class SmartImage(object):
     """Image wrapper which converts between Axes"""
 
     def __init__(self, start, size, image, transformer):
-        self._size = size
-        self._start = start
+        self.size = size
+        self.origin = start
         self.image = image
         self._transformer = transformer
 
@@ -24,30 +24,35 @@ class SmartImage(object):
     def coords_to_other(self, transformer):
         """Converts coordinates to another system"""
 
-        return self._transformer.to_other(self._start, self._size, transformer)
+        return self._transformer.to_other(self.origin, self.size, transformer)
 
     def set_sub_image(self, sub_image):
         """Replaces part of the image with the corresponding subimage"""
 
         if self.image is None:
-            self.image = np.zeros(shape=self._size,
-                                  dtype=sub_image.image.dtype)
+            self.image = np.zeros(shape=self.size, dtype=sub_image.image.dtype)
 
         # Transform the image to our local coordinate system
-        local_subimage = sub_image.transform_to_other(self._transformer)
-        start, size = sub_image.coords_to_other(self._transformer)
+        local_subimage = self._transform_sub_image(sub_image)
+        start, size = self._transform_coords(sub_image)
 
         # Test if image is in bounds
-        start_indices = np.subtract(start, self._start)
+        start_indices = np.subtract(start, self.origin)
         end_indices = np.add(start_indices, size)
         if np.any(np.less(start_indices, 0)) \
-                or np.any(np.greater(end_indices, self._size)):
+                or np.any(np.greater(end_indices, self.size)):
             raise ValueError("Subimage is not contained within the main image")
 
         # Set the part of the image to this subimage
         selector = tuple([slice(s, e) for s, e in
                           zip(start_indices, end_indices)])
         self.image[selector] = local_subimage
+
+    def _transform_coords(self, sub_image):
+        return sub_image.coords_to_other(self._transformer)
+
+    def _transform_sub_image(self, sub_image):
+        return sub_image.transform_to_other(self._transformer)
 
 
 class ImageWrapper(object):
@@ -79,11 +84,25 @@ class ImageWrapper(object):
 
         if self.image is None:
             self.image = np.zeros(shape=self.size, dtype=sub_image.image.dtype)
-        start_indices = np.subtract(sub_image.origin, self.origin)
-        end_indices = np.add(start_indices, np.array(sub_image.size))
+
+        # Transform the image to our local coordinate system
+        local_subimage = self._transform_sub_image(sub_image)
+        start, size = self._transform_coords(sub_image)
+
+        # Test if image is in bounds
+        start_indices = np.subtract(start, self.origin)
+        end_indices = np.add(start_indices, size)
         if np.any(np.less(start_indices, 0)) \
                 or np.any(np.greater(end_indices, self.size)):
             raise ValueError("Subimage is not contained within the main image")
-        selector = tuple([slice(start, end) for start, end in
+
+        # Set the part of the image to this subimage
+        selector = tuple([slice(s, e) for s, e in
                           zip(start_indices, end_indices)])
-        self.image[selector] = sub_image.image
+        self.image[selector] = local_subimage
+
+    def _transform_coords(self, sub_image):
+        return zip(sub_image.origin, sub_image.size)
+
+    def _transform_sub_image(self, sub_image):
+        return sub_image.image
