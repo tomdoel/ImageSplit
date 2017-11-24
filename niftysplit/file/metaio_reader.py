@@ -35,7 +35,8 @@ class MetaIoFile(LinearImageFileReader):
             # File is for writing
             self._mode = 'wb'
             # Force the raw filename to match the header filename
-            base_filename = os.path.splitext(os.basename(header_filename))[0]
+            base_filename = os.path.splitext(
+                os.path.basename(header_filename))[0]
             header = copy.deepcopy(header_template)
             header['ElementDataFile'] = base_filename + '.raw'
 
