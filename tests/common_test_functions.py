@@ -2,7 +2,7 @@ import numpy as np
 
 from niftysplit.file.image_file_reader import ImageFileReader
 from niftysplit.image.combined_image import Source, CoordinateTransformer, Axis
-from niftysplit.image.image_wrapper import ImageWrapper
+from niftysplit.image.image_wrapper import ImageWrapper, ImageStorage
 
 
 class FakeImageFileReader(ImageFileReader, Source):
@@ -51,7 +51,7 @@ class SimpleMockSource(Source):
 
 
 def create_empty_image(size):
-    return ImageWrapper(np.zeros_like(size), image=np.zeros(size))
+    return ImageWrapper(np.zeros_like(size), image=ImageStorage(np.zeros(size)))
 
 def create_dummy_image(size):
-    return ImageWrapper(np.zeros_like(size), image=np.arange(0, np.prod(size)).reshape(size))
+    return ImageWrapper(np.zeros_like(size), image=ImageStorage(np.arange(0, np.prod(size)).reshape(size)))

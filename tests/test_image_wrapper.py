@@ -6,7 +6,7 @@ from unittest import TestCase
 import numpy as np
 from parameterized import parameterized, param
 
-from niftysplit.image.image_wrapper import ImageWrapper
+from niftysplit.image.image_wrapper import ImageWrapper, ImageStorage
 
 
 class TestImageWrapper(TestCase):
@@ -32,10 +32,10 @@ class TestImageWrapper(TestCase):
     def test_set_sub_image(self, main_dim_size, main_origin, sub_dim_size, sub_origin):
         num_dimensions = len(main_dim_size)
         raw_array = np.arange(0, np.prod(main_dim_size)).reshape(main_dim_size)
-        main_image = ImageWrapper(main_origin, image=raw_array)
+        main_image = ImageWrapper(main_origin, image=ImageStorage(raw_array))
         main_image_unset = ImageWrapper(main_origin, image_size=raw_array.shape)
         sub_raw_array = np.reshape(np.arange(1000, 1000 + np.prod(sub_dim_size)), sub_dim_size)
-        sub_image = ImageWrapper(sub_origin, image=sub_raw_array)
+        sub_image = ImageWrapper(sub_origin, image=ImageStorage(sub_raw_array))
         is_valid = True
         for dim_index in range(0, num_dimensions):
             if sub_origin[dim_index] < main_origin[dim_index] or \

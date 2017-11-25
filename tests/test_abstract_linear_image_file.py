@@ -5,7 +5,7 @@ from parameterized import parameterized, param
 from tests.common_test_functions import create_dummy_image, \
     SimpleMockSource, create_empty_image
 from niftysplit.file.image_file_reader import LinearImageFileReader
-from niftysplit.image.image_wrapper import ImageWrapper
+from niftysplit.image.image_wrapper import ImageWrapper, ImageStorage
 import numpy as np
 
 
@@ -20,13 +20,14 @@ class MockAbstractLinearImageFile(LinearImageFileReader):
     def read_line(self, start, num_voxels):
         size = np.ones_like(start)
         size[0] = num_voxels
-        return self.image.get_sub_image(start, size).image.flatten()
+        return self.image.get_sub_image(start, size).image._numpy_image.flatten()
 
     def write_line(self, start, image_line):
         size = np.ones_like(start)
         size[0] = len(image_line)
-        self.image.set_sub_image(ImageWrapper(origin=start,
-                                              image=image_line.reshape(size)))
+        self.image.set_sub_image(ImageWrapper(
+            origin=start,
+            image=ImageStorage(image_line.reshape(size))))
 
 
 class TestAbstractLinearImageFile(TestCase):

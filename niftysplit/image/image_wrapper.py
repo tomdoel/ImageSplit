@@ -11,7 +11,7 @@ class ImageWrapperBase(object):
     def __init__(self, origin, image_size=None, image=None):
         self.origin = origin
         if image is not None:
-            self.size = list(np.shape(image))
+            self.size = image.get_size()
         else:
             self.size = image_size
         self.image = image
@@ -20,7 +20,9 @@ class ImageWrapperBase(object):
         """Replaces part of the image with the corresponding subimage"""
 
         if self.image is None:
-            self.image = np.zeros(shape=self.size, dtype=sub_image.image.dtype)
+            self.image = ImageStorage.create_empty(
+                size=self.size,
+                dtype=sub_image.image.get_type())
 
         # Transform the image to our local coordinate system
         local_subimage = self.transform_sub_image(sub_image)
@@ -36,7 +38,7 @@ class ImageWrapperBase(object):
         # Set the part of the image to this subimage
         selector = tuple([slice(s, e) for s, e in
                           zip(start_indices, end_indices)])
-        self.image[selector] = local_subimage
+        self.image.set(selector, local_subimage)
 
     @abstractmethod
     def transform_coords(self, sub_image):
@@ -68,7 +70,7 @@ class ImageWrapper(ImageWrapperBase):
             raise ValueError("Subimage is not contained within the main image")
         selector = tuple([slice(s, e) for s, e in
                           zip(start_indices, end_indices)])
-        return ImageWrapper(origin=start, image=self.image[selector])
+        return ImageWrapper(origin=start, image=self.image.get(selector))
 
     def transform_coords(self, sub_image):
         return sub_image.origin, sub_image.size
@@ -106,3 +108,53 @@ class SmartImage(ImageWrapper):
 
     def transform_sub_image(self, sub_image):
         return sub_image.transform_to_other(self._transformer)
+
+
+class ImageStorage(object):
+    def __init__(self, numpy_image=None):
+        self._numpy_image = numpy_image
+
+    def set(self, selector, image):
+        self._numpy_image[list((selector))] = image._numpy_image
+
+    def get(self, selector):
+        return ImageStorage(self._numpy_image[list((selector))])
+
+    def get_size(self):
+        return list((list(np.shape(self._numpy_image))))
+
+    def get_type(self):
+        return self._numpy_image.dtype
+
+    def get_raw(self):
+        return self._numpy_image
+
+    def transpose(self, order):
+        return ImageStorage(np.transpose(self._numpy_image, order))
+
+    def flip(self, do_flip):
+        image = self._numpy_image
+        for index, flip in enumerate(do_flip):
+            if flip:
+                image = np.flip(image, index)
+        return ImageStorage(image)
+
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(other, self.__class__):
+            return np.array_equal(self._numpy_image, other._numpy_image)
+        else:
+            return False
+
+    def __ne__(self, other):
+        """Overrides the default implementation"""
+        return not self.__eq__(other)
+
+    def copy(self):
+        return ImageStorage(self._numpy_image.copy())
+
+    @classmethod
+    def create_empty(cls, size, dtype):
+        raw = np.zeros(shape=list((size)), dtype=dtype)
+        return cls(numpy_image=raw)
+

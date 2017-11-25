@@ -234,12 +234,10 @@ class CoordinateTransformer(object):
     def image_to_local(self, global_image):
         """Transform global image to local coordinate system"""
 
-        local_image = np.transpose(global_image, self.axis.dim_order)
+        local_image = global_image.transpose(self.axis.dim_order)
 
         # Flip dimensions where necessary
-        for index, flip in enumerate(self.axis.dim_flip):
-            if flip:
-                local_image = np.flip(local_image, index)
+        local_image = local_image.flip(self.axis.dim_flip)
 
         return local_image
 
@@ -247,23 +245,19 @@ class CoordinateTransformer(object):
         """Transform image to a different local coordinate system"""
 
         # Flip dimensions where necessary
-        for index, flip in enumerate(self.axis.dim_flip):
-            if flip:
-                local_image = np.flip(local_image, index)
+        local_image = local_image.flip(self.axis.dim_flip)
 
         # Reverse permute dimensions of local coordinates
         global_dim_order = self.axis.reverse_dim_order
         global_flip = np.array(self.axis.dim_flip)[global_dim_order]
         local_dim_order = global_dim_order[other_transformer.axis.dim_order]
-        local_image = np.transpose(local_image, local_dim_order)
+        local_image = local_image.transpose(local_dim_order)
         local_flip = global_flip[other_transformer.axis.dim_order]
         local_flip = np.logical_xor(local_flip,
                                     other_transformer.axis.dim_flip)
 
         # Flip dimensions where necessary
-        for index, flip in enumerate(local_flip):
-            if flip:
-                local_image = np.flip(local_image, index)
+        local_image = local_image.flip(local_flip)
 
         return local_image
 
@@ -271,12 +265,10 @@ class CoordinateTransformer(object):
         """Convert local coordinates to global coordinates"""
 
         # Flip dimensions where necessary
-        for index, flip in enumerate(self.axis.dim_flip):
-            if flip:
-                local_image = np.flip(local_image, index)
+        local_image = local_image.flip(self.axis.dim_flip)
 
         # Reverse permute dimensions of local coordinates
-        global_image = np.transpose(local_image, self.axis.reverse_dim_order)
+        global_image = local_image.transpose(self.axis.reverse_dim_order)
 
         return global_image
 

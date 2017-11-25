@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from image.image_wrapper import ImageStorage
 from niftysplit.image.combined_image import CoordinateTransformer, Axis
 from parameterized import parameterized, param
 import numpy as np
@@ -46,17 +47,17 @@ class TestCoordinateTransformer(TestCase):
 
         transformed_start, transformed_size = ct.to_local(g_start, size)
         global_image = np.reshape(np.arange(0, np.prod(size)), size)
-        local_image = ct.image_to_local(global_image)
+        local_image = ct.image_to_local(ImageStorage(global_image))
         np.testing.assert_array_equal(size, global_image.shape)
-        np.testing.assert_array_equal(transformed_size, local_image.shape)
+        np.testing.assert_array_equal(transformed_size, local_image.get_size())
         test_image = np.transpose(global_image, order)
         for index, flip in enumerate(flip):
             if flip:
                 test_image = np.flip(test_image, index)
-        np.testing.assert_array_equal(test_image, local_image)
+        np.testing.assert_array_equal(test_image, local_image.get_raw())
 
         global_image_2 = ct.image_to_global(local_image)
-        np.testing.assert_array_equal(global_image, global_image_2)
+        np.testing.assert_array_equal(global_image, global_image_2.get_raw())
 
     @parameterized.expand([
         param(dim=[0, 1, 2], flip=[0, 0, 0], expected=[[[0, 1, 2], [3, 4, 5], [6, 7, 8], [9, 10, 11]], [[20, 21, 22], [23, 24, 25], [26, 27, 28], [29, 30, 31]]]),
@@ -73,9 +74,9 @@ class TestCoordinateTransformer(TestCase):
                         [[20, 21, 22], [23, 24, 25], [26, 27, 28], [29, 30, 31]]])
 
         ct = CoordinateTransformer(np.zeros_like(dim), np.shape(global_image), Axis(dim, flip))
-        local_image = ct.image_to_local(global_image.copy())
-        np.testing.assert_array_equal(local_image, np.array(expected))
-        np.testing.assert_array_equal(local_image, np.array(expected))
+        local_image = ct.image_to_local(ImageStorage(global_image.copy()))
+        np.testing.assert_array_equal(local_image.get_raw(), np.array(expected))
+        np.testing.assert_array_equal(local_image.get_raw(), np.array(expected))
 
         global_image_2 = ct.image_to_global(local_image)
-        np.testing.assert_array_equal(global_image, global_image_2)
+        np.testing.assert_array_equal(global_image, global_image_2.get_raw())

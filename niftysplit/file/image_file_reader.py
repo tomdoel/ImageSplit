@@ -6,7 +6,7 @@ from copy import deepcopy
 import itertools
 import numpy as np
 
-from niftysplit.image.image_wrapper import ImageWrapper
+from niftysplit.image.image_wrapper import ImageWrapper, ImageStorage
 
 
 class ImageFileReader(object):
@@ -61,8 +61,9 @@ class LinearImageFileReader(ImageFileReader):
 
             # Read one image line from the file
             image_line = self.read_line(start, size[0])
-            sub_image = ImageWrapper(origin=start,
-                                     image=image_line.reshape(size))
+            sub_image = ImageWrapper(
+                origin=start,
+                image=ImageStorage(image_line.reshape(size)))
 
             combined_image.set_sub_image(sub_image)
 
@@ -95,7 +96,7 @@ class LinearImageFileReader(ImageFileReader):
                 if len(start) > 1:
                     out_start[1] = line
                 line = image_slice.get_sub_image(out_start, out_size).image
-                self.write_line(out_start, line)
+                self.write_line(out_start, line.get_raw())
 
         self.close_file()
 
@@ -128,7 +129,7 @@ class BlockImageFileReader(ImageFileReader):
             raise ValueError("Image is not the expected size")
 
         image = ImageWrapper(origin=np.zeros_like(start_local),
-                             image=image_data)
+                             image=ImageStorage(image_data))
 
         return image.get_sub_image(start_local, size_local).image
 
