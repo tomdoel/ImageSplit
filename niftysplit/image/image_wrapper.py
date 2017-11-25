@@ -66,7 +66,7 @@ class ImageWrapper(ImageWrapperBase):
                           np.zeros_like(start_indices))) \
                 or np.any(np.greater(end_indices, self.size)):
             raise ValueError("Subimage is not contained within the main image")
-        selector = tuple([slice(start, end) for start, end in
+        selector = tuple([slice(s, e) for s, e in
                           zip(start_indices, end_indices)])
         return ImageWrapper(origin=start, image=self.image[selector])
 
