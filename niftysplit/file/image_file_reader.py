@@ -73,20 +73,30 @@ class LinearImageFileReader(ImageFileReader):
         # Compute coordinate ranges
         ranges = [range(0, sz) for sz in self.size]
 
-        # Exclude first coordinate and get others in reverse order
-        ranges_to_iterate = ranges[:0:-1]
+        # Exclude first two coordinates and get others in reverse order
+        ranges_to_iterate = ranges[:1:-1]
 
         # Iterate over each line (equivalent to multiple for loops)
         for main_dim_size in itertools.product(*ranges_to_iterate):
-            start = [0] + list(reversed(main_dim_size))
-            size = np.ones_like(self.size)
-            size[0] = self.size[0]
+            start = [0] * min(2, len(self.size)) + \
+                    list(reversed(main_dim_size))
 
-            # Read one image line from the transformed source
-            image_line = data_source.read_image(start, size)
+            # Size contains the first two dimensions and ones
+            size = self.size[:2] + [1] * (len(self.size) - 2)
+
+            # Read one image slice from the transformed source
+            image_slice = data_source.read_image(start, size)
 
             # Write out the image data to the file
-            self.write_line(start, image_line)
+            for line in range(0, size[1] if len(size) > 1 else 1):
+            # for line in ranges[1:1]:
+                line_coords = (Ellipsis,) + (line,) + \
+                              tuple(np.zeros_like(start)[2:])
+                line_coords = line_coords[0:len(size)]
+                out_start = start
+                if len(start) > 1:
+                    out_start[1] = line
+                self.write_line(out_start, image_slice[line_coords])
 
         self.close_file()
 

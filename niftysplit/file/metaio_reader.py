@@ -81,8 +81,8 @@ class MetaIoFile(LinearImageFileReader):
 
         if subimage_descriptor.data_type:
             header_template["ElementType"] = subimage_descriptor.data_type
-        header_template["DimSize"] = np.array(local_file_size).tolist()
-        header_template["Origin"] = local_origin.tolist()
+        header_template["DimSize"] = local_file_size
+        header_template["Origin"] = local_origin
         filename = subimage_descriptor.filename
         return cls(local_file_size, filename, file_handle_factory,
                    header_template)

@@ -63,11 +63,11 @@ class SubImageDescriptor(object):
 
     def get_local_size(self):
         """Transpose the subimage size to the local coordinate system"""
-        return np.take(self.ranges.image_size, self.axis.dim_order)
+        return np.take(self.ranges.image_size, self.axis.dim_order).tolist()
 
     def get_local_origin(self):
         """Transpose the subimage origin to the local coordinate system"""
-        return np.take(self.ranges.origin_start, self.axis.dim_order)
+        return np.take(self.ranges.origin_start, self.axis.dim_order).tolist()
 
     @staticmethod
     def from_dict(descriptor_dict):
