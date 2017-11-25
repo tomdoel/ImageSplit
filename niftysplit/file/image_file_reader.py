@@ -2,6 +2,7 @@
 """Write multidimensional data line by line"""
 
 from abc import ABCMeta, abstractmethod
+from copy import deepcopy
 import itertools
 import numpy as np
 
@@ -89,13 +90,12 @@ class LinearImageFileReader(ImageFileReader):
 
             # Write out the image data to the file
             for line in range(0, size[1] if len(size) > 1 else 1):
-                line_coords = (Ellipsis,) + (line,) + \
-                              tuple(np.zeros_like(start)[2:])
-                line_coords = line_coords[0:len(size)]
-                out_start = start
+                out_start = deepcopy(start)
+                out_size = [self.size[0]] + [1] * (len(self.size) - 1)
                 if len(start) > 1:
                     out_start[1] = line
-                self.write_line(out_start, image_slice[line_coords])
+                line = image_slice.get_sub_image(out_start, out_size).image
+                self.write_line(out_start, line)
 
         self.close_file()
 
@@ -135,6 +135,7 @@ class BlockImageFileReader(ImageFileReader):
     def write_image(self, data_source):
         """Create and write out this file, using data from this image source"""
 
-        image_data = data_source.read_image(np.zeros_like(self.size), self.size)
+        image_data = \
+            data_source.read_image(np.zeros_like(self.size), self.size).image
         self.save(image_data)
         self.close_file()

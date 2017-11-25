@@ -39,7 +39,7 @@ class SimpleMockSource(Source):
 
     def read_image(self, start, size):
         if self.global_image:
-            return self.global_image.get_sub_image(start, size).image
+            return self.global_image.get_sub_image(start, size)
         else:
             return None
 

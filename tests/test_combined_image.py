@@ -246,7 +246,8 @@ class TestSubImage(TestCase):
         local_data_source = out_file.write_image.call_args[0][0]
 
         # Read from the local data source to trigger a read in the global source
-        input_image = local_data_source.read_image(local_start, local_size)
+        input_image = local_data_source.read_image(local_start, local_size).image
+        input_image = local_data_source.read_image(local_start, local_size).image
 
         # Get the arguments
         test_start = source.read_image.call_args[0][0]
@@ -329,7 +330,7 @@ class TestLocalSource(TestCase):
         test_image = create_dummy_image(global_size)
         data_source.read_image.return_value = test_image
         source = LocalSource(data_source, transformer)
-        local_image = source.read_image(start, size)
+        local_image = source.read_image(start, size).image
         global_start, t_global_size = transformer.to_global(start, size)
         np.testing.assert_array_equal(data_source.read_image.call_args[0][0],
                                       start)

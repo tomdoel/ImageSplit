@@ -157,7 +157,7 @@ class LocalSource(Source):
         """Returns a partial image using the specified local coordinates"""
 
         return self._source.read_image(
-            start, size, self._transformer).image
+            start, size, self._transformer)
 
     def close(self):
         """Close all streams and files"""
