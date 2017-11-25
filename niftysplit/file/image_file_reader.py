@@ -89,7 +89,6 @@ class LinearImageFileReader(ImageFileReader):
 
             # Write out the image data to the file
             for line in range(0, size[1] if len(size) > 1 else 1):
-            # for line in ranges[1:1]:
                 line_coords = (Ellipsis,) + (line,) + \
                               tuple(np.zeros_like(start)[2:])
                 line_coords = line_coords[0:len(size)]
