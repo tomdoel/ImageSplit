@@ -51,7 +51,15 @@ class SimpleMockSource(Source):
 
 
 def create_empty_image(size):
-    return ImageWrapper(np.zeros_like(size), image=ImageStorage(np.zeros(size)))
+    return ImageWrapper(np.zeros_like(size), image=ImageStorage(np.zeros(list(reversed(size)))))
 
-def create_dummy_image(size):
-    return ImageWrapper(np.zeros_like(size), image=ImageStorage(np.arange(0, np.prod(size)).reshape(size)))
+
+def create_dummy_image(size, origin=None, value_base=0):
+    if not origin:
+        origin = np.zeros_like(size)
+    return ImageWrapper(origin=origin,
+                        image=ImageStorage(np.arange(value_base, value_base+np.prod(size)).reshape(list(reversed(size)))))
+
+
+def create_dummy_image_storage(size, value_base=0):
+    return ImageStorage(np.arange(value_base, value_base+np.prod(size)).reshape(list(reversed(size))))

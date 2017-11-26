@@ -39,6 +39,7 @@ class FileStreamer(object):
         data_type = np.dtype(self._numpy_format)
         bytes_array = self._file_wrapper.get_handle().read(
             num_voxels * self._bytes_per_voxel)
+
         return np.fromstring(bytes_array, dtype=data_type)
 
     def write_line(self, start_coords, image_line):

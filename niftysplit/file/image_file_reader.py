@@ -63,7 +63,7 @@ class LinearImageFileReader(ImageFileReader):
             image_line = self.read_line(start, size[0])
             sub_image = ImageWrapper(
                 origin=start,
-                image=ImageStorage(image_line.reshape(size)))
+                image=ImageStorage(image_line).reshape(size))
 
             combined_image.set_sub_image(sub_image)
 
@@ -95,8 +95,9 @@ class LinearImageFileReader(ImageFileReader):
                 out_size = [self.size[0]] + [1] * (len(self.size) - 1)
                 if len(start) > 1:
                     out_start[1] = line
-                line = image_slice.get_sub_image(out_start, out_size).image
-                self.write_line(out_start, line.get_raw())
+                image_line = image_slice.get_sub_image(out_start,
+                                                       out_size).image
+                self.write_line(out_start, image_line.get_raw())
 
         self.close_file()
 
@@ -138,5 +139,5 @@ class BlockImageFileReader(ImageFileReader):
 
         image_data = \
             data_source.read_image(np.zeros_like(self.size), self.size).image
-        self.save(image_data)
+        self.save(image_data.get_raw())
         self.close_file()

@@ -24,10 +24,10 @@ class MockAbstractLinearImageFile(LinearImageFileReader):
 
     def write_line(self, start, image_line):
         size = np.ones_like(start)
-        size[0] = len(image_line)
+        size[0] = image_line.size
         self.image.set_sub_image(ImageWrapper(
             origin=start,
-            image=ImageStorage(image_line.reshape(size))))
+            image=ImageStorage(image_line.reshape(list(reversed(size))))))
 
 
 class TestAbstractLinearImageFile(TestCase):

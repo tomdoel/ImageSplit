@@ -111,50 +111,82 @@ class SmartImage(ImageWrapper):
 
 
 class ImageStorage(object):
+    """Abstraction for storing image data in an arbitrary orientation
+
+    Allows storing of data without assuming the order in which the dimensions
+    are stored in memory or indexed. This allows images to be indexed using
+    the [x,y,z] convention while the numpy ordering is actually [z,y,x]
+
+    """
+
     def __init__(self, numpy_image=None):
         self._numpy_image = numpy_image
 
     def set(self, selector, image):
-        self._numpy_image[list((selector))] = image._numpy_image
+        """Replaces part of the image data using the specified selectors"""
+
+        self._numpy_image[list(reversed(selector))] = image.get_raw()
 
     def get(self, selector):
-        return ImageStorage(self._numpy_image[list((selector))])
+        """Returns part of the image data using the specified selectors"""
+
+        return ImageStorage(self._numpy_image[list(reversed(selector))])
 
     def get_size(self):
-        return list((list(np.shape(self._numpy_image))))
+        """Returns the image size in the global dimension ordering scheme"""
+
+        return list(reversed(list(np.shape(self._numpy_image))))
 
     def get_type(self):
+        """Returns the underlying data type"""
+
         return self._numpy_image.dtype
 
     def get_raw(self):
+        """Return raw image array, not be in the global dimension ordering"""
+
         return self._numpy_image
 
     def transpose(self, order):
-        return ImageStorage(np.transpose(self._numpy_image, order))
+        """Return a transpose of the image data using global ordering"""
+
+        order = list(np.subtract(len(order) - 1, order))
+        return ImageStorage(np.transpose(self._numpy_image,
+                                         list(reversed(order))))
 
     def flip(self, do_flip):
+        """Return a copy of image data flipped using global ordering"""
+
         image = self._numpy_image
         for index, flip in enumerate(do_flip):
             if flip:
-                image = np.flip(image, index)
+                image = np.flip(image, len(do_flip) - 1 - index)
         return ImageStorage(image)
+
+    def reshape(self, new_shape):
+        """Return a reshaping of the image data using global ordering"""
+
+        return ImageStorage(
+            np.reshape(self._numpy_image, list(reversed(new_shape))))
 
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(other, self.__class__):
-            return np.array_equal(self._numpy_image, other._numpy_image)
-        else:
-            return False
+            return np.array_equal(self._numpy_image, other.get_raw())
+        return False
 
     def __ne__(self, other):
         """Overrides the default implementation"""
         return not self.__eq__(other)
 
     def copy(self):
+        """Returns a new object with a copy of the underlying data"""
+
         return ImageStorage(self._numpy_image.copy())
 
     @classmethod
     def create_empty(cls, size, dtype):
-        raw = np.zeros(shape=list((size)), dtype=dtype)
-        return cls(numpy_image=raw)
+        """Create empty object of the specified global size and data type"""
 
+        raw = np.zeros(shape=list(reversed(size)), dtype=dtype)
+        return cls(numpy_image=raw)
