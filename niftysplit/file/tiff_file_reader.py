@@ -31,5 +31,5 @@ class TiffFileReader(BlockImageFileReader):
     def create_write_file(subimage_descriptor, file_handle_factory):
         """Create a TiffFileReader class for this filename and template"""
         filename = subimage_descriptor.filename
-        image_size = subimage_descriptor.ranges.image_size
-        return TiffFileReader(filename, image_size)
+        local_file_size = subimage_descriptor.get_local_size()
+        return TiffFileReader(filename, local_file_size)
