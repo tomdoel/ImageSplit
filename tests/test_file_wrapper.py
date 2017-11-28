@@ -220,8 +220,8 @@ class TestStreamer(fake_filesystem_unittest.TestCase):
         to_write_numpy = np.asarray(to_write_voxels,
                                     dtype=TestStreamer.get_np_type(
                                         bytes_per_voxel, is_signed))
-        file_streamer.write_line([0, 0, 0], base_data_numpy)
-        file_streamer.write_line(start_coords, to_write_numpy)
+        file_streamer.write_line([0, 0, 0], base_data_numpy, None)
+        file_streamer.write_line(start_coords, to_write_numpy, None)
         file_streamer.close()
         read_file_contents = TestStreamer.read_from_fake_file(
             '/test/test_write_image_stream.bin',

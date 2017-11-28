@@ -23,7 +23,7 @@ class FakeImageFileReader(ImageFileReader, Source):
         else:
             return None
 
-    def write_image(self, data_source):
+    def write_image(self, data_source, rescale_limits):
         self.close()  # Note: we generally expect file classes to close themselves after writing the file
 
     def close(self):
@@ -43,7 +43,7 @@ class SimpleMockSource(Source):
         else:
             return None
 
-    def write_image(self, data_source):
+    def write_image(self, data_source, rescale_limits):
         pass
 
     def close(self):

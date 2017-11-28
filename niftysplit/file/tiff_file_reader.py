@@ -8,8 +8,8 @@ from niftysplit.file.image_file_reader import BlockImageFileReader
 class TiffFileReader(BlockImageFileReader):
     """Read and write to TIFF files"""
 
-    def __init__(self, filename, image_size):
-        super(TiffFileReader, self).__init__(image_size)
+    def __init__(self, filename, image_size, data_type):
+        super(TiffFileReader, self).__init__(image_size, data_type)
         self.read_image = None
         self.filename = filename
 
@@ -32,4 +32,5 @@ class TiffFileReader(BlockImageFileReader):
         """Create a TiffFileReader class for this filename and template"""
         filename = subimage_descriptor.filename
         local_file_size = subimage_descriptor.get_local_size()
-        return TiffFileReader(filename, local_file_size)
+        data_type = subimage_descriptor.data_type
+        return TiffFileReader(filename, local_file_size, data_type)

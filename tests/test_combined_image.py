@@ -76,7 +76,7 @@ class TestCombinedImage(TestCase):
         ci = CombinedImage(descriptors, file_factory)
         source = Mock()
         self.assertEqual(len(file_factory.write_files), 0)
-        ci.write_image(source)
+        ci.write_image(source, False)
         self.assertEqual(len(file_factory.write_files), 27)
         for descriptor, write_file in zip(descriptors, file_factory.write_files):
             self.assertEqual(descriptor.ranges.ranges, write_file.descriptor.ranges.ranges)
@@ -148,7 +148,7 @@ class TestSubImage(TestCase):
         # Check that file is closed after writing
         source = FakeImageFileReader(descriptor)
         self.assertEqual(len(file_factory.write_files), 0)
-        si.write_image(source)
+        si.write_image(source, None)
         self.assertEqual(len(file_factory.write_files), 1)
         self.assertFalse(file_factory.write_files[0].open)
 
@@ -234,7 +234,7 @@ class TestSubImage(TestCase):
         source.read_image.return_value = dummy_image
 
         si = SubImage(descriptor, file_factory)
-        si.write_image(source)
+        si.write_image(source, None)
 
         # CoordinateTransforer is tested elsewhere.
         transformer = CoordinateTransformer(

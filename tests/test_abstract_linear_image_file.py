@@ -22,7 +22,7 @@ class MockAbstractLinearImageFile(LinearImageFileReader):
         size[0] = num_voxels
         return self.image.get_sub_image(start, size).image._numpy_image.flatten()
 
-    def write_line(self, start, image_line):
+    def write_line(self, start, image_line, rescale_limits):
         size = np.ones_like(start)
         size[0] = image_line.size
         self.image.set_sub_image(ImageWrapper(
@@ -62,5 +62,5 @@ class TestAbstractLinearImageFile(TestCase):
         dummy_image = create_dummy_image(image_size)
         source = SimpleMockSource(dummy_image)
 
-        linear_image_file.write_image(source)
+        linear_image_file.write_image(source, None)
         np.testing.assert_equal(initial_image.image, dummy_image.image)

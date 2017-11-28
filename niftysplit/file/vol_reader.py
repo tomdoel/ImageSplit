@@ -55,7 +55,7 @@ class VolFile(LinearImageFileReader):
         self.close()
 
     # pylint: disable=unused-argument
-    def write_line(self, start_coords, image_line):
+    def write_line(self, start_coords, image_line, rescale_limits):
         """Write consecutive voxels to the raw binary file."""
 
         raise ValueError("Writing of vol files is not supported")

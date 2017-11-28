@@ -7,6 +7,7 @@ import itertools
 import numpy as np
 
 from niftysplit.image.image_wrapper import ImageWrapper, ImageStorage
+from niftysplit.utils.utilities import rescale_image
 
 
 class ImageFileReader(object):
@@ -14,7 +15,7 @@ class ImageFileReader(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def write_image(self, data_source):
+    def write_image(self, data_source, rescale_limits):
         """Create and write out this file, using data from this image source"""
         pass
 
@@ -26,7 +27,7 @@ class LinearImageFileReader(ImageFileReader):
         self.size = image_size
 
     @abstractmethod
-    def write_line(self, start, image_line):
+    def write_line(self, start, image_line, rescale_limits):
         """Write the next line of bytes to the file"""
 
     @abstractmethod
@@ -69,7 +70,7 @@ class LinearImageFileReader(ImageFileReader):
 
         return combined_image.image
 
-    def write_image(self, data_source):
+    def write_image(self, data_source, rescale_limits):
         """Create and write out this file, using data from this image source"""
 
         # Compute coordinate ranges
@@ -97,7 +98,7 @@ class LinearImageFileReader(ImageFileReader):
                     out_start[1] = line
                 image_line = image_slice.get_sub_image(out_start,
                                                        out_size).image
-                self.write_line(out_start, image_line.get_raw())
+                self.write_line(out_start, image_line.get_raw(), rescale_limits)
 
         self.close_file()
 
@@ -119,8 +120,9 @@ class BlockImageFileReader(ImageFileReader):
         """Close the file"""
         pass
 
-    def __init__(self, image_size):
+    def __init__(self, image_size, data_type):
         self.size = image_size
+        self.data_type = data_type
 
     def read_image(self, start_local, size_local):
         """Read the specified part of the image"""
@@ -134,10 +136,16 @@ class BlockImageFileReader(ImageFileReader):
 
         return image.get_sub_image(start_local, size_local).image
 
-    def write_image(self, data_source):
+    def write_image(self, data_source, rescale_limits):
         """Create and write out this file, using data from this image source"""
+
+        data_type = np.dtype(self.data_type)
 
         image_data = \
             data_source.read_image(np.zeros_like(self.size), self.size).image
-        self.save(image_data.get_raw())
+        image_data_raw = image_data.get_raw()
+        if rescale_limits:
+            image_data_raw = rescale_image(data_type, image_data_raw,
+                                           rescale_limits)
+        self.save(image_data_raw)
         self.close_file()

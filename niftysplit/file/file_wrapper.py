@@ -13,7 +13,7 @@ import os
 
 import numpy as np
 
-from niftysplit.utils.utilities import file_linear_byte_offset
+from niftysplit.utils.utilities import file_linear_byte_offset, rescale_image
 
 
 class FileStreamer(object):
@@ -42,7 +42,7 @@ class FileStreamer(object):
 
         return np.fromstring(bytes_array, dtype=data_type)
 
-    def write_line(self, start_coords, image_line):
+    def write_line(self, start_coords, image_line, rescale_limits):
         """Write a line of image data to a binary file at the specified image
         location """
 
@@ -52,6 +52,11 @@ class FileStreamer(object):
         self._file_wrapper.get_handle().seek(offset)
 
         data_type = np.dtype(self._numpy_format)
+
+        if rescale_limits:
+            image_line = rescale_image(data_type, image_line,
+                                       rescale_limits)
+
         self._file_wrapper.get_handle().write(
             image_line.astype(data_type).tobytes())
 

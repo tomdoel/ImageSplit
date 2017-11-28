@@ -29,6 +29,7 @@ class CombinedImage(object):
     def __init__(self, descriptors, file_factory):
         """Create for the given set of descriptors"""
 
+        self.limits = None
         self._subimages = []
         for subimage_descriptor in descriptors:
             self._subimages.append(SubImage(subimage_descriptor, file_factory))
@@ -62,12 +63,39 @@ class CombinedImage(object):
         for subimage in self._subimages:
             subimage.close()
 
-    def write_image(self, source):
+    def write_image(self, source, rescale):
         """Write out all the subimages with data from supplied source"""
+
+        # If rescaling is required, get the global limits
+        limits = source.get_limits() if rescale else None
 
         # Get each subimage to write itself
         for next_image in self._subimages:
-            next_image.write_image(source)
+            next_image.write_image(source, limits)
+
+    def get_limits(self):
+        """Return minimum and maximum values across all subimages"""
+
+        if not self.limits:
+            minv = None
+            maxv = None
+            for next_image in self._subimages:
+                next_min, next_max = next_image.get_limits()
+                if minv is None or next_min < minv:
+                    minv = next_min
+                if maxv is None or next_max > maxv:
+                    maxv = next_max
+            self.limits = Limits(minv, maxv)
+
+        return self.limits
+
+
+class Limits(object):
+    """Image range values across all subimages"""
+
+    def __init__(self, rmin, rmax):
+        self.min = rmin
+        self.max = rmax
 
 
 class SubImage(Source):
@@ -123,12 +151,12 @@ class SubImage(Source):
             self._read_file.close()
             self._read_file = None
 
-    def write_image(self, global_source):
+    def write_image(self, global_source, rescale_limits):
         """Write out SubImage using data from the specified source"""
 
         out_file = self._file_factory.create_write_file(self._descriptor)
         local_source = LocalSource(global_source, self._transformer)
-        out_file.write_image(local_source)
+        out_file.write_image(local_source, rescale_limits)
 
     def bind_by_roi(self, start_global, size_global):
         """Find the part of the specified region that fits within the ROI"""
@@ -138,6 +166,16 @@ class SubImage(Source):
                          np.add(self._roi_start, self._roi_size))
         size = np.subtract(end, start)
         return start, size
+
+    def get_limits(self):
+        """Return minimum and maximum values across all subimages"""
+
+        image = self.read_image(self._descriptor.ranges.origin_start,
+                                self._descriptor.ranges.image_size)
+
+        minv = np.min(image)
+        maxv = np.max(image)
+        return minv, maxv
 
     def _get_read_file(self):
         if not self._read_file:

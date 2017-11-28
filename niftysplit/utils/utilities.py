@@ -7,6 +7,7 @@ Copyright UCL 2017
 
 """
 from math import ceil
+import numpy as np
 
 
 def file_linear_byte_offset(image_size, bytes_per_voxel, start_coords):
@@ -31,7 +32,7 @@ def get_number_of_blocks(image_size, max_block_size):
     size limit """
 
     return [1 if max_block_size_element <= 0 else
-            int(ceil(float(image_size_element)/float(max_block_size_element)))
+            int(ceil(float(image_size_element) / float(max_block_size_element)))
             for image_size_element, max_block_size_element in
             zip(image_size, max_block_size)]
 
@@ -114,3 +115,13 @@ def convert_to_array(scalar_or_list, parameter_name, num_dims):
                                       'containing one entry for '
                                       'each image dimension')
     return array
+
+
+def rescale_image(data_type, image_line, rescale_limits):
+    """Rescale image to the limits of this datatype"""
+    dt_min = np.iinfo(data_type).min
+    dt_max = np.iinfo(data_type).max
+    dt_range = dt_max - dt_min
+    image_line = dt_min + dt_range * (image_line - rescale_limits.min) / \
+                          (rescale_limits.max - rescale_limits.min)
+    return image_line

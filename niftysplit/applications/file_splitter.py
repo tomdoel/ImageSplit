@@ -22,9 +22,11 @@ from niftysplit.utils.file_descriptor import write_descriptor_file, \
 from niftysplit.applications.write_files import write_files
 
 
+# pylint: disable=too-many-arguments
 def split_file(input_file, filename_out_base, max_block_size_voxels,
                overlap_size_voxels, start_index, output_type,
-               dim_order, file_handle_factory, output_format, slice_output):
+               dim_order, file_handle_factory, output_format, slice_output,
+               rescale):
     """Saves the specified image file as a number of smaller files"""
 
     [header, descriptors_in, global_descriptor] = \
@@ -62,7 +64,7 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
 
     file_factory = FileFactory(file_handle_factory)
 
-    write_files(descriptors_in, descriptors_out, file_factory)
+    write_files(descriptors_in, descriptors_out, file_factory, rescale)
     write_descriptor_file(descriptors_in, descriptors_out, filename_out_base)
 
 
@@ -105,6 +107,7 @@ def parse_slice_output(dim_order, max_block_size_voxels, overlap_size_voxels,
 
 def main(args):
     """Utility for splitting images into subimages"""
+
     parser = argparse.ArgumentParser(
         description='Splits a large MetaIO (.mhd) file into multiple parts '
                     'with overlap')
@@ -121,19 +124,24 @@ def main(args):
     parser.add_argument("-m", "--max", nargs='+', required=False, default=None,
                         type=int,
                         help="Maximum number of voxels in each dimension")
-    parser.add_argument("-s", "--startindex", required=False, default=None,
+    parser.add_argument("-i", "--startindex", required=False, default=None,
                         type=int,
                         help="Start index for filename suffix when loading a "
                              "series of files")
     parser.add_argument("-t", "--type", required=False, default=None, type=str,
                         help="Output data type (default: same as input file "
                              "datatype)")
-    parser.add_argument("-r", "--format", required=False, default=None,
+    parser.add_argument("-e", "--format", required=False, default=None,
                         type=str,
                         help="Output file format such as mhd, tiff "
                              "(default: same as input file format)")
 
-    parser.add_argument("-c", "--slice", required=False, default=None,
+    parser.add_argument("-r", "--rescale", required=False, default=None,
+                        type=str,
+                        help="If true, rescale image to the full range of the "
+                             "data type")
+
+    parser.add_argument("-s", "--slice", required=False, default=None,
                         type=str,
                         help="Divide image into slices along the specified "
                              "axis. Choose 1, 2, 3 etc to select an axis "
@@ -170,7 +178,8 @@ def main(args):
                    dim_order=args.axis,
                    file_handle_factory=FileHandleFactory(),
                    output_format=args.format,
-                   slice_output=args.slice)
+                   slice_output=args.slice,
+                   rescale=args.rescale)
 
 
 if __name__ == '__main__':

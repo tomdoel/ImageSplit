@@ -91,10 +91,11 @@ class MetaIoFile(LinearImageFileReader):
         """Close file"""
         self.close()
 
-    def write_line(self, start_coords, image_line):
+    def write_line(self, start_coords, image_line, rescale_limits):
         """Write consecutive voxels to the raw binary file."""
 
-        return self._get_file_streamer().write_line(start_coords, image_line)
+        return self._get_file_streamer().write_line(
+            start_coords, image_line, rescale_limits)
 
     def read_line(self, start_coords, num_voxels_to_read):
         """Read consecutive voxels of image data from the raw binary file
