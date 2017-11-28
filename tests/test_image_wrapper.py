@@ -6,7 +6,7 @@ from unittest import TestCase
 import numpy as np
 from parameterized import parameterized, param
 
-from common_test_functions import create_dummy_image
+from tests.common_test_functions import create_dummy_image
 from niftysplit.image.image_wrapper import ImageWrapper, ImageStorage
 
 

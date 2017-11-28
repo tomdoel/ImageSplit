@@ -229,7 +229,8 @@ def generate_input_descriptors(input_file, start_index):
         current_image_size = file_descriptor.image_size
 
         axis = Axis.from_condensed_format(dim_order)
-        current_image_size = np.take(current_image_size, axis.reverse_dim_order)
+        current_image_size = \
+            np.take(current_image_size, axis.reverse_dim_order).tolist()
 
         if not current_ranges:
             full_image_size = copy.deepcopy(current_image_size)
