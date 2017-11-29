@@ -9,6 +9,7 @@ Copyright UCL 2017
 import os
 from six.moves import configparser
 
+from niftysplit.file.data_type import DataTypeFactory
 from niftysplit.file.file_image_descriptor import FileImageDescriptor
 from niftysplit.file.file_wrapper import FileWrapper, FileStreamer
 from niftysplit.file.image_file_reader import LinearImageFileReader
@@ -135,7 +136,6 @@ class VolFile(LinearImageFileReader):
             self._file_wrapper.close()
             self._file_wrapper = None
 
-
     @classmethod
     def load_and_parse_header(cls, filename):
         """Load vge header file and parse into FileImageDescriptor"""
@@ -204,11 +204,7 @@ def parse_vge(header):
     file_format = "vol"  # ToDo
     # file_format = FormatFactory.VOL_FORMAT
     dim_order = dim_order_from_header(header)
-    # dim_order = [1, 2, 3]  # ToDo: parse orientation from header
-    data_type = file_section['filedatatype']
-    if data_type != "VolumeDataType_Float":
-        raise ValueError("Unknown data type " + data_type)
-    data_type = "MET_LONG"
+    data_type = DataTypeFactory.from_vge(file_section['filedatatype'])
 
     header_dict = header
 

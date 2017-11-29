@@ -24,7 +24,9 @@ class TiffFileReader(BlockImageFileReader):
 
     def save(self, image):
         """Save out image data into TIFF file"""
+        # imsave(self.filename, image, imagej=True, compress='lzma')
         imsave(self.filename, image)
+        # imsave(self.filename, image, compress='lzma')
 
     @staticmethod
     # pylint: disable=unused-argument

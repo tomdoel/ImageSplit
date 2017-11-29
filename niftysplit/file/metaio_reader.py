@@ -12,6 +12,7 @@ from collections import OrderedDict
 
 import numpy as np
 
+from niftysplit.file.data_type import DataTypeFactory
 from niftysplit.file.file_image_descriptor import FileImageDescriptor
 from niftysplit.file.file_wrapper import FileWrapper, FileStreamer
 from niftysplit.file.image_file_reader import LinearImageFileReader
@@ -50,7 +51,7 @@ class MetaIoFile(LinearImageFileReader):
             self._header = load_mhd_header(header_filename)
 
         self._bytes_per_voxel = compute_bytes_per_voxel(
-            self._header["ElementType"])
+            self._header["ElementType"]) # ToDo: set this based on output format
         self._numpy_format = get_numpy_datatype(
             self._header["ElementType"],
             self._header["BinaryDataByteOrderMSB"])
@@ -374,7 +375,7 @@ def parse_mhd(header):
 
     file_format = "mhd"
     dim_order = get_dim_order(header)
-    data_type = header["ElementType"]
+    data_type = DataTypeFactory.from_metaio(header["ElementType"])
     image_size = header["DimSize"]
     return (FileImageDescriptor(file_format=file_format,
                                 dim_order=dim_order,

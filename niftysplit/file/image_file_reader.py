@@ -151,5 +151,6 @@ class BlockImageFileReader(ImageFileReader):
         if rescale_limits:
             image_data_raw = rescale_image(data_type, image_data_raw,
                                            rescale_limits)
-        self.save(to_rgb(image_data_raw))
+        self.save(image_data_raw)
+        # self.save(to_rgb(image_data_raw))
         self.close_file()
