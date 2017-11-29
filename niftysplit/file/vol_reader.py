@@ -189,7 +189,7 @@ def dim_order_from_header(header):
     The first element in the array contains the index of the global dimension
     which is represented by the first dimension in the file, and so on
     """
-    return [2, 1, 3]  # ToDo: parse orientation from header
+    return [1, 3, 2]  # ToDo: parse orientation from header
 
 
 def parse_vge(header):
