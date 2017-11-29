@@ -6,7 +6,7 @@ from copy import deepcopy
 import itertools
 import numpy as np
 
-from utils.utilities import get_numpy_datatype, to_rgb
+from niftysplit.utils.utilities import get_numpy_datatype, to_rgb
 from niftysplit.image.image_wrapper import ImageWrapper, ImageStorage
 from niftysplit.utils.utilities import rescale_image
 
