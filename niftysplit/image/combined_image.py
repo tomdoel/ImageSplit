@@ -173,8 +173,8 @@ class SubImage(Source):
         image = self.read_image(self._descriptor.ranges.origin_start,
                                 self._descriptor.ranges.image_size)
 
-        minv = np.min(image)
-        maxv = np.max(image)
+        minv = np.min(image.image._numpy_image)
+        maxv = np.max(image.image._numpy_image)
         return minv, maxv
 
     def _get_read_file(self):

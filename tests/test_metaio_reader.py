@@ -1,6 +1,6 @@
 import unittest
 
-from niftysplit.file.metaio_reader import compute_bytes_per_voxel
+from utils.utilities import compute_bytes_per_voxel
 
 
 class TestMetaIoReader(unittest.TestCase):

@@ -39,6 +39,9 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
     if output_format is None:
         output_format = global_descriptor.file_format
 
+    if output_type is None:
+        output_type = global_descriptor.data_type
+
     if dim_order is None:
         dim_order = global_descriptor.dim_order
 
@@ -137,7 +140,7 @@ def main(args):
                              "(default: same as input file format)")
 
     parser.add_argument("-r", "--rescale", required=False, default=None,
-                        type=str,
+                        action='store_true',
                         help="If true, rescale image to the full range of the "
                              "data type")
 

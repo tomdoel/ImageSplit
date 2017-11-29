@@ -37,12 +37,13 @@ class SubImageRanges(object):
 class GlobalImageDescriptor(object):
     """Describes a full combined image"""
 
-    def __init__(self, size, file_format, dim_order):
+    def __init__(self, size, file_format, dim_order, data_type):
+        self.data_type = data_type
         self.file_format = file_format
         self.size = size
         self.num_dims = len(size)
         self.dim_order = dim_order if dim_order \
-            else np.arange(1, self.num_dims + 1)
+            else np.arange(1, self.num_dims + 1).tolist()
 
 
 class SubImageDescriptor(object):
@@ -286,7 +287,8 @@ def generate_input_descriptors(input_file, start_index):
     # All input files processed
     global_descriptor = GlobalImageDescriptor(size=full_image_size,
                                               file_format=combined_file_format,
-                                              dim_order=combined_dim_order)
+                                              dim_order=combined_dim_order,
+                                              data_type=data_type)
 
     # Update the combined image size
     combined_header["DimSize"] = full_image_size

@@ -6,6 +6,7 @@ from copy import deepcopy
 import itertools
 import numpy as np
 
+from utils.utilities import get_numpy_datatype, to_rgb
 from niftysplit.image.image_wrapper import ImageWrapper, ImageStorage
 from niftysplit.utils.utilities import rescale_image
 
@@ -139,7 +140,10 @@ class BlockImageFileReader(ImageFileReader):
     def write_image(self, data_source, rescale_limits):
         """Create and write out this file, using data from this image source"""
 
-        data_type = np.dtype(self.data_type)
+        # data_type = np.dtype(self.data_type)
+
+        numpy_format = get_numpy_datatype(self.data_type, True)
+        data_type = np.dtype(numpy_format)
 
         image_data = \
             data_source.read_image(np.zeros_like(self.size), self.size).image
@@ -147,5 +151,5 @@ class BlockImageFileReader(ImageFileReader):
         if rescale_limits:
             image_data_raw = rescale_image(data_type, image_data_raw,
                                            rescale_limits)
-        self.save(image_data_raw)
+        self.save(to_rgb(image_data_raw))
         self.close_file()

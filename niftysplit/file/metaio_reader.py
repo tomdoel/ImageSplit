@@ -13,9 +13,10 @@ from collections import OrderedDict
 import numpy as np
 
 from niftysplit.file.file_image_descriptor import FileImageDescriptor
-from niftysplit.image.combined_image import Axis
 from niftysplit.file.file_wrapper import FileWrapper, FileStreamer
 from niftysplit.file.image_file_reader import LinearImageFileReader
+from niftysplit.image.combined_image import Axis
+from utils.utilities import compute_bytes_per_voxel, get_numpy_datatype
 
 
 class MetaIoFile(LinearImageFileReader):
@@ -197,51 +198,6 @@ def load_mhd_header(filename):
             metadata[key] = new_val
 
     return metadata
-
-
-def compute_bytes_per_voxel(element_type):
-    """Returns number of bytes required to store one voxel for the given
-    metaIO ElementType """
-
-    switcher = {
-        'MET_CHAR': 1,
-        'MET_UCHAR': 1,
-        'MET_SHORT': 2,
-        'MET_USHORT': 2,
-        'MET_INT': 4,
-        'MET_UINT': 4,
-        'MET_LONG': 4,
-        'MET_ULONG': 4,
-        'MET_LONG_LONG': 8,
-        'MET_ULONG_LONG': 8,
-        'MET_FLOAT': 4,
-        'MET_DOUBLE': 8,
-    }
-    return switcher.get(element_type, 2)
-
-
-def get_numpy_datatype(element_type, byte_order_msb):
-    """Returns the numpy datatype corresponding to this ElementType"""
-
-    if byte_order_msb and (byte_order_msb or byte_order_msb == "True"):
-        prefix = '>'
-    else:
-        prefix = '<'
-    switcher = {
-        'MET_CHAR': 'i1',
-        'MET_UCHAR': 'u1',
-        'MET_SHORT': 'i2',
-        'MET_USHORT': 'u2',
-        'MET_INT': 'i4',
-        'MET_UINT': 'u4',
-        'MET_LONG': 'i4',
-        'MET_ULONG': 'u4',
-        'MET_LONG_LONG': 'i8',
-        'MET_ULONG_LONG': 'u8',
-        'MET_FLOAT': 'f4',
-        'MET_DOUBLE': 'f8',
-    }
-    return prefix + switcher.get(element_type, 2)
 
 
 def save_mhd_header(filename, metadata):
