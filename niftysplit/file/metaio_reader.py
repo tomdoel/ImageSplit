@@ -376,10 +376,11 @@ def parse_mhd(header):
 
     file_format = "mhd"
     dim_order = get_dim_order(header)
-    data_type = DataType.from_metaio(header["ElementType"],
-                                     header["BinaryDataByteOrderMSB"])
+    data_type = DataType.name_from_metaio(header["ElementType"])
     image_size = header["DimSize"]
+    msb = header["BinaryDataByteOrderMSB"]
     return (FileImageDescriptor(file_format=file_format,
                                 dim_order=dim_order,
                                 data_type=data_type,
-                                image_size=image_size), header)
+                                image_size=image_size,
+                                msb=msb), header)

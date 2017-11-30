@@ -202,13 +202,15 @@ def parse_vge(header):
     if file_format != "VolumeFileFormat_Raw":
         raise ValueError("Unknown file format " + file_format)
     file_format = "vol"  # ToDo
+    msb = True  # True
     # file_format = FormatFactory.VOL_FORMAT
     dim_order = dim_order_from_header(header)
-    data_type = DataType.from_vge(file_section['filedatatype'])
+    data_type = DataType.name_from_vge(file_section['filedatatype'])
 
     header_dict = header
 
     return (FileImageDescriptor(file_format=file_format,
                                 dim_order=dim_order,
                                 data_type=data_type,
-                                image_size=image_size), header_dict)
+                                image_size=image_size,
+                                msb=msb), header_dict)

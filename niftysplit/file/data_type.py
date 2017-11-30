@@ -44,6 +44,7 @@ class DataType(object):
 
     types = {
         RGB_TYPE: DataTypeTemplate(metaio_type='MET_UCHAR',
+                                   numpy_base='u1',
                                    bytes_per_voxel=1,
                                    is_rgb=True),
         CHAR_TYPE: DataTypeTemplate(metaio_type='MET_CHAR',
@@ -82,9 +83,9 @@ class DataType(object):
                                       bytes_per_voxel=8)
     }
 
-    def __init__(self, template_name, byte_order_msb, is_rgb):
-        self.template = DataType.types[template_name]
-        self.is_rgb = is_rgb
+    def __init__(self, template_name, byte_order_msb):
+        self.template = DataType.types[template_name.lower()]
+        self.is_rgb = self.template.is_rgb
         self.byte_order_msb = byte_order_msb
 
     def get_numpy_format(self):
@@ -106,8 +107,7 @@ class DataType(object):
         for name, data_type in cls.types.items():
             if data_type.metaio_type == metaio_type_name:
                 return cls(template_name=name,
-                           byte_order_msb=byte_order_msb,
-                           is_rgb=False)
+                           byte_order_msb=byte_order_msb)
         raise ValueError("Unknown type: " + metaio_type_name)
 
     @classmethod
@@ -115,5 +115,24 @@ class DataType(object):
         """Create a DataType from a vge header data type string"""
         for name, data_type in cls.types.items():
             if data_type.vge_type == vge_type_name:
+                return cls(template_name=name,
+                           byte_order_msb=True)
+        raise ValueError("Unknown type: " + vge_type_name)
+
+    @classmethod
+    def name_from_metaio(cls, metaio_type_name):
+        """Get a DataType string from a MetaIO data type string"""
+        for name, data_type in cls.types.items():
+            if data_type.metaio_type == metaio_type_name:
                 return name
+
+        raise ValueError("Unknown type: " + metaio_type_name)
+
+    @classmethod
+    def name_from_vge(cls, vge_type_name):
+        """Get a DataType string from a vge data type string"""
+        for name, data_type in cls.types.items():
+            if data_type.vge_type == vge_type_name:
+                return name
+
         raise ValueError("Unknown type: " + vge_type_name)

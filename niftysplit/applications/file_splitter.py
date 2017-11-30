@@ -54,6 +54,8 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
     if overlap_size_voxels is None:
         overlap_size_voxels = 0
 
+    out_msb = global_descriptor.msb
+
     descriptors_out = generate_output_descriptors(
         filename_out_base=filename_out_base,
         max_block_size_voxels=max_block_size_voxels,
@@ -63,7 +65,8 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
         output_type=output_type,
         output_file_format=output_format,
         num_dims=global_descriptor.num_dims,
-        image_size=global_descriptor.size)
+        image_size=global_descriptor.size,
+        msb=out_msb)
 
     file_factory = FileFactory(file_handle_factory)
 

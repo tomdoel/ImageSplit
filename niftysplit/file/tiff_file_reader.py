@@ -2,6 +2,8 @@
 
 """Read and write data to TIFF files"""
 from tifffile import imread, imsave
+
+from niftysplit.file.data_type import DataType
 from niftysplit.file.image_file_reader import BlockImageFileReader
 
 
@@ -34,5 +36,7 @@ class TiffFileReader(BlockImageFileReader):
         """Create a TiffFileReader class for this filename and template"""
         filename = subimage_descriptor.filename
         local_file_size = subimage_descriptor.get_local_size()
-        data_type = subimage_descriptor.data_type
+        byte_order_msb = subimage_descriptor.msb
+        data_type = DataType(subimage_descriptor.data_type,
+                             byte_order_msb=byte_order_msb)
         return TiffFileReader(filename, local_file_size, data_type)
