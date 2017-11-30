@@ -150,10 +150,11 @@ def compute_bytes_per_voxel(element_type):
     return switcher.get(element_type, 2)
 
 
-def to_rgb(im):
-    im = im.copy()
-    im.resize(im.shape + (1,))
-    return np.repeat(im.astype(np.uint8), 3, len(im.shape) - 1)
+def to_rgb(image_line):
+    """Convert greyscale array to RGB"""
+    image_line = image_line.copy()
+    image_line.resize(image_line.shape + (1,))
+    return np.repeat(image_line.astype(np.uint8), 3, len(image_line.shape) - 1)
 
 
 def get_numpy_datatype(element_type, byte_order_msb):

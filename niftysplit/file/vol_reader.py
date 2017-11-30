@@ -9,7 +9,7 @@ Copyright UCL 2017
 import os
 from six.moves import configparser
 
-from niftysplit.file.data_type import DataTypeFactory
+from niftysplit.file.data_type import DataType
 from niftysplit.file.file_image_descriptor import FileImageDescriptor
 from niftysplit.file.file_wrapper import FileWrapper, FileStreamer
 from niftysplit.file.image_file_reader import LinearImageFileReader
@@ -204,7 +204,7 @@ def parse_vge(header):
     file_format = "vol"  # ToDo
     # file_format = FormatFactory.VOL_FORMAT
     dim_order = dim_order_from_header(header)
-    data_type = DataTypeFactory.from_vge(file_section['filedatatype'])
+    data_type = DataType.from_vge(file_section['filedatatype'])
 
     header_dict = header
 
