@@ -27,7 +27,7 @@ class TiffFileReader(BlockImageFileReader):
     def save(self, image):
         """Save out image data into TIFF file"""
         compression = self.data_type.compression
-        if compression in "0123456789":
+        if compression and compression in "0123456789":
             compression = int(compression)
         imagej = True if self.data_type.get_is_imagej() else False
         imsave(self.filename, image, compress=compression, imagej=imagej)
