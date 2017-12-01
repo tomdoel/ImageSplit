@@ -2,7 +2,7 @@ import numpy as np
 
 from niftysplit.file.image_file_reader import ImageFileReader
 from niftysplit.image.combined_image import Source, CoordinateTransformer, Axis
-from niftysplit.image.image_wrapper import ImageWrapper
+from niftysplit.image.image_wrapper import ImageWrapper, ImageStorage
 
 
 class FakeImageFileReader(ImageFileReader, Source):
@@ -23,7 +23,7 @@ class FakeImageFileReader(ImageFileReader, Source):
         else:
             return None
 
-    def write_image(self, data_source):
+    def write_image(self, data_source, rescale_limits):
         self.close()  # Note: we generally expect file classes to close themselves after writing the file
 
     def close(self):
@@ -39,11 +39,11 @@ class SimpleMockSource(Source):
 
     def read_image(self, start, size):
         if self.global_image:
-            return self.global_image.get_sub_image(start, size).image
+            return self.global_image.get_sub_image(start, size)
         else:
             return None
 
-    def write_image(self, data_source):
+    def write_image(self, data_source, rescale_limits):
         pass
 
     def close(self):
@@ -51,7 +51,15 @@ class SimpleMockSource(Source):
 
 
 def create_empty_image(size):
-    return ImageWrapper(np.zeros_like(size), image=np.zeros(size))
+    return ImageWrapper(np.zeros_like(size), image=ImageStorage(np.zeros(list(reversed(size)))))
 
-def create_dummy_image(size):
-    return ImageWrapper(np.zeros_like(size), image=np.arange(0, np.prod(size)).reshape(size))
+
+def create_dummy_image(size, origin=None, value_base=0):
+    if not origin:
+        origin = np.zeros_like(size)
+    return ImageWrapper(origin=origin,
+                        image=ImageStorage(np.arange(value_base, value_base+np.prod(size)).reshape(list(reversed(size)))))
+
+
+def create_dummy_image_storage(size, value_base=0):
+    return ImageStorage(np.arange(value_base, value_base+np.prod(size)).reshape(list(reversed(size))))

@@ -1,15 +1,92 @@
 # coding=utf-8
 """A wrapper for a multi-dimensional image with an origin offset"""
+from abc import abstractmethod
 
 import numpy as np
 
 
-class SmartImage(object):
+class ImageWrapperBase(object):
+    """Multi-dimensional image array with an origin"""
+
+    def __init__(self, origin, image_size=None, image=None):
+        self.origin = origin
+        if image is not None:
+            self.size = image.get_size()
+        else:
+            self.size = image_size
+        self.image = image
+
+    def set_sub_image(self, sub_image):
+        """Replaces part of the image with the corresponding subimage"""
+
+        if self.image is None:
+            self.image = ImageStorage.create_empty(
+                size=self.size,
+                dtype=sub_image.image.get_type())
+
+        # Transform the image to our local coordinate system
+        local_subimage = self.transform_sub_image(sub_image)
+        start, size = self.transform_coords(sub_image)
+
+        # Test if image is in bounds
+        start_indices = np.subtract(start, self.origin)
+        end_indices = np.add(start_indices, size)
+        if np.any(np.less(start_indices, 0)) \
+                or np.any(np.greater(end_indices, self.size)):
+            raise ValueError("Subimage is not contained within the main image")
+
+        # Set the part of the image to this subimage
+        selector = tuple([slice(s, e) for s, e in
+                          zip(start_indices, end_indices)])
+        self.image.set(selector, local_subimage)
+
+    @abstractmethod
+    def transform_coords(self, sub_image):
+        """Transforms sub_image start, size to this coordinate system"""
+        pass
+
+    @abstractmethod
+    def transform_sub_image(self, sub_image):
+        """Transforms sub_image to this coordinate system"""
+        pass
+
+
+class ImageWrapper(ImageWrapperBase):
+    """Multi-dimensional image array with an origin"""
+
+    def __init__(self, origin, image_size=None, image=None):
+        super(ImageWrapper, self).__init__(origin=origin,
+                                           image_size=image_size,
+                                           image=image)
+
+    def get_sub_image(self, start, size):
+        """Returns the corresponding subimage"""
+
+        start_indices = np.subtract(start, self.origin)
+        end_indices = np.add(start_indices, np.array(size))
+        if np.any(np.less(start_indices,
+                          np.zeros_like(start_indices))) \
+                or np.any(np.greater(end_indices, self.size)):
+            raise ValueError("Subimage is not contained within the main image")
+        selector = tuple([slice(s, e) for s, e in
+                          zip(start_indices, end_indices)])
+        return ImageWrapper(origin=start, image=self.image.get(selector))
+
+    def transform_coords(self, sub_image):
+        return sub_image.origin, sub_image.size
+
+    def transform_sub_image(self, sub_image):
+        return sub_image.image
+
+
+class SmartImage(ImageWrapper):
     """Image wrapper which converts between Axes"""
 
     def __init__(self, start, size, image, transformer):
-        self._size = size
-        self._start = start
+        super(SmartImage, self).__init__(origin=start, image_size=size,
+                                         image=image)
+        self.size = size
+        self.origin = start
         self.image = image
         self._transformer = transformer
 
@@ -24,66 +101,92 @@ class SmartImage(object):
     def coords_to_other(self, transformer):
         """Converts coordinates to another system"""
 
-        return self._transformer.to_other(self._start, self._size, transformer)
+        return self._transformer.to_other(self.origin, self.size, transformer)
 
-    def set_sub_image(self, sub_image):
-        """Replaces part of the image with the corresponding subimage"""
+    def transform_coords(self, sub_image):
+        return sub_image.coords_to_other(self._transformer)
 
-        if self.image is None:
-            self.image = np.zeros(shape=self._size,
-                                  dtype=sub_image.image.dtype)
-
-        # Transform the image to our local coordinate system
-        local_subimage = sub_image.transform_to_other(self._transformer)
-        start, size = sub_image.coords_to_other(self._transformer)
-
-        # Test if image is in bounds
-        start_indices = np.subtract(start, self._start)
-        end_indices = np.add(start_indices, size)
-        if np.any(np.less(start_indices, 0)) \
-                or np.any(np.greater(end_indices, self._size)):
-            raise ValueError("Subimage is not contained within the main image")
-
-        # Set the part of the image to this subimage
-        selector = tuple([slice(s, e) for s, e in
-                          zip(start_indices, end_indices)])
-        self.image[selector] = local_subimage
+    def transform_sub_image(self, sub_image):
+        return sub_image.transform_to_other(self._transformer)
 
 
-class ImageWrapper(object):
-    """Multi-dimensional image array with an origin"""
+class ImageStorage(object):
+    """Abstraction for storing image data in an arbitrary orientation
 
-    def __init__(self, origin, image_size=None, image=None):
-        self.origin = origin
-        if image is not None:
-            self.size = list(np.shape(image))
-        else:
-            self.size = image_size
-        self.image = image
+    Allows storing of data without assuming the order in which the dimensions
+    are stored in memory or indexed. This allows images to be indexed using
+    the [x,y,z] convention while the numpy ordering is actually [z,y,x]
 
-    def get_sub_image(self, start, size):
-        """Returns the corresponding subimage"""
+    """
 
-        start_indices = np.subtract(start, self.origin)
-        end_indices = np.add(start_indices, np.array(size))
-        if np.any(np.less(start_indices,
-                          np.zeros_like(start_indices))) \
-                or np.any(np.greater(end_indices, self.size)):
-            raise ValueError("Subimage is not contained within the main image")
-        selector = tuple([slice(start, end) for start, end in
-                          zip(start_indices, end_indices)])
-        return ImageWrapper(origin=start, image=self.image[selector])
+    def __init__(self, numpy_image=None):
+        self._numpy_image = numpy_image
 
-    def set_sub_image(self, sub_image):
-        """Replaces part of the image with the corresponding subimage"""
+    def set(self, selector, image):
+        """Replaces part of the image data using the specified selectors"""
 
-        if self.image is None:
-            self.image = np.zeros(shape=self.size, dtype=sub_image.image.dtype)
-        start_indices = np.subtract(sub_image.origin, self.origin)
-        end_indices = np.add(start_indices, np.array(sub_image.size))
-        if np.any(np.less(start_indices, 0)) \
-                or np.any(np.greater(end_indices, self.size)):
-            raise ValueError("Subimage is not contained within the main image")
-        selector = tuple([slice(start, end) for start, end in
-                          zip(start_indices, end_indices)])
-        self.image[selector] = sub_image.image
+        self._numpy_image[list(reversed(selector))] = image.get_raw()
+
+    def get(self, selector):
+        """Returns part of the image data using the specified selectors"""
+
+        return ImageStorage(self._numpy_image[list(reversed(selector))])
+
+    def get_size(self):
+        """Returns the image size in the global dimension ordering scheme"""
+
+        return list(reversed(list(np.shape(self._numpy_image))))
+
+    def get_type(self):
+        """Returns the underlying data type"""
+
+        return self._numpy_image.dtype
+
+    def get_raw(self):
+        """Return raw image array, not be in the global dimension ordering"""
+
+        return self._numpy_image
+
+    def transpose(self, order):
+        """Return a transpose of the image data using global ordering"""
+
+        order = list(np.subtract(len(order) - 1, order))
+        return ImageStorage(np.transpose(self._numpy_image,
+                                         list(reversed(order))))
+
+    def flip(self, do_flip):
+        """Return a copy of image data flipped using global ordering"""
+
+        image = self._numpy_image
+        for index, flip in enumerate(do_flip):
+            if flip:
+                image = np.flip(image, len(do_flip) - 1 - index)
+        return ImageStorage(image)
+
+    def reshape(self, new_shape):
+        """Return a reshaping of the image data using global ordering"""
+
+        return ImageStorage(
+            np.reshape(self._numpy_image, list(reversed(new_shape))))
+
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(other, self.__class__):
+            return np.array_equal(self._numpy_image, other.get_raw())
+        return False
+
+    def __ne__(self, other):
+        """Overrides the default implementation"""
+        return not self.__eq__(other)
+
+    def copy(self):
+        """Returns a new object with a copy of the underlying data"""
+
+        return ImageStorage(self._numpy_image.copy())
+
+    @classmethod
+    def create_empty(cls, size, dtype):
+        """Create empty object of the specified global size and data type"""
+
+        raw = np.zeros(shape=list(reversed(size)), dtype=dtype)
+        return cls(numpy_image=raw)

@@ -12,10 +12,13 @@ from collections import OrderedDict
 
 import numpy as np
 
+from niftysplit.file.data_type import DataType
 from niftysplit.file.file_image_descriptor import FileImageDescriptor
-from niftysplit.image.combined_image import Axis
 from niftysplit.file.file_wrapper import FileWrapper, FileStreamer
 from niftysplit.file.image_file_reader import LinearImageFileReader
+from niftysplit.image.combined_image import Axis
+from niftysplit.utils.utilities import compute_bytes_per_voxel, \
+    get_numpy_datatype
 
 
 class MetaIoFile(LinearImageFileReader):
@@ -50,7 +53,7 @@ class MetaIoFile(LinearImageFileReader):
             self._header = load_mhd_header(header_filename)
 
         self._bytes_per_voxel = compute_bytes_per_voxel(
-            self._header["ElementType"])
+            self._header["ElementType"]) # ToDo: set this based on output format
         self._numpy_format = get_numpy_datatype(
             self._header["ElementType"],
             self._header["BinaryDataByteOrderMSB"])
@@ -82,8 +85,8 @@ class MetaIoFile(LinearImageFileReader):
 
         if subimage_descriptor.data_type:
             header_template["ElementType"] = subimage_descriptor.data_type
-        header_template["DimSize"] = np.array(local_file_size).tolist()
-        header_template["Origin"] = local_origin.tolist()
+        header_template["DimSize"] = local_file_size
+        header_template["Origin"] = local_origin
         filename = subimage_descriptor.filename
         return cls(local_file_size, filename, file_handle_factory,
                    header_template)
@@ -92,10 +95,11 @@ class MetaIoFile(LinearImageFileReader):
         """Close file"""
         self.close()
 
-    def write_line(self, start_coords, image_line):
+    def write_line(self, start_coords, image_line, rescale_limits):
         """Write consecutive voxels to the raw binary file."""
 
-        return self._get_file_streamer().write_line(start_coords, image_line)
+        return self._get_file_streamer().write_line(
+            start_coords, image_line, rescale_limits)
 
     def read_line(self, start_coords, num_voxels_to_read):
         """Read consecutive voxels of image data from the raw binary file
@@ -197,51 +201,6 @@ def load_mhd_header(filename):
             metadata[key] = new_val
 
     return metadata
-
-
-def compute_bytes_per_voxel(element_type):
-    """Returns number of bytes required to store one voxel for the given
-    metaIO ElementType """
-
-    switcher = {
-        'MET_CHAR': 1,
-        'MET_UCHAR': 1,
-        'MET_SHORT': 2,
-        'MET_USHORT': 2,
-        'MET_INT': 4,
-        'MET_UINT': 4,
-        'MET_LONG': 4,
-        'MET_ULONG': 4,
-        'MET_LONG_LONG': 8,
-        'MET_ULONG_LONG': 8,
-        'MET_FLOAT': 4,
-        'MET_DOUBLE': 8,
-    }
-    return switcher.get(element_type, 2)
-
-
-def get_numpy_datatype(element_type, byte_order_msb):
-    """Returns the numpy datatype corresponding to this ElementType"""
-
-    if byte_order_msb and (byte_order_msb or byte_order_msb == "True"):
-        prefix = '>'
-    else:
-        prefix = '<'
-    switcher = {
-        'MET_CHAR': 'i1',
-        'MET_UCHAR': 'u1',
-        'MET_SHORT': 'i2',
-        'MET_USHORT': 'u2',
-        'MET_INT': 'i4',
-        'MET_UINT': 'u4',
-        'MET_LONG': 'i4',
-        'MET_ULONG': 'u4',
-        'MET_LONG_LONG': 'i8',
-        'MET_ULONG_LONG': 'u8',
-        'MET_FLOAT': 'f4',
-        'MET_DOUBLE': 'f8',
-    }
-    return prefix + switcher.get(element_type, 2)
 
 
 def save_mhd_header(filename, metadata):
@@ -418,9 +377,13 @@ def parse_mhd(header):
 
     file_format = "mhd"
     dim_order = get_dim_order(header)
-    data_type = header["ElementType"]
+    data_type = DataType.name_from_metaio(header["ElementType"])
     image_size = header["DimSize"]
+    msb = header["BinaryDataByteOrderMSB"]
+    compression = None
     return (FileImageDescriptor(file_format=file_format,
                                 dim_order=dim_order,
                                 data_type=data_type,
-                                image_size=image_size), header)
+                                image_size=image_size,
+                                msb=msb,
+                                compression=compression), header)

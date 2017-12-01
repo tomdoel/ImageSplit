@@ -9,6 +9,7 @@ Copyright UCL 2017
 import os
 from six.moves import configparser
 
+from niftysplit.file.data_type import DataType
 from niftysplit.file.file_image_descriptor import FileImageDescriptor
 from niftysplit.file.file_wrapper import FileWrapper, FileStreamer
 from niftysplit.file.image_file_reader import LinearImageFileReader
@@ -55,7 +56,7 @@ class VolFile(LinearImageFileReader):
         self.close()
 
     # pylint: disable=unused-argument
-    def write_line(self, start_coords, image_line):
+    def write_line(self, start_coords, image_line, rescale_limits):
         """Write consecutive voxels to the raw binary file."""
 
         raise ValueError("Writing of vol files is not supported")
@@ -135,7 +136,6 @@ class VolFile(LinearImageFileReader):
             self._file_wrapper.close()
             self._file_wrapper = None
 
-
     @classmethod
     def load_and_parse_header(cls, filename):
         """Load vge header file and parse into FileImageDescriptor"""
@@ -189,7 +189,7 @@ def dim_order_from_header(header):
     The first element in the array contains the index of the global dimension
     which is represented by the first dimension in the file, and so on
     """
-    return [2, 1, 3]  # ToDo: parse orientation from header
+    return [1, 3, 2]  # ToDo: parse orientation from header
 
 
 def parse_vge(header):
@@ -202,17 +202,17 @@ def parse_vge(header):
     if file_format != "VolumeFileFormat_Raw":
         raise ValueError("Unknown file format " + file_format)
     file_format = "vol"  # ToDo
+    msb = True  # True
     # file_format = FormatFactory.VOL_FORMAT
     dim_order = dim_order_from_header(header)
-    # dim_order = [1, 2, 3]  # ToDo: parse orientation from header
-    data_type = file_section['filedatatype']
-    if data_type != "VolumeDataType_Float":
-        raise ValueError("Unknown data type " + data_type)
-    data_type = "MET_LONG"
+    data_type = DataType.name_from_vge(file_section['filedatatype'])
+    compression = None
 
     header_dict = header
 
     return (FileImageDescriptor(file_format=file_format,
                                 dim_order=dim_order,
                                 data_type=data_type,
-                                image_size=image_size), header_dict)
+                                image_size=image_size,
+                                msb=msb,
+                                compression=compression), header_dict)

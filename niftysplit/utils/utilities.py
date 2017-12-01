@@ -7,6 +7,7 @@ Copyright UCL 2017
 
 """
 from math import ceil
+import numpy as np
 
 
 def file_linear_byte_offset(image_size, bytes_per_voxel, start_coords):
@@ -31,7 +32,7 @@ def get_number_of_blocks(image_size, max_block_size):
     size limit """
 
     return [1 if max_block_size_element <= 0 else
-            int(ceil(float(image_size_element)/float(max_block_size_element)))
+            int(ceil(float(image_size_element) / float(max_block_size_element)))
             for image_size_element, max_block_size_element in
             zip(image_size, max_block_size)]
 
@@ -114,3 +115,67 @@ def convert_to_array(scalar_or_list, parameter_name, num_dims):
                                       'containing one entry for '
                                       'each image dimension')
     return array
+
+
+def rescale_image(data_type, image_line, rescale_limits):
+    """Rescale image to the limits of this datatype"""
+    dt_min = np.iinfo(data_type).min
+    dt_max = np.iinfo(data_type).max
+    dt_range = dt_max - dt_min
+    im_range = rescale_limits.max - rescale_limits.min
+    scale = float(dt_range)/float(im_range)
+    image_line = (dt_min + scale*(image_line.astype(float) -
+                                  rescale_limits.min)).astype(data_type)
+    return image_line
+
+
+def compute_bytes_per_voxel(element_type):
+    """Returns number of bytes required to store one voxel for the given
+    metaIO ElementType """
+
+    switcher = {
+        'MET_CHAR': 1,
+        'MET_UCHAR': 1,
+        'MET_SHORT': 2,
+        'MET_USHORT': 2,
+        'MET_INT': 4,
+        'MET_UINT': 4,
+        'MET_LONG': 4,
+        'MET_ULONG': 4,
+        'MET_LONG_LONG': 8,
+        'MET_ULONG_LONG': 8,
+        'MET_FLOAT': 4,
+        'MET_DOUBLE': 8,
+    }
+    return switcher.get(element_type, 2)
+
+
+def to_rgb(image_line):
+    """Convert greyscale array to RGB"""
+    image_line = image_line.copy()
+    image_line.resize(image_line.shape + (1,))
+    return np.repeat(image_line.astype(np.uint8), 3, len(image_line.shape) - 1)
+
+
+def get_numpy_datatype(element_type, byte_order_msb):
+    """Returns the numpy datatype corresponding to this ElementType"""
+
+    if byte_order_msb and (byte_order_msb or byte_order_msb == "True"):
+        prefix = '>'
+    else:
+        prefix = '<'
+    switcher = {
+        'MET_CHAR': 'i1',
+        'MET_UCHAR': 'u1',
+        'MET_SHORT': 'i2',
+        'MET_USHORT': 'u2',
+        'MET_INT': 'i4',
+        'MET_UINT': 'u4',
+        'MET_LONG': 'i4',
+        'MET_ULONG': 'u4',
+        'MET_LONG_LONG': 'i8',
+        'MET_ULONG_LONG': 'u8',
+        'MET_FLOAT': 'f4',
+        'MET_DOUBLE': 'f8',
+    }
+    return prefix + switcher.get(element_type, 2)

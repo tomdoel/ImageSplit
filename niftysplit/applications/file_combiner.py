@@ -22,7 +22,7 @@ from niftysplit.applications.write_files import write_files
 
 
 def combine_file(input_file_base, descriptor_filename, filename_out_base,
-                 start_index, output_type, file_handle_factory):
+                 start_index, output_type, file_handle_factory, rescale):
     """Combines several overlapping files into one output file"""
 
     if not filename_out_base:
@@ -42,7 +42,7 @@ def combine_file(input_file_base, descriptor_filename, filename_out_base,
                                                       original_header,
                                                       output_type)
 
-    write_files(descriptors_in, descriptors_out, file_factory)
+    write_files(descriptors_in, descriptors_out, file_factory, rescale)
 
 
 def main(args):
@@ -59,7 +59,7 @@ def main(args):
     parser.add_argument("-d", "--descriptor", required=False, default=None,
                         help="Name of descriptor file (.gift) which defines "
                              "the file splitting")
-    parser.add_argument("-s", "--startindex", required=False, default="0",
+    parser.add_argument("-i", "--startindex", required=False, default="0",
                         type=int,
                         help="Start index for filename suffix when loading a "
                              "series of files")
@@ -67,6 +67,10 @@ def main(args):
                         help="Output data type (default: same as input file "
                              "datatype)")
 
+    parser.add_argument("-r", "--rescale", required=False, default=None,
+                        type=str,
+                        help="If true, rescale image to the full range of the "
+                             "data type")
     args = parser.parse_args(args)
 
     assert sys.version_info >= (2, 7)
@@ -75,7 +79,7 @@ def main(args):
         raise ValueError('No filename was specified')
     else:
         combine_file(args.filename, args.descriptor, args.out, args.startindex,
-                     args.type, FileHandleFactory())
+                     args.type, FileHandleFactory(), args.rescale)
 
 
 if __name__ == '__main__':

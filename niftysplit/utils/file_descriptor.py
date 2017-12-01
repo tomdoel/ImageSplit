@@ -37,21 +37,25 @@ class SubImageRanges(object):
 class GlobalImageDescriptor(object):
     """Describes a full combined image"""
 
-    def __init__(self, size, file_format, dim_order):
+    def __init__(self, size, file_format, dim_order, data_type, msb):
+        self.data_type = data_type
         self.file_format = file_format
         self.size = size
         self.num_dims = len(size)
+        self.msb = msb
         self.dim_order = dim_order if dim_order \
-            else np.arange(1, self.num_dims + 1)
+            else np.arange(1, self.num_dims + 1).tolist()
 
 
 class SubImageDescriptor(object):
     """Describes an image in relation to a larger image"""
 
     # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-arguments
 
     def __init__(self, filename, file_format, data_type,
-                 template, ranges, dim_order_condensed, suffix, index):
+                 template, ranges, dim_order_condensed, suffix, index, msb,
+                 compression):
         self.suffix = suffix
         self.index = index
         self.filename = filename
@@ -60,14 +64,16 @@ class SubImageDescriptor(object):
         self.template = template
         self.ranges = SubImageRanges(ranges)
         self.axis = Axis.from_condensed_format(dim_order_condensed)
+        self.msb = msb
+        self.compression = compression
 
     def get_local_size(self):
         """Transpose the subimage size to the local coordinate system"""
-        return np.take(self.ranges.image_size, self.axis.dim_order)
+        return np.take(self.ranges.image_size, self.axis.dim_order).tolist()
 
     def get_local_origin(self):
         """Transpose the subimage origin to the local coordinate system"""
-        return np.take(self.ranges.origin_start, self.axis.dim_order)
+        return np.take(self.ranges.origin_start, self.axis.dim_order).tolist()
 
     @staticmethod
     def from_dict(descriptor_dict):
@@ -80,7 +86,9 @@ class SubImageDescriptor(object):
             ranges=descriptor_dict["ranges"],
             dim_order_condensed=descriptor_dict["dim_order"],
             suffix=descriptor_dict["suffix"],
-            index=descriptor_dict["index"]
+            index=descriptor_dict["index"],
+            msb=descriptor_dict["msb"],
+            compression=descriptor_dict["compression"]
         )
 
     def to_dict(self):
@@ -90,6 +98,7 @@ class SubImageDescriptor(object):
                 "filename": self.filename, "data_type": self.data_type,
                 "file_format": self.file_format, "template": self.template,
                 "dim_order": self.axis.to_condensed_format(),
+                "msb": self.msb,
                 "ranges": self.ranges.ranges}
 
 
@@ -104,6 +113,7 @@ def write_descriptor_file(descriptors_in, descriptors_out, filename_out_base):
     write_json(descriptor_output_filename, descriptor)
 
 
+# pylint: disable=too-many-arguments
 def generate_output_descriptors(filename_out_base,
                                 max_block_size_voxels,
                                 overlap_size_voxels,
@@ -112,7 +122,9 @@ def generate_output_descriptors(filename_out_base,
                                 output_type,
                                 output_file_format,
                                 num_dims,
-                                image_size):
+                                image_size,
+                                msb,
+                                compression):
     """Creates descriptors representing file output"""
     max_block_size_voxels_array = convert_to_array(max_block_size_voxels,
                                                    "block size", num_dims)
@@ -135,7 +147,9 @@ def generate_output_descriptors(filename_out_base,
             index=index,
             dim_order_condensed=dim_order,
             data_type=output_type,
-            template=copy.deepcopy(header)
+            template=copy.deepcopy(header),
+            msb=msb,
+            compression=compression
         )
         descriptors_out.append(file_descriptor_out)
         index += 1
@@ -158,6 +172,8 @@ def generate_descriptor_from_header(filename_out_base, original_header,
     output_image_size = np.array(original_header["DimSize"]).tolist()
     dim_order = [1, 2, 3]  # ToDo: get from header
     file_format = "mhd"
+    msb = original_header["BinaryDataByteOrderMSB"]
+    compression = None
 
     return [SubImageDescriptor(
         filename=filename_out_base + '.mhd',
@@ -169,7 +185,9 @@ def generate_descriptor_from_header(filename_out_base, original_header,
         index=0,
         ranges=[[0, output_image_size[0] - 1, 0, 0],
                 [0, output_image_size[1] - 1, 0, 0],
-                [0, output_image_size[2] - 1, 0, 0]])]
+                [0, output_image_size[2] - 1, 0, 0]],
+        msb=msb,
+        compression=compression)]
 
 
 def header_from_descriptor(descriptor_filename):
@@ -227,9 +245,12 @@ def generate_input_descriptors(input_file, start_index):
         dim_order = file_descriptor.dim_order
         file_format = file_descriptor.file_format
         current_image_size = file_descriptor.image_size
+        msb = file_descriptor.msb
+        compression = file_descriptor.compression
 
         axis = Axis.from_condensed_format(dim_order)
-        current_image_size = np.take(current_image_size, axis.reverse_dim_order)
+        current_image_size = \
+            np.take(current_image_size, axis.reverse_dim_order).tolist()
 
         if not current_ranges:
             full_image_size = copy.deepcopy(current_image_size)
@@ -267,6 +288,8 @@ def generate_input_descriptors(input_file, start_index):
             data_type=data_type,
             dim_order_condensed=dim_order,
             file_format=file_format,
+            msb=msb,
+            compression=compression
         ))
 
         if start_index is None:
@@ -285,7 +308,9 @@ def generate_input_descriptors(input_file, start_index):
     # All input files processed
     global_descriptor = GlobalImageDescriptor(size=full_image_size,
                                               file_format=combined_file_format,
-                                              dim_order=combined_dim_order)
+                                              dim_order=combined_dim_order,
+                                              data_type=data_type,
+                                              msb=msb)
 
     # Update the combined image size
     combined_header["DimSize"] = full_image_size

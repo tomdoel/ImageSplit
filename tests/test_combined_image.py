@@ -76,7 +76,7 @@ class TestCombinedImage(TestCase):
         ci = CombinedImage(descriptors, file_factory)
         source = Mock()
         self.assertEqual(len(file_factory.write_files), 0)
-        ci.write_image(source)
+        ci.write_image(source, False)
         self.assertEqual(len(file_factory.write_files), 27)
         for descriptor, write_file in zip(descriptors, file_factory.write_files):
             self.assertEqual(descriptor.ranges.ranges, write_file.descriptor.ranges.ranges)
@@ -104,7 +104,7 @@ class TestCombinedImage(TestCase):
         return SubImageDescriptor.from_dict({"filename": 'TestFileName',
             "ranges": ranges, "suffix": "SUFFIX", "dim_order": [1, 2, 3],
             "data_type": "XXXX", "index": index, "template": [],
-            "file_format": "mhd"})
+            "file_format": "mhd", "msb": "True", "compression": []})
 
 
 def global_coordinate_transformer(size):
@@ -122,7 +122,9 @@ class TestSubImage(TestCase):
             "dim_order": [1, 2, 3],
             "data_type": "XXXX",
             "template": [],
-            "file_format": "mhd"})
+            "file_format": "mhd",
+            "msb": "False",
+            "compression": []})
 
         # Check that reading creates only one read file and it is left open
         file_factory = FakeFileFactory(create_dummy_image([11, 11, 11]))
@@ -148,7 +150,7 @@ class TestSubImage(TestCase):
         # Check that file is closed after writing
         source = FakeImageFileReader(descriptor)
         self.assertEqual(len(file_factory.write_files), 0)
-        si.write_image(source)
+        si.write_image(source, None)
         self.assertEqual(len(file_factory.write_files), 1)
         self.assertFalse(file_factory.write_files[0].open)
 
@@ -172,7 +174,8 @@ class TestSubImage(TestCase):
         descriptor = SubImageDescriptor.from_dict({
             "filename": 'TestFileName', "suffix": "SUFFIX", "index": 0,
             "data_type": "XXXX", "template": [], "dim_order": dim_order,
-            "ranges": ranges, "file_format": "mhd"})
+            "ranges": ranges, "file_format": "mhd", "msb": "False",
+            "compression": []})
 
         read_file = Mock()
         global_image_size = len(dim_order)*[50]
@@ -220,7 +223,8 @@ class TestSubImage(TestCase):
         descriptor = SubImageDescriptor.from_dict({
             "filename": 'TestFileName', "suffix": "SUFFIX", "index": 0,
             "data_type": "XXXX", "template": [], "dim_order": dim_order,
-            "ranges": ranges, "file_format": "mhd"})
+            "ranges": ranges, "file_format": "mhd", "msb": "False",
+            "compression": []})
 
         file_factory = Mock()
         out_file = Mock()
@@ -234,7 +238,7 @@ class TestSubImage(TestCase):
         source.read_image.return_value = dummy_image
 
         si = SubImage(descriptor, file_factory)
-        si.write_image(source)
+        si.write_image(source, None)
 
         # CoordinateTransforer is tested elsewhere.
         transformer = CoordinateTransformer(
@@ -246,7 +250,8 @@ class TestSubImage(TestCase):
         local_data_source = out_file.write_image.call_args[0][0]
 
         # Read from the local data source to trigger a read in the global source
-        input_image = local_data_source.read_image(local_start, local_size)
+        input_image = local_data_source.read_image(local_start, local_size).image
+        input_image = local_data_source.read_image(local_start, local_size).image
 
         # Get the arguments
         test_start = source.read_image.call_args[0][0]
@@ -270,7 +275,8 @@ class TestSubImage(TestCase):
         descriptor = SubImageDescriptor.from_dict({
             "filename": 'TestFileName', "suffix": "SUFFIX", "index": 0,
             "data_type": "XXXX", "template": [], "dim_order": np.arange(1, len(start) + 1),
-            "ranges": ranges, "file_format": "mhd"})
+            "ranges": ranges, "file_format": "mhd", "msb": "False",
+            "compression": []})
         file_factory = FakeFileFactory()
         si = SubImage(descriptor, file_factory)
         start_test, size_test = si.bind_by_roi(start_global=start, size_global=size)
@@ -329,7 +335,7 @@ class TestLocalSource(TestCase):
         test_image = create_dummy_image(global_size)
         data_source.read_image.return_value = test_image
         source = LocalSource(data_source, transformer)
-        local_image = source.read_image(start, size)
+        local_image = source.read_image(start, size).image
         global_start, t_global_size = transformer.to_global(start, size)
         np.testing.assert_array_equal(data_source.read_image.call_args[0][0],
                                       start)

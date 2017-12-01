@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+from tests.common_test_functions import create_dummy_image_storage
+from niftysplit.image.image_wrapper import ImageStorage
 from niftysplit.image.combined_image import CoordinateTransformer, Axis
 from parameterized import parameterized, param
 import numpy as np
@@ -45,37 +47,35 @@ class TestCoordinateTransformer(TestCase):
         ct = CoordinateTransformer(origin, size, Axis(order, flip))
 
         transformed_start, transformed_size = ct.to_local(g_start, size)
-        global_image = np.reshape(np.arange(0, np.prod(size)), size)
+        global_image = create_dummy_image_storage(size)
         local_image = ct.image_to_local(global_image)
-        np.testing.assert_array_equal(size, global_image.shape)
-        np.testing.assert_array_equal(transformed_size, local_image.shape)
-        test_image = np.transpose(global_image, order)
-        for index, flip in enumerate(flip):
-            if flip:
-                test_image = np.flip(test_image, index)
-        np.testing.assert_array_equal(test_image, local_image)
+        np.testing.assert_array_equal(size, global_image.get_size())
+        np.testing.assert_array_equal(transformed_size, local_image.get_size())
+        test_image = global_image.transpose(order)
+        test_image = test_image.flip(flip)
+        np.testing.assert_array_equal(test_image.get_raw(), local_image.get_raw())
 
         global_image_2 = ct.image_to_global(local_image)
-        np.testing.assert_array_equal(global_image, global_image_2)
+        np.testing.assert_array_equal(global_image.get_raw(), global_image_2.get_raw())
 
     @parameterized.expand([
         param(dim=[0, 1, 2], flip=[0, 0, 0], expected=[[[0, 1, 2], [3, 4, 5], [6, 7, 8], [9, 10, 11]], [[20, 21, 22], [23, 24, 25], [26, 27, 28], [29, 30, 31]]]),
-        param(dim=[0, 2, 1], flip=[0, 0, 0], expected=[[[0, 3, 6, 9], [1, 4, 7, 10], [2, 5, 8, 11]], [[20, 23, 26, 29], [21, 24, 27, 30], [22, 25, 28, 31]]]),
-        param(dim=[0, 2, 1], flip=[0, 0, 1], expected=[[[9, 6, 3, 0], [10, 7, 4, 1], [11, 8, 5, 2]], [[29, 26, 23, 20], [30, 27, 24, 21], [31, 28, 25, 22]]]),
-        param(dim=[1, 2, 0], flip=[0, 0, 0], expected=[[[0, 20], [1, 21], [2, 22]], [[3, 23], [4, 24], [5, 25]], [[6, 26], [7, 27], [8, 28]], [[9, 29], [10, 30], [11, 31]]]),
-        param(dim=[1, 2, 0], flip=[0, 0, 1], expected=[[[20, 0], [21, 1], [22, 2]], [[23, 3], [24, 4], [25, 5]], [[26, 6], [27, 7], [28, 8]], [[29, 9], [30, 10], [31, 11]]]),
+        param(dim=[1, 0, 2], flip=[0, 0, 0], expected=[[[0, 3, 6, 9], [1, 4, 7, 10], [2, 5, 8, 11]], [[20, 23, 26, 29], [21, 24, 27, 30], [22, 25, 28, 31]]]),
+        param(dim=[1, 0, 2], flip=[1, 0, 0], expected=[[[9, 6, 3, 0], [10, 7, 4, 1], [11, 8, 5, 2]], [[29, 26, 23, 20], [30, 27, 24, 21], [31, 28, 25, 22]]]),
+        param(dim=[2, 0, 1], flip=[0, 0, 0], expected=[[[0, 20], [1, 21], [2, 22]], [[3, 23], [4, 24], [5, 25]], [[6, 26], [7, 27], [8, 28]], [[9, 29], [10, 30], [11, 31]]]),
+        param(dim=[2, 0, 1], flip=[1, 0, 0], expected=[[[20, 0], [21, 1], [22, 2]], [[23, 3], [24, 4], [25, 5]], [[26, 6], [27, 7], [28, 8]], [[29, 9], [30, 10], [31, 11]]]),
         param(dim=[0, 1, 2], flip=[0, 1, 0], expected=[[[9, 10, 11], [6, 7, 8], [3, 4, 5], [0, 1, 2]], [[29, 30, 31], [26, 27, 28], [23, 24, 25], [20, 21, 22]]]),
-        param(dim=[0, 1, 2], flip=[1, 0, 0], expected=[[[20, 21, 22], [23, 24, 25], [26, 27, 28], [29, 30, 31]], [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9, 10, 11]]]),
-        param(dim=[0, 1, 2], flip=[0, 0, 1], expected=[[[2, 1, 0], [5, 4, 3], [8, 7, 6], [11, 10, 9]], [[22, 21, 20], [25, 24, 23], [28, 27, 26], [31, 30, 29]]])
+        param(dim=[0, 1, 2], flip=[0, 0, 1], expected=[[[20, 21, 22], [23, 24, 25], [26, 27, 28], [29, 30, 31]], [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9, 10, 11]]]),
+        param(dim=[0, 1, 2], flip=[1, 0, 0], expected=[[[2, 1, 0], [5, 4, 3], [8, 7, 6], [11, 10, 9]], [[22, 21, 20], [25, 24, 23], [28, 27, 26], [31, 30, 29]]])
     ])
     def test_flip_explicit(self, dim, flip, expected):
-        global_image = np.array([[[0, 1, 2], [3, 4, 5], [6, 7, 8], [9, 10, 11]],
+        global_image_raw = np.array([[[0, 1, 2], [3, 4, 5], [6, 7, 8], [9, 10, 11]],
                         [[20, 21, 22], [23, 24, 25], [26, 27, 28], [29, 30, 31]]])
-
-        ct = CoordinateTransformer(np.zeros_like(dim), np.shape(global_image), Axis(dim, flip))
-        local_image = ct.image_to_local(global_image.copy())
-        np.testing.assert_array_equal(local_image, np.array(expected))
-        np.testing.assert_array_equal(local_image, np.array(expected))
+        global_image = ImageStorage(global_image_raw)
+        ct = CoordinateTransformer(np.zeros_like(dim), global_image.get_size(), Axis(dim, flip))
+        local_image = ct.image_to_local(global_image)
+        np.testing.assert_array_equal(local_image.get_raw(), np.array(expected))
+        np.testing.assert_array_equal(local_image.get_raw(), np.array(expected))
 
         global_image_2 = ct.image_to_global(local_image)
-        np.testing.assert_array_equal(global_image, global_image_2)
+        np.testing.assert_array_equal(global_image_raw, global_image_2.get_raw())
