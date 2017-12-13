@@ -204,6 +204,46 @@ class TestSubImage(TestCase):
         np.testing.assert_array_equal(read_file.read_image.call_args[0][1], expected_size)
 
     @parameterized.expand([
+        param(dim_order=[1, 2, 3], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]]),
+        param(dim_order=[1, 2, 3], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]]),
+        param(dim_order=[1, 2, 3], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]]),
+        param(dim_order=[1, 2, 3], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]]),
+        param(dim_order=[1, 2, 3], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]]),
+        param(dim_order=[1, 2, 3], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]]),
+        param(dim_order=[2, 1, 3], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]]),
+        param(dim_order=[2, 3, 1], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]]),
+        param(dim_order=[3, 2, 1], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]]),
+        param(dim_order=[-2, 1, 3], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]]),
+        param(dim_order=[-2, 1], ranges=[[0, 40, 0, 0], [0, 40, 0, 0]]),
+        param(dim_order=[-2, 1, 3, 4], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]]),
+        param(dim_order=[2, -3, 1], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]]),
+        param(dim_order=[3, 2, -1], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]])
+    ])
+    def test_get_limits(self, dim_order, ranges):
+        descriptor = SubImageDescriptor.from_dict({
+            "filename": 'TestFileName', "suffix": "SUFFIX", "index": 0,
+            "data_type": "XXXX", "template": [], "dim_order": dim_order,
+            "ranges": ranges, "file_format": "mhd", "msb": "False",
+            "compression": []})
+
+        read_file = Mock()
+        global_image_size = len(dim_order)*[50]
+        image = create_dummy_image(global_image_size)
+        image_wrapper = image
+        read_file.read_image.return_value = image_wrapper.image
+
+        file_factory = Mock()
+        file_factory.create_read_file.return_value = read_file
+
+        si = SubImage(descriptor, file_factory)
+
+        minv, maxv = si.get_limits()
+        actual_min = np.min(image_wrapper.image.get_raw())
+        actual_max = np.max(image_wrapper.image.get_raw())
+        self.assertEqual(minv, actual_min)
+        self.assertEqual(maxv, actual_max)
+
+    @parameterized.expand([
         param(dim_order=[1, 2, 3], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]], start=[0, 0, 0], size=[10, 10, 10]),
         param(dim_order=[1, 2, 3], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]], start=[0, 0, 0], size=[11, 11, 11]),
         param(dim_order=[1, 2, 3], ranges=[[0, 40, 0, 0], [0, 40, 0, 0], [0, 40, 0, 0]], start=[1, 2, 3], size=[20, 15, 15]),
