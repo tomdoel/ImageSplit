@@ -100,6 +100,12 @@ class TestCombinedImage(TestCase):
         for read_file in file_factory.read_files:
             self.assertFalse(read_file.open)
 
+        limits = ci.get_limits()
+        self.assertEqual(limits.min, np.min(image.image.get_raw()))
+        self.assertEqual(limits.max, np.max(image.image.get_raw()))
+
+
+
     def _make_descriptor(self, index, ranges):
         return SubImageDescriptor.from_dict({"filename": 'TestFileName',
             "ranges": ranges, "suffix": "SUFFIX", "dim_order": [1, 2, 3],
@@ -400,5 +406,13 @@ class TestAxis(TestCase):
         self.assertSequenceEqual(axis.dim_order, dim)
         self.assertSequenceEqual(axis.dim_flip, flip)
         self.assertSequenceEqual(axis.to_condensed_format(), condensed)
+
+        try:
+            Axis.from_condensed_format([0, 1, 2])
+            self.fail("Zero-indexed array for condensed dim ordering should "
+                      "assert")
+        except ValueError as e:
+            pass
+
 
 
