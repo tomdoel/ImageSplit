@@ -124,7 +124,9 @@ def rescale_image(data_type, image_line, rescale_limits):
     dt_range = dt_max - dt_min
     im_range = rescale_limits.max - rescale_limits.min
     scale = float(dt_range)/float(im_range)
-    image_line = (dt_min + scale*(image_line.astype(float) -
+    image_line = np.clip(image_line,
+                         a_min=rescale_limits.min, a_max=rescale_limits.max)
+    image_line = (dt_min + scale*(np.around(image_line).astype(float) -
                                   rescale_limits.min)).astype(data_type)
     return image_line
 
