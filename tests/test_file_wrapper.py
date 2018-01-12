@@ -11,6 +11,7 @@ from pyfakefs import fake_filesystem_unittest
 
 from niftysplit.file import file_wrapper
 from niftysplit.file.file_wrapper import FileStreamer
+from niftysplit.image.combined_image import Limits
 
 
 class FakeFileHandleFactory(object):
@@ -192,12 +193,19 @@ class TestStreamer(fake_filesystem_unittest.TestCase):
         self.assertTrue(np.array_equal(expected, read_file_contents))
 
     @parameterized.expand([
-        [[2, 3, 8], 4, True, [1, 2, 3], 2],
-        [[101, 222, 4], 4, True, [1, 1, 1], 10],
-        [[154, 141, 183], 4, True, [13, 12, 11], 30],
+        [[2, 3, 8], 4, True, [1, 2, 3], 2, None],
+        [[101, 222, 4], 4, True, [1, 1, 1], 10, None],
+        [[154, 141, 183], 4, True, [13, 12, 11], 30, None],
+        [[2, 3, 8], 1, False, [1, 2, 3], 2, Limits(1, 99)],
+        [[101, 222, 4], 1, False, [1, 1, 1], 10, Limits(1, 99)],
+        [[154, 141, 183], 1, False, [13, 12, 11], 30, Limits(1, 99)],
+        [[2, 3, 8], 4, False, [1, 2, 3], 2, Limits(1, 99)],
+        [[101, 222, 4], 4, True, [1, 1, 1], 10, Limits(1, 99)],
+        [[154, 141, 183], 4, True, [13, 12, 11], 30, Limits(1, 99)],
     ])
     def test_write_image_stream(self, image_size, bytes_per_voxel, is_signed,
-                                start_coords, num_voxels_to_write):
+                                start_coords, num_voxels_to_write,
+                                rescale_limits):
         file_handle_factory = file_wrapper.FileHandleFactory()
 
         wrapper = file_wrapper.FileWrapper(
@@ -220,8 +228,8 @@ class TestStreamer(fake_filesystem_unittest.TestCase):
         to_write_numpy = np.asarray(to_write_voxels,
                                     dtype=TestStreamer.get_np_type(
                                         bytes_per_voxel, is_signed))
-        file_streamer.write_line([0, 0, 0], base_data_numpy, None)
-        file_streamer.write_line(start_coords, to_write_numpy, None)
+        file_streamer.write_line([0, 0, 0], base_data_numpy, rescale_limits)
+        file_streamer.write_line(start_coords, to_write_numpy, rescale_limits)
         file_streamer.close()
         read_file_contents = TestStreamer.read_from_fake_file(
             '/test/test_write_image_stream.bin',
@@ -231,7 +239,24 @@ class TestStreamer(fake_filesystem_unittest.TestCase):
 
         expected = np.asarray(expected, dtype=TestStreamer.get_np_type(
             bytes_per_voxel, is_signed))
-        self.assertTrue(np.array_equal(expected, read_file_contents))
+        if rescale_limits:
+            expected_clipped = np.clip(expected, a_min=rescale_limits.min,
+                                        a_max=rescale_limits.max)
+
+            int_size = 256.0**bytes_per_voxel
+            if is_signed:
+                offset = - np.floor(int_size/2)
+            else:
+                offset = 0
+            scale = (int_size - 1.0)/\
+                    (float(rescale_limits.max) - float(rescale_limits.min))
+
+            expected_rescaled = np.around(offset +
+                scale*(expected_clipped.astype(np.float)
+                       - float(rescale_limits.min))).astype(expected.dtype)
+        else:
+            expected_rescaled = expected
+        self.assertTrue(np.array_equal(expected_rescaled, read_file_contents))
 
     @staticmethod
     def read_from_fake_file(file_name, bytes_per_voxel, is_signed):
