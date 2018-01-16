@@ -5,9 +5,9 @@ from mock import Mock
 from parameterized import parameterized, param
 
 from tests.common_test_functions import FakeImageFileReader, create_dummy_image
-from niftysplit.image.combined_image import SubImage, CoordinateTransformer, \
+from imagesplit.image.combined_image import SubImage, CoordinateTransformer, \
     CombinedImage, LocalSource, Axis
-from niftysplit.utils.file_descriptor import SubImageDescriptor
+from imagesplit.utils.file_descriptor import SubImageDescriptor
 
 
 class FakeFileFactory(object):

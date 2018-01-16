@@ -7,10 +7,10 @@ pylintjob:
   script:
 
     # save current folder path just in case
-    - export niftysplit_dir=$(pwd)
+    - export imagesplit_dir=$(pwd)
 
     # create a virtual env so that pylint can import
-    - pyl_venv_name="niftysplit-test-pyl"
+    - pyl_venv_name="imagesplit-test-pyl"
     - py3_bin=$(which python3)
     - virtualenv -p $py3_bin $pyl_venv_name
     - cd $pyl_venv_name/bin
@@ -20,11 +20,11 @@ pylintjob:
     - $pyl_venv_bin/python --version
 
     # Install requirements
-    - cd $niftysplit_dir
+    - cd $imagesplit_dir
     - $pyl_venv_bin/pip install -r requirements-test.txt
 
     # Run pylint
-    - $pyl_venv_bin/pylint --rcfile=tests/pylintrc niftysplit
+    - $pyl_venv_bin/pylint --rcfile=tests/pylintrc imagesplit
   tags:
     - gift-linux
 
@@ -38,13 +38,13 @@ testjob-linux:
     - pwd
 
     # save current folder path just in case
-    - export niftysplit_dir=$(pwd)
+    - export imagesplit_dir=$(pwd)
 
     #### python 3 tests ###################################
     - echo 'Running Python 3 tests'
 
     # create a virtual env for testing
-    - py3_venv_name="niftysplit-test-py3"
+    - py3_venv_name="imagesplit-test-py3"
     - py3_bin=$(which python3)
     - virtualenv -p $py3_bin $py3_venv_name
     - cd $py3_venv_name/bin
@@ -54,11 +54,11 @@ testjob-linux:
     - $py3_venv_bin/python --version
 
     # Install requirements for tests
-    - cd $niftysplit_dir
+    - cd $imagesplit_dir
     - $py3_venv_bin/pip install -r requirements-test.txt
 
     # Run tests with coverage
-    - $py3_venv_bin/coverage run -a --source ./niftysplit -m unittest discover -s "tests"
+    - $py3_venv_bin/coverage run -a --source ./imagesplit -m unittest discover -s "tests"
     - $py3_venv_bin/coverage report -m
 
     ###############end of python3
@@ -68,7 +68,7 @@ testjob-linux:
     - echo 'Running Python 2 tests'
 
     # create a virtual env for testing
-    - py2_venv_name="niftysplit-test-py2"
+    - py2_venv_name="imagesplit-test-py2"
     - py2_bin=$(which python2)
     - virtualenv -p $py2_bin $py2_venv_name
     - cd $py2_venv_name/bin
@@ -78,7 +78,7 @@ testjob-linux:
     - $py2_venv_bin/python --version
 
     # Install requirements for tests
-    - cd $niftysplit_dir
+    - cd $imagesplit_dir
     - $py2_venv_bin/pip install -r requirements-test.txt
 
     # Run tests
@@ -98,13 +98,13 @@ testjob-mac:
     - pwd
 
     # save current folder path just in case
-    - export niftysplit_dir=$(pwd)
+    - export imagesplit_dir=$(pwd)
 
     #### python 3 tests ###################################
     - echo 'Running Python 3 tests'
 
     # create a virtual env for testing
-    - py3_venv_name="niftysplit-test-py3"
+    - py3_venv_name="imagesplit-test-py3"
     - py3_bin=$(which python3)
     - virtualenv -p $py3_bin $py3_venv_name
     - cd $py3_venv_name/bin
@@ -114,7 +114,7 @@ testjob-mac:
     - $py3_venv_bin/python --version
 
     # Install requirements for tests
-    - cd $niftysplit_dir
+    - cd $imagesplit_dir
     - $py3_venv_bin/pip install -r requirements-test.txt
 
     # Run tests
@@ -127,7 +127,7 @@ testjob-mac:
     - echo 'Running Python 2 tests'
 
     # create a virtual env for testing
-    - py2_venv_name="niftysplit-test-py2"
+    - py2_venv_name="imagesplit-test-py2"
     - py2_bin=$(which python2)
     - virtualenv -p $py2_bin $py2_venv_name
     - cd $py2_venv_name/bin
@@ -137,7 +137,7 @@ testjob-mac:
     - $py2_venv_bin/python --version
 
     # Install requirements for tests
-    - cd $niftysplit_dir
+    - cd $imagesplit_dir
     - $py2_venv_bin/pip install -r requirements-test.txt
 
     # Run tests
@@ -160,7 +160,7 @@ testjob-win:
     - py -3 --version
 
     # create a virtual env for testing
-    - set py3_venv_name=niftysplit-test-py3
+    - set py3_venv_name=imagesplit-test-py3
 
     # Create virtual environment if it does not exist
     - IF NOT EXIST %py3_venv_name%\Scripts\python.exe (
@@ -180,7 +180,7 @@ testjob-win:
     - py -2 --version
 
     # create a virtual env for testing
-    - set py2_venv_name=niftysplit-test-py2
+    - set py2_venv_name=imagesplit-test-py2
 
     # Create virtual environment if it does not exist
     - IF NOT EXIST %py2_venv_name%\Scripts\python2 (

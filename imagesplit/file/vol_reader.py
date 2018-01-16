@@ -9,10 +9,10 @@ Copyright UCL 2017
 import os
 from six.moves import configparser
 
-from niftysplit.file.data_type import DataType
-from niftysplit.file.file_image_descriptor import FileImageDescriptor
-from niftysplit.file.file_wrapper import FileWrapper, FileStreamer
-from niftysplit.file.image_file_reader import LinearImageFileReader
+from imagesplit.file.data_type import DataType
+from imagesplit.file.file_image_descriptor import FileImageDescriptor
+from imagesplit.file.file_wrapper import FileWrapper, FileStreamer
+from imagesplit.file.image_file_reader import LinearImageFileReader
 
 
 class VolFile(LinearImageFileReader):

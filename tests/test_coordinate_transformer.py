@@ -1,8 +1,8 @@
 from unittest import TestCase
 
 from tests.common_test_functions import create_dummy_image_storage
-from niftysplit.image.image_wrapper import ImageStorage
-from niftysplit.image.combined_image import CoordinateTransformer, Axis
+from imagesplit.image.image_wrapper import ImageStorage
+from imagesplit.image.combined_image import CoordinateTransformer, Axis
 from parameterized import parameterized, param
 import numpy as np
 

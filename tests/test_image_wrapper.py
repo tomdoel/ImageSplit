@@ -7,7 +7,7 @@ import numpy as np
 from parameterized import parameterized, param
 
 from tests.common_test_functions import create_dummy_image
-from niftysplit.image.image_wrapper import ImageWrapper, ImageStorage
+from imagesplit.image.image_wrapper import ImageWrapper, ImageStorage
 
 
 class TestImageWrapper(TestCase):

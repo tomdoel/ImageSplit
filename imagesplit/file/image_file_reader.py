@@ -6,9 +6,9 @@ from copy import deepcopy
 import itertools
 import numpy as np
 
-from niftysplit.utils.utilities import to_rgb
-from niftysplit.image.image_wrapper import ImageWrapper, ImageStorage
-from niftysplit.utils.utilities import rescale_image
+from imagesplit.utils.utilities import to_rgb
+from imagesplit.image.image_wrapper import ImageWrapper, ImageStorage
+from imagesplit.utils.utilities import rescale_image
 
 
 class ImageFileReader(object):

@@ -6,9 +6,9 @@ Author: Tom Doel
 Copyright UCL 2017
 
 """
-from niftysplit.file.metaio_reader import MetaIoFile
-from niftysplit.file.tiff_file_reader import TiffFileReader
-from niftysplit.file.vol_reader import VolFile
+from imagesplit.file.metaio_reader import MetaIoFile
+from imagesplit.file.tiff_file_reader import TiffFileReader
+from imagesplit.file.vol_reader import VolFile
 
 
 class FormatFactory(object):

@@ -4,7 +4,7 @@
 from abc import ABCMeta, abstractmethod
 
 import numpy as np
-from niftysplit.image.image_wrapper import SmartImage
+from imagesplit.image.image_wrapper import SmartImage
 
 
 class Source(object):

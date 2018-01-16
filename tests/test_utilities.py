@@ -5,8 +5,8 @@ import unittest
 from parameterized import parameterized
 import numpy as np
 
-from niftysplit.image.combined_image import Limits
-from niftysplit.utils.utilities import file_linear_byte_offset, rescale_image
+from imagesplit.image.combined_image import Limits
+from imagesplit.utils.utilities import file_linear_byte_offset, rescale_image
 
 
 class TestUtilities(unittest.TestCase):

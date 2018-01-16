@@ -12,12 +12,12 @@ from collections import OrderedDict
 
 import numpy as np
 
-from niftysplit.file.data_type import DataType
-from niftysplit.file.file_image_descriptor import FileImageDescriptor
-from niftysplit.file.file_wrapper import FileWrapper, FileStreamer
-from niftysplit.file.image_file_reader import LinearImageFileReader
-from niftysplit.image.combined_image import Axis
-from niftysplit.utils.utilities import compute_bytes_per_voxel, \
+from imagesplit.file.data_type import DataType
+from imagesplit.file.file_image_descriptor import FileImageDescriptor
+from imagesplit.file.file_wrapper import FileWrapper, FileStreamer
+from imagesplit.file.image_file_reader import LinearImageFileReader
+from imagesplit.image.combined_image import Axis
+from imagesplit.utils.utilities import compute_bytes_per_voxel, \
     get_numpy_datatype
 
 

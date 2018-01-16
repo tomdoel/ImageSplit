@@ -3,8 +3,8 @@
 """Read and write data to TIFF files"""
 from tifffile import imread, imsave
 
-from niftysplit.file.data_type import DataType
-from niftysplit.file.image_file_reader import BlockImageFileReader
+from imagesplit.file.data_type import DataType
+from imagesplit.file.image_file_reader import BlockImageFileReader
 
 
 class TiffFileReader(BlockImageFileReader):

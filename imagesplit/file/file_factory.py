@@ -1,6 +1,6 @@
 # coding=utf-8
 """Factory for creating file objects fod different file types"""
-from niftysplit.file.file_formats import FormatFactory
+from imagesplit.file.file_formats import FormatFactory
 
 
 class FileFactory(object):

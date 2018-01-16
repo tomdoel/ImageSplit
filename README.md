@@ -1,17 +1,17 @@
-# NiftySplit
+# ImageSplit
 
-<img src="https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/raw/master/giftsurg-icon.png" width="150" height="150">
+<img src="https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/raw/master/giftsurg-icon.png" width="150" height="150">
 
-[![build status](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/badges/master/build.svg)](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/commits/master)
-[![coverage report](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/badges/master/coverage.svg)](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/commits/master)
+[![build status](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/badges/master/build.svg)](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/commits/master)
+[![coverage report](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/badges/master/coverage.svg)](https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/commits/master)
 
-NiftySplit is a utility for splitting very large image volumes into multiple overlapping sub-volumes, and for recombining sub-volumes into a one or more volumes. NiftySplit can also convert the underlying data types.
-NiftySplit is designed to prioritise low memory usage over performance, so that large volumes can be easily processed with limited memory resources.
+ImageSplit is a utility for splitting very large image volumes into multiple overlapping sub-volumes, and for recombining sub-volumes into a one or more volumes. ImageSplit can also convert the underlying data types.
+ImageSplit is designed to prioritise low memory usage over performance, so that large volumes can be easily processed with limited memory resources.
 
 
 Author: Tom Doel
 
-NiftySplit was developed as part of the [GIFT-Surg][giftsurg] project, at the [Wellcome EPSRC Centre for Interventional and Surgical Sciences][weiss], and the [Translational Imaging Group][tig] in the [Centre for Medical Image Computing][cmic] at [University College London (UCL)][ucl].
+ImageSplit was developed as part of the [GIFT-Surg][giftsurg] project, at the [Wellcome EPSRC Centre for Interventional and Surgical Sciences][weiss], and the [Translational Imaging Group][tig] in the [Centre for Medical Image Computing][cmic] at [University College London (UCL)][ucl].
 
 
 
@@ -22,15 +22,15 @@ Please see the [contribution guidelines](./CONTRIBUTING.md).
 
 ### Useful links
 
-[NiftySplit source code on CmicLab][NiftySplit-cmiclab]
+[ImageSplit source code on CmicLab][ImageSplit-cmiclab]
 
-[NiftySplit-cmiclab]: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit
+[ImageSplit-cmiclab]: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit
 
 
 ## Licensing and Copyright
 
 Copyright 2017 University College London.
-NiftySplit is released under the BSD-3 license. Please see the LICENSE file for details.
+ImageSplit is released under the BSD-3 license. Please see the LICENSE file for details.
 
 
 ## Acknowledgements

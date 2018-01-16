@@ -6,7 +6,7 @@ Author: Tom Doel
 Copyright UCL 2017
 
 """
-from niftysplit.image.combined_image import CombinedImage
+from imagesplit.image.combined_image import CombinedImage
 
 
 def write_files(descriptors_in, descriptors_out, file_factory, rescale):

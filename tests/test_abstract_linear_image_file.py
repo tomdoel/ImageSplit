@@ -4,8 +4,8 @@ from parameterized import parameterized, param
 
 from tests.common_test_functions import create_dummy_image, \
     SimpleMockSource, create_empty_image
-from niftysplit.file.image_file_reader import LinearImageFileReader
-from niftysplit.image.image_wrapper import ImageWrapper, ImageStorage
+from imagesplit.file.image_file_reader import LinearImageFileReader
+from imagesplit.image.image_wrapper import ImageWrapper, ImageStorage
 import numpy as np
 
 

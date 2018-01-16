@@ -15,11 +15,11 @@ import argparse
 import os
 import sys
 
-from niftysplit.file.file_factory import FileFactory
-from niftysplit.file.file_wrapper import FileHandleFactory
-from niftysplit.utils.file_descriptor import write_descriptor_file, \
+from imagesplit.file.file_factory import FileFactory
+from imagesplit.file.file_wrapper import FileHandleFactory
+from imagesplit.utils.file_descriptor import write_descriptor_file, \
     generate_output_descriptors, generate_input_descriptors
-from niftysplit.applications.write_files import write_files
+from imagesplit.applications.write_files import write_files
 
 
 # pylint: disable=too-many-arguments

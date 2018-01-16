@@ -1,15 +1,15 @@
-## NiftySplit
+## ImageSplit
 
-The main source code repository for NiftySplit is [CMICLab][cmiclab-repo].
+The main source code repository for ImageSplit is [CMICLab][cmiclab-repo].
 
-[cmiclab-repo]: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit
+[cmiclab-repo]: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit
 
 
 ## Submitting bug reports and feature requests
 
 Bug reports and feature requests should be submitted by creating an issue on [CMICLab][cmiclab-issue].
 
-[cmiclab-issue]: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/issues/new
+[cmiclab-issue]: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/issues/new
 
 
 ## Submitting merge requests
@@ -17,7 +17,7 @@ Bug reports and feature requests should be submitted by creating an issue on [CM
 All merge requests should be submitted via [CMICLab][cmiclab-mr].
 Please make sure you have read the following subsections before submitting a merge request.
 
-[cmiclab-mr]: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/NiftySplit/merge_requests/new
+[cmiclab-mr]: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/merge_requests/new
 
 
 ### Python style guide
@@ -33,6 +33,6 @@ Before submitting a merge request, please make sure your branch passes all
 unit tests, by running:
 
 ``` sh
-cd NiftySplit/
+cd ImageSplit/
 sh run_tests.sh
 ```

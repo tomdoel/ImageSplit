@@ -13,7 +13,7 @@ import os
 
 import numpy as np
 
-from niftysplit.utils.utilities import file_linear_byte_offset, rescale_image
+from imagesplit.utils.utilities import file_linear_byte_offset, rescale_image
 
 
 class FileStreamer(object):

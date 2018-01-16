@@ -9,9 +9,9 @@ import numpy as np
 from parameterized import parameterized
 from pyfakefs import fake_filesystem_unittest
 
-from niftysplit.file import file_wrapper
-from niftysplit.file.file_wrapper import FileStreamer
-from niftysplit.image.combined_image import Limits
+from imagesplit.file import file_wrapper
+from imagesplit.file.file_wrapper import FileStreamer
+from imagesplit.image.combined_image import Limits
 
 
 class FakeFileHandleFactory(object):

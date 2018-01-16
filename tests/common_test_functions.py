@@ -1,8 +1,8 @@
 import numpy as np
 
-from niftysplit.file.image_file_reader import ImageFileReader
-from niftysplit.image.combined_image import Source, CoordinateTransformer, Axis
-from niftysplit.image.image_wrapper import ImageWrapper, ImageStorage
+from imagesplit.file.image_file_reader import ImageFileReader
+from imagesplit.image.combined_image import Source, CoordinateTransformer, Axis
+from imagesplit.image.image_wrapper import ImageWrapper, ImageStorage
 
 
 class FakeImageFileReader(ImageFileReader, Source):

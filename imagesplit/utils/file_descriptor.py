@@ -12,11 +12,11 @@ import os
 
 import numpy as np
 
-from niftysplit.file.file_formats import FormatFactory
-from niftysplit.file.metaio_reader import load_mhd_header
-from niftysplit.image.combined_image import Axis
-from niftysplit.utils.json_reader import write_json, read_json
-from niftysplit.utils.utilities import get_image_block_ranges, convert_to_array
+from imagesplit.file.file_formats import FormatFactory
+from imagesplit.file.metaio_reader import load_mhd_header
+from imagesplit.image.combined_image import Axis
+from imagesplit.utils.json_reader import write_json, read_json
+from imagesplit.utils.utilities import get_image_block_ranges, convert_to_array
 
 
 class SubImageRanges(object):
