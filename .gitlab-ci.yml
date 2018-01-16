@@ -3,12 +3,31 @@ stages:
   - test
   - dev_test
 
+
+test Linux:
+  stage: test
+  script:
+      - tox
+  tags:
+    - gift-linux
+  coverage: '/^TOTAL.*\s+(\d+\%)$/'
+
+
 test macOS:
   stage: test
   script:
       - tox
   tags:
     - gift-mac
+
+
+test Windows:
+  stage: test
+  script:
+      - tox
+  tags:
+    - gift-win
+
 
 pylintjob:
   stage: pylint_test
