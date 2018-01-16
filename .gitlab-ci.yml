@@ -27,7 +27,6 @@ build docs:
     - doc/
 
 
-
 test Linux:
   stage: test
   script:
@@ -51,33 +50,6 @@ test Windows:
       - tox
   tags:
     - gift-win
-
-
-pylintjob:
-  stage: pylint_test
-  script:
-
-    # save current folder path just in case
-    - export imagesplit_dir=$(pwd)
-
-    # create a virtual env so that pylint can import
-    - pyl_venv_name="imagesplit-test-pyl"
-    - py3_bin=$(which python3)
-    - virtualenv -p $py3_bin $pyl_venv_name
-    - cd $pyl_venv_name/bin
-    - pyl_venv_bin=$(pwd)
-
-    # print Python version to CI output
-    - $pyl_venv_bin/python --version
-
-    # Install requirements
-    - cd $imagesplit_dir
-    - $pyl_venv_bin/pip install -r requirements-dev.txt
-
-    # Run pylint
-    - $pyl_venv_bin/pylint --rcfile=tests/pylintrc imagesplit
-  tags:
-    - gift-linux
 
 
 deploy docs to staging:
