@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# NiftyNet documentation build configuration file, created by
+# ImageSplit documentation build configuration file, created by
 # sphinx-quickstart on Wed Aug 30 14:13:50 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -31,7 +31,7 @@ root_dir_rel = os.path.join('..', '..')
 root_dir_abs = os.path.abspath(root_dir_rel)
 module_path = root_dir_abs
 sys.path.insert(0, module_path)
-logo_file = 'niftynet-logo.png'
+logo_file = 'giftsurg-icon.png'
 static_images_folder = 'images'
 logo_path = os.path.join('..', '..', logo_file)
 
@@ -100,16 +100,16 @@ source_suffix = '.rst'
 # The master toctree document.
 master_doc = 'index'
 
-# This is for instance for niftynet.engine to be shown under the letter 'e'
+# This is for instance for imagesplit.engine to be shown under the letter 'e'
 # rather than 'n'. That way the Python module index is displayed more nicely.
 modindex_common_prefix = [
-    'niftynet.'
+    'imagesplit.'
 ]
 
 # General information about the project.
-project = u'NiftyNet'
-copyright = u'2017, NiftyNet Consortium'
-author = u'NiftyNet Consortium'
+project = u'ImageSplit'
+copyright = u'2017, UCL'
+author = u'UCL'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -177,7 +177,7 @@ html_logo = logo_path
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'NiftyNetdoc'
+htmlhelp_basename = 'ImageSplitdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -204,8 +204,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'NiftyNet.tex', u'NiftyNet Documentation',
-     u'NiftyNet Consortium', 'manual'),
+    (master_doc, 'ImageSplit.tex', u'ImageSplit Documentation',
+     u'UCL', 'manual'),
 ]
 
 
@@ -214,7 +214,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'niftynet', u'NiftyNet Documentation',
+    (master_doc, 'imagesplit', u'ImageSplit Documentation',
      [author], 1)
 ]
 
@@ -225,8 +225,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'NiftyNet', u'NiftyNet Documentation',
-     author, 'NiftyNet', 'One line description of project.',
+    (master_doc, 'ImageSplit', u'ImageSplit Documentation',
+     author, 'ImageSplit', 'One line description of project.',
      'Miscellaneous'),
 ]
 
