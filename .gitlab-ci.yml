@@ -21,7 +21,7 @@ pylintjob:
 
     # Install requirements
     - cd $imagesplit_dir
-    - $pyl_venv_bin/pip install -r requirements-test.txt
+    - $pyl_venv_bin/pip install -r requirements-dev.txt
 
     # Run pylint
     - $pyl_venv_bin/pylint --rcfile=tests/pylintrc imagesplit
@@ -55,7 +55,7 @@ testjob-linux:
 
     # Install requirements for tests
     - cd $imagesplit_dir
-    - $py3_venv_bin/pip install -r requirements-test.txt
+    - $py3_venv_bin/pip install -r requirements-dev.txt
 
     # Run tests with coverage
     - $py3_venv_bin/coverage run -a --source ./imagesplit -m unittest discover -s "tests"
@@ -79,7 +79,7 @@ testjob-linux:
 
     # Install requirements for tests
     - cd $imagesplit_dir
-    - $py2_venv_bin/pip install -r requirements-test.txt
+    - $py2_venv_bin/pip install -r requirements-dev.txt
 
     # Run tests
     - $py2_venv_bin/python -m unittest discover -s "tests"
@@ -115,7 +115,7 @@ testjob-mac:
 
     # Install requirements for tests
     - cd $imagesplit_dir
-    - $py3_venv_bin/pip install -r requirements-test.txt
+    - $py3_venv_bin/pip install -r requirements-dev.txt
 
     # Run tests
     - $py3_venv_bin/python -m unittest discover -s "tests"
@@ -138,7 +138,7 @@ testjob-mac:
 
     # Install requirements for tests
     - cd $imagesplit_dir
-    - $py2_venv_bin/pip install -r requirements-test.txt
+    - $py2_venv_bin/pip install -r requirements-dev.txt
 
     # Run tests
     - $py2_venv_bin/python -m unittest discover -s "tests"
@@ -169,7 +169,7 @@ testjob-win:
     - )
 
     # Install requirements for tests
-    - .\%py3_venv_name%\Scripts\pip install -r requirements-test.txt
+    - .\%py3_venv_name%\Scripts\pip install -r requirements-dev.txt
     - if %errorlevel% neq 0 exit /b %errorlevel%
 
     # Run tests
@@ -189,7 +189,7 @@ testjob-win:
     - )
 
     # Install requirements for tests
-    - .\%py2_venv_name%\Scripts\pip install -r requirements-test.txt
+    - .\%py2_venv_name%\Scripts\pip install -r requirements-dev.txt
     - if %errorlevel% neq 0 exit /b %errorlevel%
 
     # Run tests
