@@ -4,3 +4,4 @@ mock
 pyfakefs
 parameterized
 pylint
+sphinx
