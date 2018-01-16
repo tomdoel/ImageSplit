@@ -1,6 +1,14 @@
 stages:
   - pylint_test
+  - test
   - dev_test
+
+test macOS:
+  stage: test
+  script:
+      - tox
+  tags:
+    - gift-mac
 
 pylintjob:
   stage: pylint_test
