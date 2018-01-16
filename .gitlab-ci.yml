@@ -1,7 +1,31 @@
 stages:
-  - pylint_test
+  - build
   - test
-  - dev_test
+  - deploy
+
+
+build docs:
+  stage: build
+  script:
+    # create a virtual env
+    - py3_venv_name="py-venv-py3"
+    - py3_bin=$(which python3)
+    - virtualenv -p $py3_bin $py3_venv_name
+
+    # Install requirements for sphinx
+    - $py3_venv_name/bin/pip install -r requirements-dev.txt
+    - source $py3_venv_name/bin/activate
+
+    - cd doc
+    - make html
+    - cd ..
+
+  tags:
+    - gift-adelie
+  artifacts:
+    paths:
+    - doc/
+
 
 
 test Linux:
@@ -55,174 +79,33 @@ pylintjob:
   tags:
     - gift-linux
 
-testjob-linux:
-  stage: dev_test
+
+deploy docs to staging:
+  stage: deploy
   script:
-    # !!kill coverage in case of hanging processes
-    - if pgrep coverage; then pkill -f coverage; fi
-
-    # print system info
-    - pwd
-
-    # save current folder path just in case
-    - export imagesplit_dir=$(pwd)
-
-    #### python 3 tests ###################################
-    - echo 'Running Python 3 tests'
-
-    # create a virtual env for testing
-    - py3_venv_name="imagesplit-test-py3"
-    - py3_bin=$(which python3)
-    - virtualenv -p $py3_bin $py3_venv_name
-    - cd $py3_venv_name/bin
-    - py3_venv_bin=$(pwd)
-
-    # print Python version to CI output
-    - $py3_venv_bin/python --version
-
-    # Install requirements for tests
-    - cd $imagesplit_dir
-    - $py3_venv_bin/pip install -r requirements-dev.txt
-
-    # Run tests with coverage
-    - $py3_venv_bin/coverage run -a --source ./imagesplit -m unittest discover -s "tests"
-    - $py3_venv_bin/coverage report -m
-
-    ###############end of python3
-
-
-    #### python 2 tests ###################################
-    - echo 'Running Python 2 tests'
-
-    # create a virtual env for testing
-    - py2_venv_name="imagesplit-test-py2"
-    - py2_bin=$(which python2)
-    - virtualenv -p $py2_bin $py2_venv_name
-    - cd $py2_venv_name/bin
-    - py2_venv_bin=$(pwd)
-
-    # print Python version to CI output
-    - $py2_venv_bin/python --version
-
-    # Install requirements for tests
-    - cd $imagesplit_dir
-    - $py2_venv_bin/pip install -r requirements-dev.txt
-
-    # Run tests
-    - $py2_venv_bin/python -m unittest discover -s "tests"
-
-    ###############end of python3
-
-    - echo 'finished tests'
+    # Note: the group/username directory must already exist on the server before calling this command
+    - rsync -avz -e'ssh -v' --numeric-ids --delete doc/build/html/* staging_docs_rsync:GIFT-Surg/ImageSplit 2>&1
   tags:
-    - gift-linux
+    - docs-staging
+  environment:
+    name: staging
+    url: http://gift-adelie.cs.ucl.ac.uk/staging/GIFT-Surg/ImageSplit
+  only:
+    - master
+  dependencies:
+    - build docs
 
 
-testjob-mac:
-  stage: dev_test
+deploy docs to production:
+  stage: deploy
   script:
-    # print system info
-    - pwd
-
-    # save current folder path just in case
-    - export imagesplit_dir=$(pwd)
-
-    #### python 3 tests ###################################
-    - echo 'Running Python 3 tests'
-
-    # create a virtual env for testing
-    - py3_venv_name="imagesplit-test-py3"
-    - py3_bin=$(which python3)
-    - virtualenv -p $py3_bin $py3_venv_name
-    - cd $py3_venv_name/bin
-    - py3_venv_bin=$(pwd)
-
-    # print Python version to CI output
-    - $py3_venv_bin/python --version
-
-    # Install requirements for tests
-    - cd $imagesplit_dir
-    - $py3_venv_bin/pip install -r requirements-dev.txt
-
-    # Run tests
-    - $py3_venv_bin/python -m unittest discover -s "tests"
-
-    ###############end of python3
-
-
-    #### python 2 tests ###################################
-    - echo 'Running Python 2 tests'
-
-    # create a virtual env for testing
-    - py2_venv_name="imagesplit-test-py2"
-    - py2_bin=$(which python2)
-    - virtualenv -p $py2_bin $py2_venv_name
-    - cd $py2_venv_name/bin
-    - py2_venv_bin=$(pwd)
-
-    # print Python version to CI output
-    - $py2_venv_bin/python --version
-
-    # Install requirements for tests
-    - cd $imagesplit_dir
-    - $py2_venv_bin/pip install -r requirements-dev.txt
-
-    # Run tests
-    - $py2_venv_bin/python -m unittest discover -s "tests"
-
-    ###############end of python3
-
-    - echo 'finished tests'
+    # Note: the group/username directory must already exist on the server before calling this command
+    - rsync -avz -e'ssh -v' --numeric-ids --delete doc/build/html/* production_docs_rsync:GIFT-Surg/ImageSplit 2>&1
   tags:
-    - gift-mac
-
-testjob-win:
-  stage: dev_test
-  script:
-
-    # print system info
-    - echo %CD%
-
-    # PYTHON 3 Print Python version
-    - py -3 --version
-
-    # create a virtual env for testing
-    - set py3_venv_name=imagesplit-test-py3
-
-    # Create virtual environment if it does not exist
-    - IF NOT EXIST %py3_venv_name%\Scripts\python.exe (
-    - py -3 -m virtualenv %py3_venv_name%
-    - if %errorlevel% neq 0 exit /b %errorlevel%
-    - )
-
-    # Install requirements for tests
-    - .\%py3_venv_name%\Scripts\pip install -r requirements-dev.txt
-    - if %errorlevel% neq 0 exit /b %errorlevel%
-
-    # Run tests
-    - .\%py3_venv_name%\Scripts\python -m unittest discover -s "tests"
-    - if %errorlevel% neq 0 exit /b %errorlevel%
-
-    # PYTHON 2 Print Python version
-    - py -2 --version
-
-    # create a virtual env for testing
-    - set py2_venv_name=imagesplit-test-py2
-
-    # Create virtual environment if it does not exist
-    - IF NOT EXIST %py2_venv_name%\Scripts\python2 (
-    - py -2.7 -m virtualenv %py2_venv_name%
-    - if %errorlevel% neq 0 exit /b %errorlevel%
-    - )
-
-    # Install requirements for tests
-    - .\%py2_venv_name%\Scripts\pip install -r requirements-dev.txt
-    - if %errorlevel% neq 0 exit /b %errorlevel%
-
-    # Run tests
-    - .\%py2_venv_name%\Scripts\python -m unittest discover -s "tests"
-    - if %errorlevel% neq 0 exit /b %errorlevel%
-
-  tags:
-    - gift-win
-
+    - docs-production
+  environment:
+    name: production
+  only:
+    - public
+  dependencies:
+    - build docs
