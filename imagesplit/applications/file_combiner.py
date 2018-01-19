@@ -51,7 +51,7 @@ def main(args):
         description='Combines multiple image parts into a single large MetaIO '
                     '(.mhd) file')
 
-    parser.add_argument("-f", "--filename", required=True,
+    parser.add_argument("-i", "--input", required=True,
                         default="_no_filename_specified",
                         help="Base name of files to combine")
     parser.add_argument("-o", "--out", required=False, default="",
@@ -59,7 +59,7 @@ def main(args):
     parser.add_argument("-d", "--descriptor", required=False, default=None,
                         help="Name of descriptor file (.gift) which defines "
                              "the file splitting")
-    parser.add_argument("-i", "--startindex", required=False, default="0",
+    parser.add_argument("-x", "--startindex", required=False, default="0",
                         type=int,
                         help="Start index for filename suffix when loading a "
                              "series of files")

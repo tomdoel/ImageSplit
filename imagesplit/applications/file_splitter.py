@@ -122,26 +122,27 @@ def main(args):
         description='Splits a large MetaIO (.mhd) file into multiple parts '
                     'with overlap')
 
-    parser.add_argument("-f", "--filename", required=True,
+    parser.add_argument("-i", "--input", required=True,
                         default="_no_filename_specified",
-                        help="Name of file to split, or filename prefix for a "
+                        help="Name of input file, or filename prefix for a "
                              "series of files")
     parser.add_argument("-o", "--out", required=False, default="",
-                        help="Prefix of output files")
+                        help="Name of output file, or filename prefix for a "
+                             "series of files")
     parser.add_argument("-l", "--overlap", required=False, default=None,
                         type=int,
                         help="Number of voxels to overlap between outputs")
     parser.add_argument("-m", "--max", nargs='+', required=False, default=None,
                         type=int,
                         help="Maximum number of voxels in each dimension")
-    parser.add_argument("-i", "--startindex", required=False, default=None,
+    parser.add_argument("-x", "--startindex", required=False, default=None,
                         type=int,
                         help="Start index for filename suffix when loading a "
                              "series of files")
     parser.add_argument("-t", "--type", required=False, default=None, type=str,
                         help="Output data type (default: same as input file "
                              "datatype)")
-    parser.add_argument("-e", "--format", required=False, default=None,
+    parser.add_argument("-f", "--format", required=False, default=None,
                         type=str,
                         help="Output file format such as mhd, tiff "
                              "(default: same as input file format)")
@@ -178,11 +179,11 @@ def main(args):
     if args.slice and (args.axis or args.max or args.overlap):
         raise ValueError('Cannot use --slice with --axis, --max or --overlap')
 
-    if args.filename == '_no_filename_specified':
+    if args.input == '_no_filename_specified':
         raise ValueError('No filename was specified')
     else:
         assert sys.version_info >= (2, 7)
-        split_file(input_file=args.filename,
+        split_file(input_file=args.input,
                    filename_out_base=args.out,
                    max_block_size_voxels=args.max,
                    overlap_size_voxels=args.overlap,
