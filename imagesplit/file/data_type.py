@@ -16,9 +16,7 @@ class DataTypeTemplate(object):
                  numpy_base=None,
                  metaio_type=None,
                  vge_type=None,
-                 is_rgb=False,
-                 is_imagej=False):
-        self.is_imagej = is_imagej
+                 is_rgb=False):
         self.numpy_base = numpy_base
         self.vge_type = vge_type
         self.bytes_per_voxel = bytes_per_voxel
@@ -52,15 +50,13 @@ class DataType(object):
                                     bytes_per_voxel=1),
         UCHAR_TYPE: DataTypeTemplate(metaio_type='MET_UCHAR',
                                      numpy_base='u1',
-                                     bytes_per_voxel=1,
-                                     is_imagej=True),
+                                     bytes_per_voxel=1),
         SHORT_TYPE: DataTypeTemplate(metaio_type='MET_SHORT',
                                      numpy_base='i2',
                                      bytes_per_voxel=2),
         USHORT_TYPE: DataTypeTemplate(metaio_type='MET_USHORT',
                                       numpy_base='u2',
-                                      bytes_per_voxel=2,
-                                      is_imagej=True),
+                                      bytes_per_voxel=2),
         LONG_TYPE: DataTypeTemplate(metaio_type='MET_LONG',
                                     numpy_base='i4',
                                     vge_type='VolumeDataType_Float',
@@ -76,18 +72,19 @@ class DataType(object):
                                           bytes_per_voxel=8),
         FLOAT_TYPE: DataTypeTemplate(metaio_type='MET_FLOAT',
                                      numpy_base='f4',
-                                     is_imagej=True,
                                      bytes_per_voxel=4),
         DOUBLE_TYPE: DataTypeTemplate(metaio_type='MET_DOUBLE',
                                       numpy_base='f8',
                                       bytes_per_voxel=8)
     }
 
-    def __init__(self, template_name, byte_order_msb, compression=None):
+    def __init__(self, template_name, byte_order_msb, compression=None,
+                 is_imagej=False):
         self.template = DataType.types[template_name.lower()]
         self.is_rgb = self.template.is_rgb
         self.byte_order_msb = byte_order_msb
         self.compression = compression
+        self.is_imagej = is_imagej
 
     def get_numpy_format(self):
         """Create a numpy data format string for this data type"""
@@ -100,7 +97,7 @@ class DataType(object):
 
     def get_is_imagej(self):
         """True if this datatype is an RGB format"""
-        return self.template.is_imagej
+        return self.is_imagej
 
     def __get_type(self, type_string):
         return self.types[type_string]
