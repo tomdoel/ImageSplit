@@ -2,6 +2,9 @@
 
 """Read and write data to TIFF files"""
 from tifffile import imread, imsave
+from PIL import Image, TiffImagePlugin
+import numpy as np
+import os
 
 from imagesplit.file.data_type import DataType
 from imagesplit.file.image_file_reader import BlockImageFileReader
@@ -32,6 +35,13 @@ class TiffFileReader(BlockImageFileReader):
         imagej = True if self.data_type.get_is_imagej() else False
         imsave(self.filename, image, compress=compression, imagej=imagej)
 
+        img = Image.fromarray(np.squeeze(image))
+
+        img.save(TiffFileReader.add_filename_suffix(self.filename, '_UN'))
+        TiffImagePlugin.WRITE_LIBTIFF = True
+        img.save(TiffFileReader.add_filename_suffix(self.filename, '_COM'),
+                 compression='packbits')
+
     @staticmethod
     # pylint: disable=unused-argument
     def create_write_file(subimage_descriptor, file_handle_factory):
@@ -44,3 +54,9 @@ class TiffFileReader(BlockImageFileReader):
                              byte_order_msb=byte_order_msb,
                              compression=compression)
         return TiffFileReader(filename, local_file_size, data_type)
+
+    @staticmethod
+    def add_filename_suffix(filename, suffix):
+        """Adds a suffix to to the filename before the extension"""
+        name, ext = os.path.splitext(filename)
+        return "{name}_{suffix}{ext}".format(name=name, suffix=suffix, ext=ext)
