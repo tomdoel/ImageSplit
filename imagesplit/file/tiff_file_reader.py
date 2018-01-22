@@ -35,7 +35,7 @@ class TiffFileReader(BlockImageFileReader):
         imagej = True if self.data_type.get_is_imagej() else False
         imsave(self.filename, image, compress=compression, imagej=imagej)
 
-        img = Image.fromarray(np.squeeze(image))
+        img = Image.fromarray(image)
 
         img.save(TiffFileReader.add_filename_suffix(self.filename, '_UN'))
         TiffImagePlugin.WRITE_LIBTIFF = True

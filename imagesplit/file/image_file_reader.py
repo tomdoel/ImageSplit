@@ -145,7 +145,7 @@ class BlockImageFileReader(ImageFileReader):
 
         image_data = \
             data_source.read_image(np.zeros_like(self.size), self.size).image
-        image_data_raw = image_data.get_raw()
+        image_data_raw = image_data.get_raw_image()
         if rescale_limits:
             image_data_raw = rescale_image(data_type, image_data_raw,
                                            rescale_limits)
