@@ -155,7 +155,7 @@ class BlockImageFileReader(ImageFileReader):
         if self.data_type.get_is_rgb():
             image_data_raw = to_rgb(image_data_raw)
         else:
-            if image_data_raw.dtype !=  data_type:
+            if image_data_raw.dtype != data_type:
                 image_data_raw = np.around(image_data_raw).astype(data_type)
 
         self.save(image_data_raw)

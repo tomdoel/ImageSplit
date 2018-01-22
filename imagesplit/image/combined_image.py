@@ -312,7 +312,7 @@ class CoordinateTransformer(object):
 
 
 class Axis(object):
-    """Defines coordinate system used by imaeg coordinates"""
+    """Defines coordinate system used by image coordinates"""
 
     def __init__(self, dim_order, dim_flip):
         self.dim_order = dim_order

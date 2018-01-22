@@ -167,7 +167,7 @@ def main(args):
                         default=None, type=int,
                         help="Axis ordering (default 1 2 3). Specifies the "
                              "global axis corresponding to each dimension "
-                             "in the imnage file. The first value is the "
+                             "in the image file. The first value is the "
                              "global axis represented by the first dimension "
                              "in the file, and so on. One value for each "
                              "dimension, dimensions are numbered 1,2,3,"
