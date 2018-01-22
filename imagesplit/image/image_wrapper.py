@@ -156,7 +156,11 @@ class ImageStorage(object):
     def get_raw_image(self):
         """Return raw image array in the standard PIL dimension ordering"""
 
-        return np.transpose(self._numpy_image)
+        transposed = np.transpose(self._numpy_image)
+        if np.ndim(transposed) == 3 and np.shape(transposed)[2] == 1:
+            return np.squeeze(transposed, 2)
+        else:
+            return transposed
 
     def transpose(self, order):
         """Return a transpose of the image data using global ordering"""
