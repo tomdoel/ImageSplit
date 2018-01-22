@@ -2,6 +2,7 @@
 """A wrapper for a multi-dimensional image with an origin offset"""
 from abc import abstractmethod
 
+from PIL import Image
 import numpy as np
 
 
@@ -143,9 +144,19 @@ class ImageStorage(object):
         return self._numpy_image.dtype
 
     def get_raw(self):
-        """Return raw image array, not be in the global dimension ordering"""
+        """Return raw image array; might not be in global dimension ordering"""
 
         return self._numpy_image
+
+    def get_image(self):
+        """Creates and returns an Image object for this data"""
+
+        return Image.fromarray(np.transpose(self._numpy_image))
+
+    def get_raw_image(self):
+        """Return raw image array in the standard PIL dimension ordering"""
+
+        return np.transpose(self._numpy_image)
 
     def transpose(self, order):
         """Return a transpose of the image data using global ordering"""
