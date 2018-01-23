@@ -128,12 +128,12 @@ class BlockImageFileReader(ImageFileReader):
     def read_image(self, start_local, size_local):
         """Read the specified part of the image"""
 
-        image_data = self.load()
-        if image_data.shape != self.size:
+        image_data = ImageStorage.from_raw_image(self.load(), self.size)
+        if image_data.get_size() != self.size:
             raise ValueError("Image is not the expected size")
 
         image = ImageWrapper(origin=np.zeros_like(start_local),
-                             image=ImageStorage(image_data))
+                             image=image_data)
 
         return image.get_sub_image(start_local, size_local).image
 
@@ -159,4 +159,5 @@ class BlockImageFileReader(ImageFileReader):
                 image_data_raw = np.around(image_data_raw).astype(data_type)
 
         self.save(image_data_raw)
+
         self.close_file()

@@ -159,8 +159,7 @@ class ImageStorage(object):
         transposed = np.transpose(self._numpy_image)
         if np.ndim(transposed) == 3 and np.shape(transposed)[2] == 1:
             return np.squeeze(transposed, 2)
-        else:
-            return transposed
+        return transposed
 
     def transpose(self, order):
         """Return a transpose of the image data using global ordering"""
@@ -205,3 +204,16 @@ class ImageStorage(object):
 
         raw = np.zeros(shape=list(reversed(size)), dtype=dtype)
         return cls(numpy_image=raw)
+
+    @classmethod
+    def from_raw_image(cls, raw, size=None):
+        """Create ImageStorage object from this image data array"""
+
+        if size and not np.array_equal(np.shape(raw),
+                                       size[:np.size(np.shape(raw))]):
+            raise ValueError('When loading an image, nonsingleton dimensions '
+                             'must match size')
+        # Add in singleton dimensions if required
+        if size:
+            raw = np.reshape(raw, size)
+        return cls(np.transpose(raw))

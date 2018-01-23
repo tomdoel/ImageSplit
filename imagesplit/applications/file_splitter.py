@@ -152,9 +152,10 @@ def main(args):
                         help="If set, rescale image to the full range of the "
                              "data type")
 
-    parser.add_argument("-z", "--compress", required=False, default=None,
-                        type=str,
+    parser.add_argument("-z", "--compress", nargs='?', required=False,
+                        const='default', default=None, type=str,
                         help="Sets the compression level")
+
     parser.add_argument("-s", "--slice", required=False, default=None,
                         type=str,
                         help="Divide image into slices along the specified "

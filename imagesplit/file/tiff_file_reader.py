@@ -1,10 +1,9 @@
 # coding=utf-8
 
 """Read and write data to TIFF files"""
-from tifffile import imread, imsave
-from PIL import Image, TiffImagePlugin
-import numpy as np
 import os
+import numpy as np
+from PIL import Image, TiffImagePlugin
 
 from imagesplit.file.data_type import DataType
 from imagesplit.file.image_file_reader import BlockImageFileReader
@@ -15,7 +14,7 @@ class TiffFileReader(BlockImageFileReader):
 
     def __init__(self, filename, image_size, data_type):
         super(TiffFileReader, self).__init__(image_size, data_type)
-        self.read_image = None
+        self.cached_image = None
         self.filename = filename
 
     def close_file(self):
@@ -23,24 +22,42 @@ class TiffFileReader(BlockImageFileReader):
 
     def load(self):
         """Load image data from TIFF file"""
-        if not self.read_image:
-            self.read_image = imread(self.filename)
-        return self.read_image
+        if not self.cached_image:
+            img = Image.open(self.filename)
+            self.cached_image = np.array(img)
+        return self.cached_image
 
     def save(self, image):
         """Save out image data into TIFF file"""
         compression = self.data_type.compression
-        if compression and compression in "0123456789":
-            compression = int(compression)
-        imagej = True if self.data_type.get_is_imagej() else False
-        imsave(self.filename, image, compress=compression, imagej=imagej)
+
+        if compression == 'default':
+            compression = 'tiff_adobe_deflate'
+
+        if compression not in [None,
+                               'packbits',
+                               'tiff_deflate',
+                               'tiff_adobe_deflate',
+                               'tiff_sgilog23',
+                               'tiff_raw16']:
+            raise ValueError(
+                compression + ' compression not supported for TIFF files')
 
         img = Image.fromarray(image)
 
-        img.save(TiffFileReader.add_filename_suffix(self.filename, '_UN'))
-        TiffImagePlugin.WRITE_LIBTIFF = True
-        img.save(TiffFileReader.add_filename_suffix(self.filename, '_COM'),
-                 compression='packbits')
+        if compression:
+            # Set WRITE_LIBTIFF to true for compression, but restore previous
+            # value afterwards in case user has deliberately set a value
+            write_libtiff_previous_value = TiffImagePlugin.WRITE_LIBTIFF
+            try:
+                TiffImagePlugin.WRITE_LIBTIFF = True
+                img.save(self.filename, compression=compression)
+
+            finally:
+                TiffImagePlugin.WRITE_LIBTIFF = write_libtiff_previous_value
+
+        else:
+            img.save(self.filename)
 
     @staticmethod
     # pylint: disable=unused-argument
