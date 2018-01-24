@@ -227,18 +227,13 @@ def generate_input_descriptors(input_file, start_index):
     if start_index is None:
         # If no start index is specified, load a single header file
         file_index = 0
-        suffix = ""
+        format_str = ""
     else:
         # Load a series of files starting with the specified prefix
         file_index = start_index
+        format_str = _get_format_string(extension, input_file_base, start_index)
 
-        for num_zeros in range(10, -1, -1):
-            format_str = '{0:0' + str(num_zeros) + 'd}'
-            suffix = format_str.format(start_index)
-            header_filename = input_file_base + suffix + extension
-            if os.path.isfile(header_filename):
-                break
-
+    suffix = format_str.format(start_index)
     header_filename = input_file_base + suffix + extension
 
     if not os.path.isfile(header_filename):
@@ -306,7 +301,7 @@ def generate_input_descriptors(input_file, start_index):
         else:
             # Search for next file, and if not found terminate the loop
             file_index += 1
-            suffix = str(file_index)
+            suffix = format_str.format(file_index)
             header_filename = input_file_base + suffix + extension
             if not os.path.isfile(header_filename):
                 break
@@ -347,3 +342,13 @@ def parse_header(filename, factory):
 
     format_string = factory.extension_to_format(extension)
     return factory.get_factory(format_string).load_and_parse_header(filename)
+
+
+def _get_format_string(extension, input_file_base, start_index):
+    for num_zeros in range(10, -1, -1):
+        format_str = '{0:0' + str(num_zeros) + 'd}'
+        suffix_test = format_str.format(start_index)
+        header_filename = input_file_base + suffix_test + extension
+        if os.path.isfile(header_filename):
+            break
+    return format_str
