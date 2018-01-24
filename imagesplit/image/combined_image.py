@@ -4,6 +4,7 @@
 from abc import ABCMeta, abstractmethod
 
 import numpy as np
+import six
 from imagesplit.image.image_wrapper import SmartImage
 
 
@@ -63,15 +64,24 @@ class CombinedImage(object):
         for subimage in self._subimages:
             subimage.close()
 
-    def write_image(self, source, rescale):
+    def write_image(self, source, rescale, test=False):
         """Write out all the subimages with data from supplied source"""
 
         # If rescaling is required, get the global limits
-        limits = source.get_limits() if rescale else None
+        if not rescale:
+            limits = None
+            six.print_("Limits: No rescale")
+        elif rescale == "limits":
+            limits = source.get_limits()
+            six.print_("Limits: " + str(limits.min) + ":" + str(limits.max))
+        else:
+            limits = Limits(rescale[0], rescale[1])
+            six.print_("Limits: " + str(limits.min) + ":" + str(limits.max))
 
         # Get each subimage to write itself
-        for next_image in self._subimages:
-            next_image.write_image(source, limits)
+        if not test:
+            for next_image in self._subimages:
+                next_image.write_image(source, limits)
 
     def get_limits(self):
         """Return minimum and maximum values across all subimages"""

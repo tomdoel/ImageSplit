@@ -32,6 +32,9 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
     [header, descriptors_in, global_descriptor] = \
         generate_input_descriptors(input_file, start_index)
 
+    if rescale and rescale != "limits" and len(rescale) != 2:
+        raise ValueError('Rescale must have no arguments, or a min and max')
+
     if not filename_out_base:
         input_file_base = os.path.splitext(input_file)[0]
         filename_out_base = input_file_base + "_split"
@@ -147,10 +150,11 @@ def main(args):
                         help="Output file format such as mhd, tiff "
                              "(default: same as input file format)")
 
-    parser.add_argument("-r", "--rescale", required=False, default=None,
-                        action='store_true',
-                        help="If set, rescale image to the full range of the "
-                             "data type")
+    parser.add_argument("-r", "--rescale", nargs='*', required=False,
+                        default=None, type=float,
+                        help="Rescale image between the specified min and max "
+                             "values. If no values are specified, use the "
+                             "volume limits.")
 
     parser.add_argument("-z", "--compress", nargs='?', required=False,
                         const='default', default=None, type=str,
@@ -176,6 +180,10 @@ def main(args):
                              "flipped. This cannot be used with --slice")
 
     args = parser.parse_args(args)
+
+    rescale = args.rescale
+    if rescale == []:
+        rescale = 'limits'
 
     if args.slice and (args.axis or args.max or args.overlap):
         raise ValueError('Cannot use --slice with --axis, --max or --overlap')
