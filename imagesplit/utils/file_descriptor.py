@@ -139,7 +139,7 @@ def generate_output_descriptors(filename_out_base,
     descriptors_out = []
     index = 0
     for subimage_range in ranges:
-        suffix = "_" + str(index)
+        suffix = "_" + '{0:04d}'.format(index)
         output_filename_header = filename_out_base + suffix + extension
         file_descriptor_out = SubImageDescriptor(
             filename=output_filename_header,
@@ -231,7 +231,13 @@ def generate_input_descriptors(input_file, start_index):
     else:
         # Load a series of files starting with the specified prefix
         file_index = start_index
-        suffix = str(file_index)
+
+        for num_zeros in range(10, -1, -1):
+            format_str = '{0:0' + str(num_zeros) + 'd}'
+            suffix = format_str.format(start_index)
+            header_filename = input_file_base + suffix + extension
+            if os.path.isfile(header_filename):
+                break
 
     header_filename = input_file_base + suffix + extension
 
