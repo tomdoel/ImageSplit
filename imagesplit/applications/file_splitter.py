@@ -24,9 +24,9 @@ from imagesplit.applications.write_files import write_files
 
 # pylint: disable=too-many-arguments
 def split_file(input_file, filename_out_base, max_block_size_voxels,
-               overlap_size_voxels, start_index, output_type,
-               dim_order, file_handle_factory, output_format, slice_output,
-               rescale, out_compression):
+               overlap_size_voxels, start_index, output_type, dim_order,
+               file_handle_factory, output_format, slice_output, rescale,
+               out_compression, test=False):
     """Saves the specified image file as a number of smaller files"""
 
     [header, descriptors_in, global_descriptor] = \
@@ -77,8 +77,9 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
 
     file_factory = FileFactory(file_handle_factory)
 
-    write_files(descriptors_in, descriptors_out, file_factory, rescale)
-    write_descriptor_file(descriptors_in, descriptors_out, filename_out_base)
+    write_files(descriptors_in, descriptors_out, file_factory, rescale, test)
+    write_descriptor_file(descriptors_in, descriptors_out, filename_out_base,
+                          test)
 
 
 def parse_slice_output(dim_order, max_block_size_voxels, overlap_size_voxels,
@@ -179,6 +180,11 @@ def main(args):
                              "... and a negative value means that axis is "
                              "flipped. This cannot be used with --slice")
 
+    parser.add_argument("--test", required=False,
+                        action='store_true',
+                        help="If set, No writing will be performed to the "
+                             "output files")
+
     args = parser.parse_args(args)
 
     rescale = args.rescale
@@ -202,8 +208,9 @@ def main(args):
                    file_handle_factory=FileHandleFactory(),
                    output_format=args.format,
                    slice_output=args.slice,
-                   rescale=args.rescale,
-                   out_compression=args.compress)
+                   rescale=rescale,
+                   out_compression=args.compress,
+                   test=args.test)
 
 
 if __name__ == '__main__':

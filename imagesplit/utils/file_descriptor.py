@@ -102,7 +102,8 @@ class SubImageDescriptor(object):
                 "ranges": self.ranges.ranges}
 
 
-def write_descriptor_file(descriptors_in, descriptors_out, filename_out_base):
+def write_descriptor_file(descriptors_in, descriptors_out, filename_out_base,
+                          test=False):
     """Saves descriptor files"""
     dict_in = convert_to_dict(descriptors_in)
     dict_out = convert_to_dict(descriptors_out)
@@ -110,7 +111,8 @@ def write_descriptor_file(descriptors_in, descriptors_out, filename_out_base):
                   "split_files": dict_out,
                   "source_files": dict_in}
     descriptor_output_filename = filename_out_base + "_info.gift"
-    write_json(descriptor_output_filename, descriptor)
+    if not test:
+        write_json(descriptor_output_filename, descriptor)
 
 
 # pylint: disable=too-many-arguments
