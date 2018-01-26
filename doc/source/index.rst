@@ -5,7 +5,7 @@
 
 
 ImageSplit
-========
+==========
 
 ImageSplit is a utility for splitting very large image volumes into multiple overlapping sub-volumes, and for recombining sub-volumes into a one or more volumes. ImageSplit can also convert the underlying data types.
 ImageSplit is designed to prioritise low memory usage over performance, so that large volumes can be easily processed with limited memory resources.
