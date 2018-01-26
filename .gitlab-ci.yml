@@ -7,19 +7,7 @@ stages:
 build docs:
   stage: build
   script:
-    # create a virtual env
-    - py3_venv_name="py-venv-py3"
-    - py3_bin=$(which python3)
-    - virtualenv -p $py3_bin $py3_venv_name
-
-    # Install requirements for sphinx
-    - $py3_venv_name/bin/pip install -r requirements-dev.txt
-    - source $py3_venv_name/bin/activate
-
-    - cd doc
-    - make html
-    - cd ..
-
+    - tox -e docs
   tags:
     - gift-adelie
   artifacts:
