@@ -52,7 +52,9 @@ ImageSplit was developed as part of the `GIFT-Surg`_ project, at the `Wellcome E
 
 
 
-.. _`Wellcome EPSRC Centre for Interventional and Surgical Sciences`: http://www.ucl.ac.uk/weiss
+.. _`Wellcome EPSRC Centre for Interventional and Surgical Sciences (WEISS)`: http://www.ucl.ac.uk/weiss
+.. _`Translational Imaging Group (TIG)`: http://cmictig.cs.ucl.ac.uk
+.. _`GIFT-Surg`: https://www.gift-surg.ac.uk
 .. _`ImageSplit source code repository`: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit
 .. _`Centre for Medical Image Computing`: http://cmic.cs.ucl.ac.uk/
 .. _`Centre for Medical Image Computing (CMIC)`: http://cmic.cs.ucl.ac.uk/
