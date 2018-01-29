@@ -2,8 +2,8 @@ ImageSplit
 ==========
 
 .. image:: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/raw/master/giftsurg-icon.png
-   :height: 150px
-   :width: 150px
+   :height: 128px
+   :width: 128px
    :target: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit
 
 
