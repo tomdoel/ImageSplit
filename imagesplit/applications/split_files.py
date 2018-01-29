@@ -123,26 +123,32 @@ def main(args):
     """Utility for splitting images into subimages"""
 
     parser = argparse.ArgumentParser(
-        description='Splits a large MetaIO (.mhd) file into multiple parts '
-                    'with overlap')
+        description='Splits a large file into slices or blocks with overlap')
 
     parser.add_argument("-i", "--input", required=True,
                         default="_no_filename_specified",
                         help="Name of input file, or filename prefix for a "
-                             "series of files")
+                             "set of files")
     parser.add_argument("-o", "--out", required=False, default="",
-                        help="Name of output file, or filename prefix for a "
-                             "series of files")
+                        help="Name of output file, or filename prefix if more "
+                             "than one file is output")
     parser.add_argument("-l", "--overlap", required=False, default=None,
                         type=int,
-                        help="Number of voxels to overlap between outputs")
+                        help="Number of voxels to overlap between output "
+                             "images. If not specified, output images will not "
+                             "overlap")
     parser.add_argument("-m", "--max", nargs='+', required=False, default=None,
                         type=int,
-                        help="Maximum number of voxels in each dimension")
+                        help="Maximum number of voxels in each dimension in "
+                             "each output file. Can be a scalar or vector "
+                             "corresponding to each image dimension. The file "
+                             "will be optimally split such that each file "
+                             "output dimension is less than or equal to this "
+                             "maximum.")
     parser.add_argument("-x", "--startindex", required=False, default=None,
                         type=int,
-                        help="Start index for filename suffix when loading a "
-                             "series of files")
+                        help="Start index for filename suffix when loading or "
+                             "saving a sequence of files")
     parser.add_argument("-t", "--type", required=False, default=None, type=str,
                         help="Output data type (default: same as input file "
                              "datatype)")
@@ -159,7 +165,12 @@ def main(args):
 
     parser.add_argument("-z", "--compress", nargs='?', required=False,
                         const='default', default=None, type=str,
-                        help="Sets the compression level")
+                        help="Enables compression (default no compression). "
+                             "Valid values depend on the output file format. "
+                             "-z with no extra argument will choose a suitable "
+                             "compression for this file format. "
+                             "For TIFF files, the default is Adboe deflat and "
+                             "other valid values are those supported by PIL.")
 
     parser.add_argument("-s", "--slice", required=False, default=None,
                         type=str,

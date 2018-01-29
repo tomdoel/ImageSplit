@@ -1,3 +1,3 @@
 # coding=utf-8
 
-"""ImageSplit: Utilitiy for splitting and recombining images into subimages"""
+"""Read and write various file formats"""
