@@ -20,7 +20,6 @@ ImageSplit is designed to prioritise low memory usage over performance, so that 
 
 Author: Tom Doel
 
-ImageSplit was developed at the `Wellcome EPSRC Centre for Interventional and Surgical Sciences`_ in `University College London (UCL)`_.
 ImageSplit was developed as part of the `GIFT-Surg`_ project, at the `Translational Imaging Group (TIG)`_ in the `Centre for Medical Image Computing (CMIC)`_ at `University College London (UCL)`_.
 
 
@@ -55,6 +54,7 @@ Supported by `Wellcome`_ and `EPSRC`_.
 .. _`Translational Imaging Group (TIG)`: http://cmictig.cs.ucl.ac.uk/
 .. _`Centre for Medical Image Computing (CMIC)`: http://cmic.cs.ucl.ac.uk
 .. _`Wellcome`: https://wellcome.ac.uk/
+.. _`GIFT-Surg`: https://www.gift-surg.ac.uk
 .. _`EPSRC`: https://www.epsrc.ac.uk/
 .. _`contributing guidelines`: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/blob/master/CONTRIBUTING.rst
 .. _`license file`: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/blob/master/LICENSE
