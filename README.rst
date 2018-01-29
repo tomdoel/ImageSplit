@@ -23,6 +23,68 @@ Author: Tom Doel
 ImageSplit was developed as part of the `GIFT-Surg`_ project, at the `Translational Imaging Group (TIG)`_ in the `Centre for Medical Image Computing (CMIC)`_ at `University College London (UCL)`_.
 
 
+Usage
+~~~~~
+
+imagesplit.py [-h] -i INPUT [-o OUT] [-l OVERLAP] [-m MAX [MAX ...]]
+                     [-x STARTINDEX] [-t TYPE] [-f FORMAT]
+                     [-r [RESCALE [RESCALE ...]]] [-z [COMPRESS]] [-s SLICE]
+                     [-a AXIS [AXIS ...]] [--test]
+
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        Name of input file, or filename prefix for a set of
+                        files
+  -o OUT, --out OUT     Name of output file, or filename prefix if more than
+                        one file is output
+  -l OVERLAP, --overlap OVERLAP
+                        Number of voxels to overlap between output images. If
+                        not specified, output images will not overlap
+  -m MAX [MAX ...], --max MAX [MAX ...]
+                        Maximum number of voxels in each dimension in each
+                        output file. Can be a scalar or vector corresponding
+                        to each image dimension. The file will be optimally
+                        split such that each file output dimension is less
+                        than or equal to this maximum.
+  -x STARTINDEX, --startindex STARTINDEX
+                        Start index for filename suffix when loading or saving
+                        a sequence of files
+  -t TYPE, --type TYPE  Output data type (default: same as input file
+                        datatype)
+  -f FORMAT, --format FORMAT
+                        Output file format such as mhd, tiff (default: same as
+                        input file format)
+  -r [RESCALE [RESCALE ...]], --rescale [RESCALE [RESCALE ...]]
+                        Rescale image between the specified min and max
+                        values. If no values are specified, use the volume
+                        limits.
+  -z [COMPRESS], --compress [COMPRESS]
+                        Enables compression (default no compression). Valid
+                        values depend on the output file format. -z with no
+                        extra argument will choose a suitable compression for
+                        this file format. For TIFF files, the default is Adboe
+                        deflat and other valid values are those supported by
+                        PIL.
+  -s SLICE, --slice SLICE
+                        Divide image into slices along the specified axis.
+                        Choose 1, 2, 3 etc to select an axis relative to the
+                        current image orientation, or c, s, a to select an
+                        absolute orientation.This argument cannot be used with
+                        --axis, --max or --overlap.
+  -a AXIS [AXIS ...], --axis AXIS [AXIS ...]
+                        Axis ordering (default 1 2 3). Specifies the global
+                        axis corresponding to each dimension in the image
+                        file. The first value is the global axis represented
+                        by the first dimension in the file, and so on. One
+                        value for each dimension, dimensions are numbered
+                        1,2,3,... and a negative value means that axis is
+                        flipped. This cannot be used with --slice
+  --test                If set, No writing will be performed to the output
+                        files
+
+
 Contributing
 ^^^^^^^^^^^^
 
