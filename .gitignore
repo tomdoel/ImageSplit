@@ -1,0 +1,16 @@
+# general things to ignore
+build/
+dist/
+*.egg-info/
+*.egg
+*.py[cod]
+__pycache__/
+*.so
+*~
+doc/source/imagesplit.*
+doc/source/modules.rst
+
+# For testing
+.tox
+.cache
+.coverage
