@@ -51,9 +51,9 @@ Specify how to split the image:
                              Number of voxels to overlap between output images. If
                              not specified, output images will not overlap
 
-    -m MAX [MAX ...], --max MAX [MAX ...]
+    -m MAX, --max MAX
                              Maximum number of voxels in each dimension in each
-                             output file. Can be a scalar or vector corresponding
+                             output file. MAX can be a scalar or vector corresponding
                              to each image dimension. The file will be optimally
                              split such that each file output dimension is less
                              than or equal to this maximum.
@@ -65,14 +65,14 @@ Specify file format, data type, and whether data should be rescaled (normalised)
 
     -f FORMAT, --format FORMAT  Output file format such as mhd, tiff (default: same as input file format)
 
-    -r [RESCALE [RESCALE ...]], --rescale [RESCALE [RESCALE ...]]
+    -r RESCALE, --rescale RESCALE
         Rescale image between the specified min and max
-        values. If no values are specified, use the volume limits.
+        values. If no RESCALE values are specified, use the volume limits.
 
-    -z [COMPRESS], --compress [COMPRESS]
-        Enables compression (default no compression). Valid
+    -z COMPRESS, --compress COMPRESS
+        Enables compression (default if -Z not specified: no compression). Valid
         values depend on the output file format. -z with no
-        extra argument will choose a suitable compression for
+        COMPRESS argument will choose a suitable compression for
         this file format. For TIFF files, the default is Adboe
         deflat and other valid values are those supported by PIL.
 
@@ -85,7 +85,7 @@ Specify output orientation:
         current image orientation, or c, s, a to select an
         absolute orientation.This argument cannot be used with --axis, --max or --overlap.
 
-    -a AXIS [AXIS ...], --axis AXIS [AXIS ...]
+    -a AXIS, --axis AXIS
         Axis ordering (default 1 2 3). Specifies the global
         axis corresponding to each dimension in the image
         file. The first value is the global axis represented
