@@ -42,7 +42,7 @@ if not version_git or pep440_regex.match(version_git) is None:
 description = 'Utility for splitting large image files into slices or chunks'\
 
 # Get the long description
-with open('pip/long_description.rst') as f:
+with open('README.rst.rst') as f:
     long_description = f.read()
 
 
