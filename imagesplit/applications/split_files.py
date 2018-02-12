@@ -23,6 +23,9 @@ from imagesplit.applications.write_files import write_files
 
 
 # pylint: disable=too-many-arguments
+from imagesplit.utils.versioning import get_version_string
+
+
 def split_file(input_file, filename_out_base, max_block_size_voxels,
                overlap_size_voxels, start_index, output_type, dim_order,
                file_handle_factory, output_format, slice_output, rescale,
@@ -195,6 +198,11 @@ def main(args):
                         action='store_true',
                         help="If set, No writing will be performed to the "
                              "output files")
+    version_string = get_version_string()
+    parser.add_argument(
+        "-v", "--version",
+        action='version',
+        version=version_string)
 
     args = parser.parse_args(args)
 
