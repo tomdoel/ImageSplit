@@ -9,6 +9,7 @@ __pycache__/
 *~
 doc/source/imagesplit.*
 doc/source/modules.rst
+imagesplit/info.py
 
 # For testing
 .tox
