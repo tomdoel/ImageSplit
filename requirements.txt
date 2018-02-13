@@ -1,3 +1,5 @@
 numpy
 six
 pillow
+packaging
+setuptools

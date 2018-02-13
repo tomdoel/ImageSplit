@@ -5,4 +5,3 @@ pyfakefs
 parameterized
 pylint
 sphinx
-packaging
