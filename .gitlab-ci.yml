@@ -69,3 +69,30 @@ deploy docs to production:
     - public
   dependencies:
     - build docs
+
+
+pip-installer:
+  stage: pip_test
+  only:
+    - master
+    - dev
+    - tags
+  script:
+    # remove any previous distribution files
+    - rm -rf dist
+
+    # bundle installer
+    - python setup.py bdist_wheel
+
+    # get location of wheel
+    - export home_dir=$(pwd)
+    - export $wheel_path=$(ls $home_dir/dist/*.whl)  # only one file!
+
+    # test the wheel
+    - tox -e pip2 -- $wheel_path
+    - tox -e pip3 -- $wheel_path
+
+  tags:
+    - gift-linux
+
+
