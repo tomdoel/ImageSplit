@@ -40,7 +40,7 @@ class FileStreamer(object):
         bytes_array = self._file_wrapper.get_handle().read(
             num_voxels * self._bytes_per_voxel)
 
-        return np.fromstring(bytes_array, dtype=data_type)
+        return np.frombuffer(bytes_array, dtype=data_type)
 
     def write_line(self, start_coords, image_line, rescale_limits):
         """Write a line of image data to a binary file at the specified image
