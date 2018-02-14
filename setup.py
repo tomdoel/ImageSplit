@@ -8,14 +8,13 @@ Copyright UCL 2017
 """
 
 from setuptools import setup, find_packages
-from packaging import version
-import re
 import os
 
 from imagesplit.utils.versioning import version_from_git
 
 
 version_git = version_from_git('0.0.0')
+
 # Create a module that will keep the
 # version descriptor returned by Git
 info_module = open(os.path.join('imagesplit', 'info.py'), 'w')
@@ -29,19 +28,6 @@ info_module.write('\n')
 info_module.write('\n')
 info_module.write('VERSION_DESCRIPTOR = "{}"\n'.format(version_git))
 info_module.close()
-
-# Regex for checking PEP 440 conformity
-# https://www.python.org/dev/peps/pep-0440/#id79
-pep440_regex = re.compile(
-    r"^\s*" + version.VERSION_PATTERN + r"\s*$",
-    re.VERBOSE | re.IGNORECASE,
-)
-
-# Check PEP 440 conformity
-if not version_git or pep440_regex.match(version_git) is None:
-    raise ValueError('The version tag {} does not'
-                     ' conform to PEP 440'.format(
-                         version_git))
 
 # Get the summary
 description = 'Utility for splitting large image files into slices or chunks'\
