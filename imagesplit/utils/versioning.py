@@ -11,6 +11,7 @@ import os
 import re
 
 VERSION_TAG_REGEX = '^v[0-9.]+(dev)?$'
+VERSION_TAG_GLOB = 'v[0-9]*'  # Don't confuse with regex; matches v+digit+...
 HASH_REGEX = '^[A-Fa-f0-9]+$'
 
 
@@ -38,7 +39,7 @@ def _run_describe(dir_in_repo):
     from subprocess import check_output, CalledProcessError
 
     command_git = ['git', 'describe', '--always', '--dirty',
-                   '--match', VERSION_TAG_REGEX]
+                   '--match', VERSION_TAG_GLOB]
     try:
         describe_output = check_output(
             command_git, stderr=open('/dev/null', 'w'), cwd=dir_in_repo
