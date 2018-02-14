@@ -71,7 +71,7 @@ deploy docs to production:
     - build docs
 
 
-pip-installer:
+test pip bundle:
   stage: test
   script:
     # remove any previous distribution files
@@ -87,8 +87,22 @@ pip-installer:
     # test the wheel
     - tox -e pip2 -- $wheel_path
     - tox -e pip3 -- $wheel_path
-
   tags:
     - gift-linux
 
 
+deploy pip to staging:
+  stage: deploy
+  only:
+    - tags
+  script:
+    # remove any previous distribution files
+    - rm -rf dist
+
+    # bundle installer
+    - python setup.py bdist_wheel
+  artifacts:
+    paths:
+    - dist/
+  tags:
+    - gift-linux
