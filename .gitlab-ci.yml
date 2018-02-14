@@ -82,7 +82,7 @@ pip-installer:
 
     # get location of wheel
     - export home_dir=$(pwd)
-    - export $wheel_path=$(ls $home_dir/dist/*.whl)  # only one file!
+    - export wheel_path=$(ls $home_dir/dist/*.whl)  # only one file!
 
     # test the wheel
     - tox -e pip2 -- $wheel_path
