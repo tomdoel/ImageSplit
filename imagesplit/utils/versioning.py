@@ -40,9 +40,17 @@ def _run_describe(dir_in_repo):
     command_git = ['git', 'describe', '--always', '--dirty',
                    '--match', VERSION_TAG_REGEX]
     try:
-        return check_output(
+        describe_output = check_output(
             command_git, stderr=open('/dev/null', 'w'), cwd=dir_in_repo
         ).rstrip()
+
+        try:
+            # convert bytes object if necessary (depends on Python version)
+            describe_output = describe_output.decode('utf-8')
+        except AttributeError:
+            pass
+
+        return describe_output
 
     except CalledProcessError:
         return None
