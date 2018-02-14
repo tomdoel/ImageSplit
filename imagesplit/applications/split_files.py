@@ -122,7 +122,7 @@ def parse_slice_output(dim_order, max_block_size_voxels, overlap_size_voxels,
     return new_dim_order, max_block_size_voxels, overlap_size_voxels
 
 
-def main(args):
+def main(args=None):
     """Utility for splitting images into subimages"""
 
     parser = argparse.ArgumentParser(
