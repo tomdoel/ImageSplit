@@ -73,10 +73,6 @@ deploy docs to production:
 
 pip-installer:
   stage: test
-  only:
-    - master
-    - dev
-    - tags
   script:
     # remove any previous distribution files
     - rm -rf dist
