@@ -72,7 +72,7 @@ deploy docs to production:
 
 
 pip-installer:
-  stage: pip_test
+  stage: test
   only:
     - master
     - dev
