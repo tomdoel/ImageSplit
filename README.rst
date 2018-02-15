@@ -31,6 +31,10 @@ Usage
     imagesplit.py [-h] -i INPUT [-o OUT] [-l OVERLAP] [-m MAX [MAX ...]] [-x STARTINDEX] [-t TYPE] [-f FORMAT] [-r [RESCALE [RESCALE ...]]] [-z [COMPRESS]] [-s SLICE] [-a AXIS [AXIS ...]] [--test]
 
 
+:warning: ImageSplit will overwrite existing output files. Make sure you have your images backed up before you use this utility, to prevent accidental data loss.
+
+
+
 Arguments:
 
 
