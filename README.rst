@@ -98,7 +98,7 @@ Specify output orientation:
 
 Help and testing:
 
-    --test      If set, No writing will be performed to the output files
+    --test      If set, no writing will be performed to the output files
     -h, --help  Show this help message and exit
 
 
