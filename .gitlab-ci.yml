@@ -41,41 +41,6 @@ test Windows:
       - tox
 
 
-deploy docs to staging:
-  stage: deploy
-  environment:
-    name: staging
-    url: http://gift-adelie.cs.ucl.ac.uk/staging/GIFT-Surg/ImageSplit
-  tags:
-    - docs-staging
-  only:
-    - master
-  dependencies:
-    - build docs
-  script:
-    # Note: the group/username directory must already exist on the server before calling this command
-    - rsync -avz -e'ssh -v' --numeric-ids --delete doc/build/html/* staging_docs_rsync:GIFT-Surg/ImageSplit 2>&1
-
-
-deploy pip to staging:
-  stage: deploy
-  environment:
-    name: staging
-  tags:
-    - gift-linux
-  only:
-    - master
-  artifacts:
-    paths:
-    - dist/
-  script:
-    # remove any previous distribution files
-    - rm -rf dist
-
-    # bundle installer
-    - python setup.py bdist_wheel
-
-
 test pip bundle:
   stage: test
   tags:
@@ -96,27 +61,29 @@ test pip bundle:
     - tox -e pip3 -- $wheel_path
 
 
-deploy docs to production:
+deploy docs to staging:
   stage: deploy
   environment:
-    name: production
-  only:
-    - tags
+    name: Staging docs on GIFT-Adelie
+    url: http://gift-adelie.cs.ucl.ac.uk/staging/GIFT-Surg/ImageSplit
   tags:
-    - docs-production
+    - docs-staging
+  only:
+    - master
   dependencies:
     - build docs
   script:
     # Note: the group/username directory must already exist on the server before calling this command
-    - rsync -avz -e'ssh -v' --numeric-ids --delete doc/build/html/* production_docs_rsync:giftsurg/ImageSplit 2>&1
+    - rsync -avz -e'ssh -v' --numeric-ids --delete doc/build/html/* staging_docs_rsync:GIFT-Surg/ImageSplit 2>&1
 
 
-deploy pip to production:
+deploy pip to staging:
   stage: deploy
   only:
     - tags
   environment:
-    name: production
+    name: Test PyPI
+    url: https://testpypi.python.org/pypi/ImageSplit
   tags:
     - gift-linux
   artifacts:
@@ -128,3 +95,24 @@ deploy pip to production:
 
     # bundle installer
     - python setup.py bdist_wheel
+
+    # Upload to testpypi server
+    - twine upload --repository testpypi dist/*
+
+
+deploy docs to production:
+  stage: deploy
+  environment:
+    name: CMIC public docs
+    url: http://cmic.cs.ucl.ac.uk/giftsurg/ImageSplit
+  only:
+    - tags
+  tags:
+    - docs-production
+  dependencies:
+    - build docs
+  script:
+    # Note: the group/username directory must already exist on the server before calling this command
+    - rsync -avz -e'ssh -v' --numeric-ids --delete doc/build/html/* production_docs_rsync:giftsurg/ImageSplit 2>&1
+
+
