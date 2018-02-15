@@ -12,7 +12,7 @@ import re
 
 VERSION_TAG_REGEX = '^v[0-9.]+(dev)?$'
 VERSION_TAG_GLOB = 'v[0-9]*'  # Don't confuse with regex; matches v+digit+...
-HASH_REGEX = '^[A-Fa-f0-9]+$'
+HASH_REGEX = '^g[A-Fa-f0-9]+$'  # git describe prefixes hash with 'g'
 
 
 def _get_module_path():
@@ -67,7 +67,12 @@ def _parse_describe(describe_output, default_version):
     # If the first token is a hash, then we assume there is no tag. So we
     # take the default version and append the output, which may include
     if re.match(HASH_REGEX, tokens[0]):
-        return default_version + '+0.' + describe_output
+        if len(tokens) == 1:
+            return default_version + '+0.' + tokens[0]
+        if len(tokens) > 2 or not \
+                (tokens[1] == 'dirty' or tokens[1] == 'broken'):
+            return None
+        return default_version + '+0.' + tokens[0] + '.' + tokens[1]
 
     # Otherwise the first token should be a valid version tag
     if not re.match(VERSION_TAG_REGEX, tokens[0]):
@@ -100,7 +105,7 @@ def _parse_describe(describe_output, default_version):
     if not (tokens[3] == 'dirty' or tokens[3] == 'broken'):
         return None
 
-    return '{}+{}.{}-{}'.format(version_string, tokens[1], tokens[2], tokens[3])
+    return '{}+{}.{}.{}'.format(version_string, tokens[1], tokens[2], tokens[3])
 
 
 def version_from_git(default):

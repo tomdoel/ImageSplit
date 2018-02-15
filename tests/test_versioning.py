@@ -29,13 +29,14 @@ class TestVersioning(unittest.TestCase):
     @parameterized.expand([
         ['v0.1', '0.1'],
         ['v0.1s', None],
-        ['v0.1-1-abcde', '0.1+1.abcde'],
-        ['v0.1-G-abcde', None],
-        ['v0.1-1-abcdek', None],
-        ['v0.1-1-abcde-dirty', '0.1+1.abcde-dirty'],
-        ['v0.1-1-abcde-broken', '0.1+1.abcde-broken'],
-        ['v0.1-1-abcde-brokenn', None],
-        ['abcde', 'DEFAULT+0.abcde'],
+        ['v0.1-1-gabcde', '0.1+1.gabcde'],
+        ['v0.1-G-gabcde', None],
+        ['v0.1-1-gabcdek', None],
+        ['v0.1-1-gabcde-dirty', '0.1+1.gabcde.dirty'],
+        ['v0.1-1-gabcde-broken', '0.1+1.gabcde.broken'],
+        ['v0.1-1-gabcde-brokenn', None],
+        ['gabcde', 'DEFAULT+0.gabcde'],
+        ['gabcde-dirty', 'DEFAULT+0.gabcde.dirty'],
     ])
     def test_parse_describe(self, output, expected, default='DEFAULT'):
         self.assertEqual(versioning._parse_describe(output, default), expected)
