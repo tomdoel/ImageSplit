@@ -139,17 +139,6 @@ Supported by `Wellcome`_ and `EPSRC`_.
 .. _`license file`: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/blob/master/LICENSE
 
 
-.. toctree::
-   :maxdepth: 4
-   :caption: Contents:
-
-
-
-
-
-
-
-
 
 
 
