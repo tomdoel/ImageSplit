@@ -14,7 +14,7 @@ VERSION_TAG_REGEX = '^v[0-9.]+(dev)?$'
 
 # Could be pip install from repository, leading to local version identifiers
 PIP_VERSION_REGEX = \
-    r'^v[0-9.]+(dev)?(\+[0-9]+\.g[A-Fa-f0-9]+(?:.dirty|.broken)?)?$'
+    r'^[0-9.]+(dev)?(\+[0-9]+\.g[A-Fa-f0-9]+(?:.dirty|.broken)?)?$'
 
 
 VERSION_TAG_GLOB = 'v[0-9]*'  # Don't confuse with regex; matches v+digit+...
