@@ -108,7 +108,7 @@ deploy docs to production:
     - build docs
   script:
     # Note: the group/username directory must already exist on the server before calling this command
-    - rsync -avz -e'ssh -v' --numeric-ids --delete doc/build/html/* production_docs_rsync:GIFT-Surg/ImageSplit 2>&1
+    - rsync -avz -e'ssh -v' --numeric-ids --delete doc/build/html/* production_docs_rsync:giftsurg/ImageSplit 2>&1
 
 
 deploy pip to production:
