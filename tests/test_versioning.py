@@ -40,3 +40,23 @@ class TestVersioning(unittest.TestCase):
     ])
     def test_parse_describe(self, output, expected, default='DEFAULT'):
         self.assertEqual(versioning._parse_describe(output, default), expected)
+
+    @parameterized.expand([
+        ['v0.1', True],
+        ['v0.1dev', True],
+        ['v0.1s', False],
+        ['v0.1+1.gabcde', True],
+        ['v0.1+1-gabcde', False],
+        ['v0.1+1.ggabcde', False],
+        ['v0.1+G.gabcde', False],
+        ['v0.1+1.gabcdek', False],
+        ['v0.1+1.gabcde.dirty', True],
+        ['v0.1+1.dirty', False],
+        ['v0.1+1.gabcde.broken', True],
+        ['v0.1+1.gabcde.brokenn', False],
+        ['gabcde', False],
+        ['gabcde.dirty', False],
+    ])
+    def test_check_pip_version(self, version_string, expected):
+        self.assertEqual(versioning._check_pip_version(version_string),
+                         expected)
