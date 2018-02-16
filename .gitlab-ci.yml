@@ -97,7 +97,7 @@ deploy pip to staging:
     - python setup.py bdist_wheel
 
     # Upload to testpypi server
-    - twine upload --repository testpypi dist/*
+    - twine upload --repository-url https://test.pypi.org/legacy/ dist/* --username $TESTPYPI_USER --password $TESTPYPI_PASS
 
 
 deploy docs to production:
@@ -137,4 +137,4 @@ deploy pip to production:
     - python setup.py bdist_wheel
 
     # Upload to testpypi server
-    - twine upload --repository https://www.python.org/pypi dist/* --username $PYPI_USER --password $PYPI_PASS
+    - twine upload --repository pypi dist/* --username $PYPI_USER --password $PYPI_PASS
