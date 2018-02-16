@@ -2,16 +2,19 @@ ImageSplit
 ==========
 
 .. image:: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/raw/master/giftsurg-icon.png
-   :height: 128px
-   :width: 128px
-   :target: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit
+    :height: 128px
+    :width: 128px
+    :target: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit
 
 
 .. image:: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/badges/master/build.svg
-   :target: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/commits/master
+    :target: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/commits/master
+
+.. image:: https://travis-ci.org/gift-surg/ImageSplit.svg?branch=master
+    :target: https://travis-ci.org/gift-surg/ImageSplit
 
 .. image:: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/badges/master/coverage.svg
-   :target: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/commits/master
+    :target: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/commits/master
 
 
 ImageSplit is a utility for splitting very large image volumes into slices or multiple overlapping sub-volumes, and for recombining sub-volumes into a one or more volumes. ImageSplit can also convert the underlying data types.
