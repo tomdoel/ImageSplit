@@ -116,3 +116,25 @@ deploy docs to production:
     - rsync -avz -e'ssh -v' --numeric-ids --delete doc/build/html/* production_docs_rsync:giftsurg/ImageSplit 2>&1
 
 
+deploy pip to production:
+  stage: deploy
+  when: manual
+  only:
+    - tags
+  environment:
+    name: PyPI
+    url: https://pypi.python.org/pypi/ImageSplit
+  tags:
+    - gift-linux
+  artifacts:
+    paths:
+    - dist/
+  script:
+    # remove any previous distribution files
+    - rm -rf dist
+
+    # bundle installer
+    - python setup.py bdist_wheel
+
+    # Upload to testpypi server
+    - twine upload --repository https://www.python.org/pypi dist/* --username $PYPI_USER --password $PYPI_PASS
