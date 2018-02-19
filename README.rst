@@ -9,13 +9,19 @@ ImageSplit
 
 .. image:: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/badges/master/build.svg
     :target: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/commits/master
+    :alt: GitLab-CI test status
 
 .. image:: https://travis-ci.org/gift-surg/ImageSplit.svg?branch=master
     :target: https://travis-ci.org/gift-surg/ImageSplit
+    :alt: Travis test status
 
 .. image:: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/badges/master/coverage.svg
     :target: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/commits/master
+    :alt: Test coverage
 
+.. image:: https://readthedocs.org/projects/imagesplit/badge/?version=latest
+    :target: http://imagesplit.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
 ImageSplit is a utility for splitting very large image volumes into slices or multiple overlapping sub-volumes, and for recombining sub-volumes into a one or more volumes. ImageSplit can also convert the underlying data types.
 
@@ -119,6 +125,7 @@ Useful links
 ^^^^^^^^^^^^
 
 `Source code repository`_
+`Documentation`_
 
 
 Licensing and copyright
@@ -136,6 +143,7 @@ Supported by `Wellcome`_ and `EPSRC`_.
 
 .. _`Wellcome EPSRC Centre for Interventional and Surgical Sciences`: http://www.ucl.ac.uk/weiss
 .. _`source code repository`: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit
+.. _`Documentation`: https://imagesplit.readthedocs.io
 .. _`University College London (UCL)`: http://www.ucl.ac.uk/
 .. _`Translational Imaging Group (TIG)`: http://cmictig.cs.ucl.ac.uk/
 .. _`Centre for Medical Image Computing (CMIC)`: http://cmic.cs.ucl.ac.uk
