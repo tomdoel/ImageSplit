@@ -59,10 +59,14 @@ Here is an example:
     imagesplit --input input_data/image.vge --out output_data/split_image -s c --format tiff -z --rescale -50 350 --type uchar
 
 
-This command will split the volume file with header `input_data/image.vge` into coronal slices (`-s c`), saving them in the `output_data` folder with the filenames `split_image_0000.tiff`, `split_image_0001.tiff` etc.
+
+This command will:
+    * split the volume file with header `input_data/image.vge`
+    * into coronal slices (`-s c`)
+    * saving them in the `output_data` folder with the filenames `split_image_0000.tiff`, `split_image_0001.tiff` etc
     * The file format is tiff (`--format tiff`)
     * with default compression (`-z`)
-    * and data type unsigned char (`--type uchar`).
+    * and data type unsigned char (`--type uchar`)
     * The data will be normalised (rescaled) between minimum and maximum values `-50` and `350` (`--rescale -50 350`)
 
 
