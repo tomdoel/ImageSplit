@@ -32,8 +32,43 @@ Author: Tom Doel
 ImageSplit was developed as part of the `GIFT-Surg`_ project, at the `Translational Imaging Group (TIG)`_ in the `Centre for Medical Image Computing (CMIC)`_ at `University College London (UCL)`_.
 
 
-Usage
-~~~~~
+Installing
+~~~~~~~~~~
+
+::
+
+    pip install imagesplit
+
+Notes:
+    * We recommend you use pip to install ImageSplit.
+    * Ensure you have Python 2.7 or 3.5 or later installed
+    * (especially for macOS users): we suggest you do not modify the system installation of Python 2.7. Instead install a separate version of Python for development purposes (for example, using Homebrew), or use `virtualenv` to create a python virtual environment which you can safely modify without affecting the system installation.
+    * If you have Python 2 and Python 3 insatlled, `pip2` may map to Python 2 and `pip3` may map to Python 3. This will depend on your installation
+    * If you get permission errors when using `pip`, you may be trying to modify the system Python installation. This is not recommended. Instead install a local version of Python for development, or use a virtual environment (`virtualenv`).
+
+
+Example usage
+~~~~~~~~~~~~~
+
+Please see detailed usage below.
+
+Here is an example:
+
+::
+
+    imagesplit --input input_data/image.vge --out output_data/split_image -s c --format tiff -z --rescale -50 350 --type uchar
+
+
+This command will split the volume file with header `input_data/image.vge` into coronal slices (`-s c`), saving them in the `output_data` folder with the filenames `split_image_0000.tiff`, `split_image_0001.tiff` etc.
+    * The file format is tiff (`--format tiff`)
+    * with default compression (`-z`)
+    * and data type unsigned char (`--type uchar`).
+    * The data will be normalised (rescaled) between minimum and maximum values `-50` and `350` (`--rescale -50 350`)
+
+
+
+Detailed Usage
+~~~~~~~~~~~~~~
 
 ::
 
