@@ -41,8 +41,10 @@ logo_path = os.path.join('..', '..', logo_file)
 exclude_patterns = [
     'tests',
     'run_*',
-    'net_*',
     'setup.py',
+    '_build',
+    'Thumbs.db',
+    '.DS_Store',
 ]
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -85,8 +87,7 @@ def setup(app):
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc',
-    'sphinx.ext.imgmath']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx.ext.imgmath']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -109,7 +110,7 @@ modindex_common_prefix = [
 # General information about the project.
 project = u'ImageSplit'
 copyright = u'2017, UCL'
-author = u'UCL'
+author = u'Tom Doel'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
