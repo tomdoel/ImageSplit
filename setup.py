@@ -8,26 +8,11 @@ Copyright UCL 2017
 """
 
 from setuptools import setup, find_packages
-import os
 
 from imagesplit.utils.versioning import version_from_git
 
 
 version_git = version_from_git('0.0.0')
-
-# Create a module that will keep the
-# version descriptor returned by Git
-info_module = open(os.path.join('imagesplit', 'info.py'), 'w')
-info_module.write('# -*- coding: utf-8 -*-\n')
-info_module.write('"""ImageSplit version tracker.\n')
-info_module.write('\n')
-info_module.write('This module only holds the ImageSplit version')
-info_module.write('\n')
-info_module.write('"""\n')
-info_module.write('\n')
-info_module.write('\n')
-info_module.write('VERSION_DESCRIPTOR = "{}"\n'.format(version_git))
-info_module.close()
 
 # Get the summary
 description = 'Utility for splitting large image files into slices or chunks'\
