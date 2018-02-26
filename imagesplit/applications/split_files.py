@@ -88,6 +88,7 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
 def parse_slice_output(dim_order, max_block_size_voxels, overlap_size_voxels,
                        slice_output):
     """Get output parameters for splitting into slices along axis"""
+    new_dim_order = dim_order
     if slice_output:
         slice_output = slice_output.lower()
         if slice_output[0] == "s":
