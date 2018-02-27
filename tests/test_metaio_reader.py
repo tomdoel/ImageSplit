@@ -4,7 +4,8 @@ from unittest import TestCase
 from parameterized import parameterized, param
 
 from imagesplit.file.metaio_reader import mhd_cosines_to_permutation, \
-    permutation_to_cosine
+    permutation_to_cosine, condensed_to_cosine
+from imagesplit.image.combined_image import Axis
 from imagesplit.utils.utilities import compute_bytes_per_voxel
 
 
@@ -43,3 +44,6 @@ class TestMetaIoReader(unittest.TestCase):
                     perm_computed, flip_computed = mhd_cosines_to_permutation(c1, c2, c3)
                     cosines_computed = permutation_to_cosine(perm_computed, flip_computed)
                     self.assertEqual(cosines_computed, c1 + c2 + c3)
+
+                    cosines_computed_2 = condensed_to_cosine(Axis(perm_computed, flip_computed).to_condensed_format())
+                    self.assertEqual(cosines_computed_2, c1 + c2 + c3)

@@ -200,8 +200,8 @@ def parse_vge(header):
     image_size_string = file_section['filesize']
     image_size = [int(i) for i in image_size_string.split()]
     volume_section = header.get('VolumeSection0')
-    voxel_size_string = volume_section['VolumeResolution']
-    voxel_size = [int(i) for i in voxel_size_string.split()]
+    voxel_size_string = volume_section['volumeresolution']
+    voxel_size = [float(i) for i in voxel_size_string.split()]
     file_format = file_section['filefileformat']
     if file_format != "VolumeFileFormat_Raw":
         raise ValueError("Unknown file format " + file_format)

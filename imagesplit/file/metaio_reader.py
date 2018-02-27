@@ -79,7 +79,8 @@ class MetaIoFile(LinearImageFileReader):
     def create_write_file(cls, subimage_descriptor, file_handle_factory):
         """Create a MetaIoFile class for this filename and template"""
 
-        header_template = copy.deepcopy(subimage_descriptor.template)
+        header_template = cls._create_meta_header(subimage_descriptor)
+        # header_template = copy.deepcopy(subimage_descriptor.template)
         local_file_size = subimage_descriptor.get_local_size()
         local_origin = subimage_descriptor.get_local_origin()
 
@@ -127,6 +128,29 @@ class MetaIoFile(LinearImageFileReader):
         """
 
         return self._dimension_ordering
+
+    @classmethod
+    def _create_meta_header(cls, subimage_descriptor):
+        local_file_size = subimage_descriptor.get_local_size()
+        local_origin = subimage_descriptor.get_local_origin()
+        local_voxel_size = subimage_descriptor.get_local_voxel_size()
+
+        transform_matrix = condensed_to_cosine(
+            subimage_descriptor.axis.to_condensed_format())
+
+        header = get_default_metadata()
+        header["ObjectType"] = 'Image'
+        header["NDims"] = np.size(local_file_size)
+        header["BinaryData"] = 'True'
+        header["BinaryDataByteOrderMSB"] = subimage_descriptor.msb
+        header["CompressedData"] = 'False'
+        header["TransformMatrix"] = transform_matrix
+        header["ElementSize"] = local_voxel_size
+        header["DimSize"] = local_file_size
+        header["ElementType"] = subimage_descriptor.data_type
+        header["Origin"] = local_origin
+
+        return header
 
     def _get_header(self):
         """Return an OrderedDict containing the MetaIO metaheader metadata
@@ -320,6 +344,13 @@ def permutation_to_cosine(permutation, flip):
     dir_cosine[permutation[2]*3 + 2] = -1 if flip[2] else 1
 
     return dir_cosine
+
+
+def condensed_to_cosine(condensed_format):
+    """Get mhd direction cosine for this condensed format axis"""
+
+    axis = Axis.from_condensed_format(condensed_format)
+    return permutation_to_cosine(axis.dim_order, axis.dim_flip)
 
 
 def mhd_cosines_to_permutation(direction_cosine_1,
