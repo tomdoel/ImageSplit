@@ -199,6 +199,9 @@ def parse_vge(header):
     file_section = header.get('VolumeSection0\\_FileSection0')
     image_size_string = file_section['filesize']
     image_size = [int(i) for i in image_size_string.split()]
+    volume_section = header.get('VolumeSection0')
+    voxel_size_string = volume_section['VolumeResolution']
+    voxel_size = [int(i) for i in voxel_size_string.split()]
     file_format = file_section['filefileformat']
     if file_format != "VolumeFileFormat_Raw":
         raise ValueError("Unknown file format " + file_format)
@@ -215,4 +218,5 @@ def parse_vge(header):
                                 data_type=data_type,
                                 image_size=image_size,
                                 msb=msb,
-                                compression=compression), header_dict)
+                                compression=compression,
+                                voxel_size=voxel_size), header_dict)

@@ -381,9 +381,11 @@ def parse_mhd(header):
     image_size = header["DimSize"]
     msb = header["BinaryDataByteOrderMSB"]
     compression = None
+    voxel_size = header['ElementSize']
     return (FileImageDescriptor(file_format=file_format,
                                 dim_order=dim_order,
                                 data_type=data_type,
                                 image_size=image_size,
                                 msb=msb,
-                                compression=compression), header)
+                                compression=compression,
+                                voxel_size=voxel_size), header)
