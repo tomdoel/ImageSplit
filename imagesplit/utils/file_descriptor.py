@@ -13,7 +13,7 @@ import os
 import numpy as np
 
 from imagesplit.file.format_factory import FormatFactory
-from imagesplit.file.metaio_reader import load_mhd_header
+from imagesplit.file.metaio_reader import load_mhd_header, parse_mhd
 from imagesplit.image.combined_image import Axis
 from imagesplit.utils.json_reader import write_json, read_json
 from imagesplit.utils.utilities import get_image_block_ranges, convert_to_array
@@ -37,7 +37,8 @@ class SubImageRanges(object):
 class GlobalImageDescriptor(object):
     """Describes a full combined image"""
 
-    def __init__(self, size, file_format, dim_order, data_type, msb):
+    def __init__(self, size, file_format, dim_order, data_type, msb,
+                 voxel_size):
         self.data_type = data_type
         self.file_format = file_format
         self.size = size
@@ -45,6 +46,7 @@ class GlobalImageDescriptor(object):
         self.msb = msb
         self.dim_order = dim_order if dim_order \
             else np.arange(1, self.num_dims + 1).tolist()
+        self.voxel_size = voxel_size
 
 
 class SubImageDescriptor(object):
@@ -55,7 +57,7 @@ class SubImageDescriptor(object):
 
     def __init__(self, filename, file_format, data_type,
                  template, ranges, dim_order_condensed, suffix, index, msb,
-                 compression):
+                 compression, voxel_size):
         self.suffix = suffix
         self.index = index
         self.filename = filename
@@ -66,6 +68,7 @@ class SubImageDescriptor(object):
         self.axis = Axis.from_condensed_format(dim_order_condensed)
         self.msb = msb
         self.compression = compression
+        self.voxel_size = voxel_size
 
     def get_local_size(self):
         """Transpose the subimage size to the local coordinate system"""
@@ -74,6 +77,10 @@ class SubImageDescriptor(object):
     def get_local_origin(self):
         """Transpose the subimage origin to the local coordinate system"""
         return np.take(self.ranges.origin_start, self.axis.dim_order).tolist()
+
+    def get_local_voxel_size(self):
+        """Transpose the subimage origin to the local coordinate system"""
+        return np.take(self.voxel_size, self.axis.dim_order).tolist()
 
     @staticmethod
     def from_dict(descriptor_dict):
@@ -88,7 +95,8 @@ class SubImageDescriptor(object):
             suffix=descriptor_dict["suffix"],
             index=descriptor_dict["index"],
             msb=descriptor_dict["msb"],
-            compression=descriptor_dict["compression"]
+            compression=descriptor_dict["compression"],
+            voxel_size=descriptor_dict["voxel_size"],
         )
 
     def to_dict(self):
@@ -122,11 +130,12 @@ def generate_output_descriptors(filename_out_base,
                                 dim_order,
                                 header,
                                 output_type,
-                                output_file_format,
                                 num_dims,
+                                output_file_format,
                                 image_size,
                                 msb,
-                                compression):
+                                compression,
+                                voxel_size):
     """Creates descriptors representing file output"""
     max_block_size_voxels_array = convert_to_array(max_block_size_voxels,
                                                    "block size", num_dims)
@@ -151,7 +160,8 @@ def generate_output_descriptors(filename_out_base,
             data_type=output_type,
             template=copy.deepcopy(header),
             msb=msb,
-            compression=compression
+            compression=compression,
+            voxel_size=voxel_size
         )
         descriptors_out.append(file_descriptor_out)
         index += 1
@@ -250,6 +260,7 @@ def generate_input_descriptors(input_file, start_index):
         current_image_size = file_descriptor.image_size
         msb = file_descriptor.msb
         compression = file_descriptor.compression
+        voxel_size = file_descriptor.voxel_size
 
         axis = Axis.from_condensed_format(dim_order)
         current_image_size = \
@@ -292,7 +303,8 @@ def generate_input_descriptors(input_file, start_index):
             dim_order_condensed=dim_order,
             file_format=file_format,
             msb=msb,
-            compression=compression
+            compression=compression,
+            voxel_size=voxel_size
         ))
 
         if start_index is None:
@@ -313,7 +325,8 @@ def generate_input_descriptors(input_file, start_index):
                                               file_format=combined_file_format,
                                               dim_order=combined_dim_order,
                                               data_type=data_type,
-                                              msb=msb)
+                                              msb=msb,
+                                              voxel_size=voxel_size)
 
     # Update the combined image size
     combined_header["DimSize"] = full_image_size
