@@ -262,7 +262,7 @@ def get_dim_order(header):
     if header["TransformMatrix"]:
         transform = header["TransformMatrix"]
         new_dimension_order, flip_orientation = \
-            mhd_comsines_to_permutation(
+            mhd_cosines_to_permutation(
                 transform[0:3], transform[3:6], transform[6:9])
     elif header["AnatomicalOrientation"]:
         new_dimension_order, flip_orientation = \
@@ -286,7 +286,7 @@ def anatomical_to_permutation(anatomical_orientation_string):
         anatomical_to_cosine(anatomical_orientation_string[2])
 
     permutation_vector, flip_orientation = \
-        mhd_comsines_to_permutation(
+        mhd_cosines_to_permutation(
             direction_cosine_1, direction_cosine_2, direction_cosine_3)
 
     return permutation_vector, flip_orientation
@@ -311,9 +311,20 @@ def anatomical_to_cosine(anatomical_orientation_char):
                          anatomical_orientation_char + '.')
 
 
-def mhd_comsines_to_permutation(direction_cosine_1,
-                                direction_cosine_2,
-                                direction_cosine_3):
+def permutation_to_cosine(permutation, flip):
+    """Get mhd direction cosine for this dimension permutation"""
+
+    dir_cosine = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    dir_cosine[permutation[0]*3] = -1 if flip[0] else 1
+    dir_cosine[permutation[1]*3 + 1] = -1 if flip[1] else 1
+    dir_cosine[permutation[2]*3 + 2] = -1 if flip[2] else 1
+
+    return dir_cosine
+
+
+def mhd_cosines_to_permutation(direction_cosine_1,
+                               direction_cosine_2,
+                               direction_cosine_3):
     """Get dimension permutation vectors for these mhd direction cosines"""
     orientation_1 = direction_cosine_1
     orientation_2 = direction_cosine_2

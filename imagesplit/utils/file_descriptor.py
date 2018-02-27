@@ -259,13 +259,15 @@ def generate_input_descriptors(input_file, start_index):
         dim_order = file_descriptor.dim_order
         file_format = file_descriptor.file_format
         current_image_size = file_descriptor.image_size
+        voxel_size = file_descriptor.voxel_size
         msb = file_descriptor.msb
         compression = file_descriptor.compression
-        voxel_size = file_descriptor.voxel_size
 
+        # Reorder image size and voxel size dimensions
         axis = Axis.from_condensed_format(dim_order)
         current_image_size = \
             np.take(current_image_size, axis.reverse_dim_order).tolist()
+        voxel_size = np.take(voxel_size, axis.reverse_dim_order).tolist()
 
         if not current_ranges:
             full_image_size = copy.deepcopy(current_image_size)
@@ -332,7 +334,8 @@ def generate_input_descriptors(input_file, start_index):
     # Update the combined image size
     combined_header["DimSize"] = full_image_size
 
-    # Update voxel size combined_header["DimSize"] = voxel_size
+    # Update voxel size
+    combined_header["ElementSize"] = voxel_size
 
     return combined_header, descriptors, global_descriptor
 
