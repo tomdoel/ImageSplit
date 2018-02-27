@@ -10,6 +10,7 @@ import os
 from six.moves import configparser
 
 from imagesplit.file.data_type import DataType
+from imagesplit.file.file_formats import FileFormats
 from imagesplit.file.file_image_descriptor import FileImageDescriptor
 from imagesplit.file.file_wrapper import FileWrapper, FileStreamer
 from imagesplit.file.image_file_reader import LinearImageFileReader
@@ -201,9 +202,8 @@ def parse_vge(header):
     file_format = file_section['filefileformat']
     if file_format != "VolumeFileFormat_Raw":
         raise ValueError("Unknown file format " + file_format)
-    file_format = "vol"  # ToDo
     msb = True  # True
-    # file_format = FormatFactory.VOL_FORMAT
+    file_format = FileFormats.VOL_FORMAT
     dim_order = dim_order_from_header(header)
     data_type = DataType.name_from_vge(file_section['filedatatype'])
     compression = None
