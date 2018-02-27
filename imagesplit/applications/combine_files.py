@@ -16,7 +16,7 @@ import sys
 
 from imagesplit.file.file_factory import FileFactory
 from imagesplit.file.file_wrapper import FileHandleFactory
-from imagesplit.utils.file_descriptor import generate_descriptor_from_header, \
+from imagesplit.utils.file_descriptor import descriptor_from_mhd_header, \
     header_from_descriptor, generate_input_descriptors
 from imagesplit.applications.write_files import write_files
 
@@ -38,9 +38,9 @@ def combine_file(input_file_base, descriptor_filename, filename_out_base,
 
     file_factory = FileFactory(file_handle_factory)
 
-    descriptors_out = generate_descriptor_from_header(filename_out_base,
-                                                      original_header,
-                                                      output_type)
+    descriptors_out = descriptor_from_mhd_header(filename_out_base,
+                                                 original_header,
+                                                 output_type)
 
     write_files(descriptors_in, descriptors_out, file_factory, rescale)
 

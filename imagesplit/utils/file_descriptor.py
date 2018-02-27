@@ -168,28 +168,28 @@ def load_descriptor(descriptor_filename):
     return data
 
 
-def generate_descriptor_from_header(filename_out_base, original_header,
-                                    output_type):
+def descriptor_from_mhd_header(filename_out_base, original_header,
+                               output_type):
     """Use a header to define a file descriptor"""
-    output_image_size = np.array(original_header["DimSize"]).tolist()
-    dim_order = [1, 2, 3]  # ToDo: get from header
-    file_format = "mhd"
-    msb = original_header["BinaryDataByteOrderMSB"]
-    compression = None
+
+    image_descriptor, _ = parse_mhd(original_header)
+
+    output_image_size = np.array(image_descriptor.image_size).tolist()
 
     return [SubImageDescriptor(
         filename=filename_out_base + '.mhd',
-        file_format=file_format,
-        data_type=output_type,
+        file_format=image_descriptor.file_format,
+        data_type=output_type,  # NB not from input
         template=copy.deepcopy(original_header),
-        dim_order_condensed=dim_order,
+        dim_order_condensed=image_descriptor.dim_order.to_condensed_format(),
         suffix="",
         index=0,
         ranges=[[0, output_image_size[0] - 1, 0, 0],
                 [0, output_image_size[1] - 1, 0, 0],
                 [0, output_image_size[2] - 1, 0, 0]],
-        msb=msb,
-        compression=compression)]
+        msb=image_descriptor.msb,
+        compression=image_descriptor.compression,
+        voxel_size=image_descriptor.voxel_size)]
 
 
 def header_from_descriptor(descriptor_filename):
