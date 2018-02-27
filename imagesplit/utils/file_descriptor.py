@@ -184,6 +184,7 @@ def descriptor_from_mhd_header(filename_out_base, original_header,
 
     image_descriptor, _ = parse_mhd(original_header)
 
+    # ToDo: Reorder image dims
     output_image_size = np.array(image_descriptor.image_size).tolist()
 
     return [SubImageDescriptor(
@@ -199,7 +200,7 @@ def descriptor_from_mhd_header(filename_out_base, original_header,
                 [0, output_image_size[2] - 1, 0, 0]],
         msb=image_descriptor.msb,
         compression=image_descriptor.compression,
-        voxel_size=image_descriptor.voxel_size)]
+        voxel_size=image_descriptor.voxel_size)]  # ToDo: Reorder image dims
 
 
 def header_from_descriptor(descriptor_filename):
@@ -330,6 +331,8 @@ def generate_input_descriptors(input_file, start_index):
 
     # Update the combined image size
     combined_header["DimSize"] = full_image_size
+
+    # Update voxel size combined_header["DimSize"] = voxel_size
 
     return combined_header, descriptors, global_descriptor
 
