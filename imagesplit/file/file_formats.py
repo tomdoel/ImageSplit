@@ -1,6 +1,6 @@
 # coding=utf-8
 """
-Support multiple imaging formats
+Definitions for supported imaging formats
 
 Author: Tom Doel
 Copyright UCL 2017

@@ -1,3 +1,12 @@
+# coding=utf-8
+"""
+Support multiple imaging formats
+
+Author: Tom Doel
+Copyright UCL 2017
+
+"""
+
 from imagesplit.file.file_formats import FileFormats
 from imagesplit.file.metaio_reader import MetaIoFile
 from imagesplit.file.tiff_file_reader import TiffFileReader
