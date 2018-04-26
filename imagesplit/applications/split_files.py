@@ -18,9 +18,9 @@ import sys
 from imagesplit.file.file_factory import FileFactory
 from imagesplit.file.file_wrapper import FileHandleFactory
 from imagesplit.utils.file_descriptor import write_descriptor_file, \
-    generate_output_descriptors, generate_input_descriptors
+    generate_output_descriptors, generate_input_descriptors, \
+    header_from_descriptor
 from imagesplit.applications.write_files import write_files
-
 
 # pylint: disable=too-many-arguments
 from imagesplit.utils.versioning import get_version_string
@@ -29,43 +29,63 @@ from imagesplit.utils.versioning import get_version_string
 def split_file(input_file, filename_out_base, max_block_size_voxels,
                overlap_size_voxels, start_index, output_type, dim_order,
                file_handle_factory, output_format, slice_output, rescale,
-               out_compression, test=False):
+               out_compression, descriptor_filename=None, test=False):
     """Saves the specified image file as a number of smaller files"""
-
-    [header, descriptors_in, global_descriptor] = \
-        generate_input_descriptors(input_file, start_index)
-
-    if rescale and rescale != "limits" and len(rescale) != 2:
-        raise ValueError('Rescale must have no arguments, or a min and max')
 
     if not filename_out_base:
         input_file_base = os.path.splitext(input_file)[0]
         filename_out_base = input_file_base + "_split"
 
+    if rescale and rescale != "limits" and len(rescale) != 2:
+        raise ValueError('Rescale must have no arguments, or a min and max')
+
+    if not descriptor_filename:
+        # pylint: disable=unused-variable
+        [header, descriptors_in, global_descriptor] = \
+            generate_input_descriptors(input_file, start_index)
+    else:
+        [header, descriptors_in] = header_from_descriptor(descriptor_filename)
+
+
+    descriptors_out = specify_output_descriptors(dim_order,
+                                                 filename_out_base,
+                                                 global_descriptor,
+                                                 header,
+                                                 max_block_size_voxels,
+                                                 out_compression,
+                                                 output_format,
+                                                 output_type,
+                                                 overlap_size_voxels,
+                                                 slice_output)
+
+    file_factory = FileFactory(file_handle_factory)
+
+    write_files(descriptors_in, descriptors_out, file_factory, rescale, test)
+    write_descriptor_file(descriptors_in, descriptors_out, filename_out_base,
+                          test)
+
+
+def specify_output_descriptors(dim_order, filename_out_base, global_descriptor,
+                               header, max_block_size_voxels, out_compression,
+                               output_format, output_type, overlap_size_voxels,
+                               slice_output):
+    """Compute output parameters based on a set of parameters"""
     if output_format is None:
         output_format = global_descriptor.file_format
-
     if output_type is None:
         output_type = global_descriptor.data_type
-
     if out_compression is None:
         out_compression = None
-
     if dim_order is None:
         dim_order = global_descriptor.dim_order
-
     dim_order, max_block_size_voxels, overlap_size_voxels = parse_slice_output(
         dim_order, max_block_size_voxels, overlap_size_voxels, slice_output)
-
     if max_block_size_voxels is None:
         max_block_size_voxels = -1
-
     if overlap_size_voxels is None:
         overlap_size_voxels = 0
-
     out_msb = global_descriptor.msb
     voxel_size = global_descriptor.voxel_size
-
     descriptors_out = generate_output_descriptors(
         filename_out_base=filename_out_base,
         max_block_size_voxels=max_block_size_voxels,
@@ -79,12 +99,7 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
         msb=out_msb,
         compression=out_compression,
         voxel_size=voxel_size)
-
-    file_factory = FileFactory(file_handle_factory)
-
-    write_files(descriptors_in, descriptors_out, file_factory, rescale, test)
-    write_descriptor_file(descriptors_in, descriptors_out, filename_out_base,
-                          test)
+    return descriptors_out
 
 
 def parse_slice_output(dim_order, max_block_size_voxels, overlap_size_voxels,

@@ -22,11 +22,16 @@ from imagesplit.applications.write_files import write_files
 
 
 def combine_file(input_file_base, descriptor_filename, filename_out_base,
-                 start_index, output_type, file_handle_factory, rescale):
+                 start_index, output_type, file_handle_factory, rescale,
+                 test=False):
     """Combines several overlapping files into one output file"""
 
     if not filename_out_base:
-        filename_out_base = os.path.splitext(input_file_base)[0] + "_combined"
+        input_file_base = os.path.splitext(input_file_base)[0]
+        filename_out_base = input_file_base + "_combined"
+
+    if rescale and rescale != "limits" and len(rescale) != 2:
+        raise ValueError('Rescale must have no arguments, or a min and max')
 
     if not descriptor_filename:
         # pylint: disable=unused-variable
@@ -36,13 +41,13 @@ def combine_file(input_file_base, descriptor_filename, filename_out_base,
         [original_header,
          descriptors_in] = header_from_descriptor(descriptor_filename)
 
-    file_factory = FileFactory(file_handle_factory)
-
     descriptors_out = descriptor_from_mhd_header(filename_out_base,
                                                  original_header,
                                                  output_type)
 
-    write_files(descriptors_in, descriptors_out, file_factory, rescale)
+    file_factory = FileFactory(file_handle_factory)
+
+    write_files(descriptors_in, descriptors_out, file_factory, rescale, test)
 
 
 def main(args):
@@ -71,6 +76,12 @@ def main(args):
                         type=str,
                         help="If true, rescale image to the full range of the "
                              "data type")
+
+    parser.add_argument("--test", required=False,
+                        action='store_true',
+                        help="If set, No writing will be performed to the "
+                             "output files")
+
     args = parser.parse_args(args)
 
     assert sys.version_info >= (2, 7)
@@ -78,8 +89,16 @@ def main(args):
     if args.filename == '_no_filename_specified':
         raise ValueError('No filename was specified')
     else:
-        combine_file(args.filename, args.descriptor, args.out, args.startindex,
-                     args.type, FileHandleFactory(), args.rescale)
+        combine_file(
+            input_file_base=args.filename,
+            descriptor_filename=args.descriptor,
+            filename_out_base=args.out,
+            start_index=args.startindex,
+            output_type=args.type,
+            file_handle_factory=FileHandleFactory(),
+            rescale=args.rescale,
+            test=args.test
+        )
 
 
 if __name__ == '__main__':
