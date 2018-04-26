@@ -56,10 +56,6 @@ html_static_path = [static_folder]
 
 def generate_apidocs(*args):
     """Generate API docs automatically by trawling the available modules"""
-    # SimpleITK is an optional dependency, which is why it doesn't get
-    # installed automatically via the requirements file installation hook
-    # on ReadTheDocs.
-    pip.main(['install', 'simpleitk'])
 
     global working_dir, module_path
     output_path = working_dir
