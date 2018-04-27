@@ -85,7 +85,8 @@ class MetaIoFile(LinearImageFileReader):
         local_origin = subimage_descriptor.get_local_origin()
 
         if subimage_descriptor.data_type:
-            header_template["ElementType"] = subimage_descriptor.data_type
+            header_template["ElementType"] = \
+                DataType.metaio_from_name(subimage_descriptor.data_type)
         header_template["DimSize"] = local_file_size
         header_template["Origin"] = local_origin
         filename = subimage_descriptor.filename
@@ -147,7 +148,8 @@ class MetaIoFile(LinearImageFileReader):
         header["TransformMatrix"] = transform_matrix
         header["ElementSize"] = local_voxel_size
         header["DimSize"] = local_file_size
-        header["ElementType"] = subimage_descriptor.data_type
+        header["ElementType"] = \
+            DataType.metaio_from_name(subimage_descriptor.data_type)
         header["Origin"] = local_origin
 
         return header
@@ -206,7 +208,7 @@ def load_mhd_header(filename):
         for line in header_file:
             (key, val) = [x.strip() for x in line.split("=")]
             if key in ['ElementSpacing', 'Offset', 'CenterOfRotation',
-                       'TransformMatrix']:
+                       'TransformMatrix', 'ElementSize']:
                 new_val = [float(s) for s in val.split()]
             elif key in ['NDims', 'ElementNumberOfChannels']:
                 new_val = int(val)

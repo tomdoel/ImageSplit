@@ -130,6 +130,11 @@ class DataType(object):
         raise ValueError("Unknown type: " + metaio_type_name)
 
     @classmethod
+    def metaio_from_name(cls, name):
+        """Return the MetaIO name string from a DataType string"""
+        return cls.types[name].metaio_type
+
+    @classmethod
     def name_from_vge(cls, vge_type_name):
         """Get a DataType string from a vge data type string"""
         for name, data_type in cls.types.items():
