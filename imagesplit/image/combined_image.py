@@ -342,3 +342,11 @@ class Axis(object):
         dim_order = [abs(d) - 1 for d in dim_order_and_flip]
         dim_flip = [d < 0 for d in dim_order_and_flip]
         return Axis(dim_order=dim_order, dim_flip=dim_flip)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)

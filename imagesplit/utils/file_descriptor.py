@@ -34,6 +34,14 @@ class SubImageRanges(object):
         self.roi_end = [r[1] - r[3] for r in self.ranges]
         self.roi_size = [1 + (r[1] - r[3]) - (r[0] + r[2]) for r in self.ranges]
 
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 class GlobalImageDescriptor(object):
     """Describes a full combined image"""
@@ -49,6 +57,14 @@ class GlobalImageDescriptor(object):
             else np.arange(1, self.num_dims + 1).tolist()
         self.axis = Axis.from_condensed_format(dim_order)
         self.voxel_size = voxel_size
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 class SubImageDescriptor(object):
@@ -115,6 +131,14 @@ class SubImageDescriptor(object):
                 "msb": self.msb,
                 "voxel_size": self.voxel_size,
                 "ranges": self.ranges.ranges}
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 def write_descriptor_file(descriptors_in, descriptors_out, filename_out_base,
