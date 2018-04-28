@@ -120,10 +120,10 @@ def write_descriptor_file(descriptors_in, descriptors_out, filename_out_base,
     """Saves descriptor files"""
     dict_in = convert_to_dict(descriptors_in)
     dict_out = convert_to_dict(descriptors_out)
-    descriptor = {"appname": "GIFT-Surg split data", "version": "1.0",
+    descriptor = {"appname": "ImageSplit data", "version": "1.0",
                   "split_files": dict_out,
                   "source_files": dict_in}
-    descriptor_output_filename = filename_out_base + "_info.gift"
+    descriptor_output_filename = filename_out_base + "_info.imagesplit"
     if not test:
         write_json(descriptor_output_filename, descriptor)
 
@@ -176,8 +176,8 @@ def generate_output_descriptors(filename_out_base,
 def load_descriptor(descriptor_filename):
     """Loads and parses a file descriptor from disk"""
     data = read_json(descriptor_filename)
-    if data["appname"] != "GIFT-Surg split data":
-        raise ValueError('Not a GIFT-Surg file')
+    if data["appname"] != "ImageSplit data":
+        raise ValueError('Not an ImageSplit file')
     if data["version"] != "1.0":
         raise ValueError('Cannot read this file version')
     return data
