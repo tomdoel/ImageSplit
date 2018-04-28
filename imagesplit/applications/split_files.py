@@ -76,7 +76,7 @@ def specify_output_descriptors(dim_order, filename_out_base, global_descriptor,
     if out_compression is None:
         out_compression = None
     if dim_order is None:
-        dim_order = global_descriptor.dim_order
+        dim_order = global_descriptor.axis.to_condensed_format()
     dim_order, max_block_size_voxels, overlap_size_voxels = parse_slice_output(
         dim_order, max_block_size_voxels, overlap_size_voxels, slice_output)
     if max_block_size_voxels is None:

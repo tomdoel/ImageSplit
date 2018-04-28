@@ -44,8 +44,9 @@ class GlobalImageDescriptor(object):
         self.size = size
         self.num_dims = len(size)
         self.msb = msb
-        self.dim_order = dim_order_condensed if dim_order_condensed \
+        dim_order = dim_order_condensed if dim_order_condensed \
             else np.arange(1, self.num_dims + 1).tolist()
+        self.axis = Axis.from_condensed_format(dim_order)
         self.voxel_size = voxel_size
 
 
@@ -329,12 +330,13 @@ def generate_input_descriptors(input_file, start_index):
     full_image_size = np.array(full_image_size).tolist()
 
     # All input files processed
-    global_descriptor = GlobalImageDescriptor(size=full_image_size,
-                                              file_format=combined_file_format,
-                                              dim_order_condensed=combined_dim_order,
-                                              data_type=data_type,
-                                              msb=msb,
-                                              voxel_size=voxel_size)
+    global_descriptor = GlobalImageDescriptor(
+        size=full_image_size,
+        file_format=combined_file_format,
+        dim_order_condensed=combined_dim_order,
+        data_type=data_type,
+        msb=msb,
+        voxel_size=voxel_size)
 
     # Update the combined image size
     combined_header["DimSize"] = full_image_size
