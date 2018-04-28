@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from imagesplit.utils.utilities import get_number_of_blocks, get_block_coordinate_range, \
-    get_suggested_block_size, get_image_block_ranges
+    get_suggested_block_size, ranges_for_max_block_size
 
 import unittest
 
@@ -42,16 +42,16 @@ class TestFileSplitter(unittest.TestCase):
 
     def test_get_image_block_ranges(self):
         self.assertEqual(
-            get_image_block_ranges([5, 5, 5], [4, 5, 6], [0, 0, 0]),
+            ranges_for_max_block_size([5, 5, 5], [4, 5, 6], [0, 0, 0]),
             [[(0, 2, 0, 0), (0, 4, 0, 0), (0, 4, 0, 0)],
              [(3, 4, 0, 0), (0, 4, 0, 0), (0, 4, 0, 0)]])
         self.assertEqual(
-            get_image_block_ranges([5, 5, 5], [4, 5, 6], [2, 2, 2]),
+            ranges_for_max_block_size([5, 5, 5], [4, 5, 6], [2, 2, 2]),
             [[(0, 4, 0, 2), (0, 4, 0, 0), (0, 4, 0, 0)],
              [(1, 4, 2, 0), (0, 4, 0, 0), (0, 4, 0, 0)]])
         self.assertEqual(
-            get_image_block_ranges([999, 1000, 1001], [500, 500, 500],
-                                   [0, 0, 0]),
+            ranges_for_max_block_size([999, 1000, 1001], [500, 500, 500],
+                                      [0, 0, 0]),
             [[(0, 499, 0, 0), (0, 499, 0, 0), (0, 333, 0, 0)],
              [(0, 499, 0, 0), (0, 499, 0, 0), (334, 667, 0, 0)],
              [(0, 499, 0, 0), (0, 499, 0, 0), (668, 1000, 0, 0)],

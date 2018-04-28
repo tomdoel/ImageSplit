@@ -78,17 +78,26 @@ def get_suggested_block_size(image_size, number_of_blocks):
             zip(image_size, number_of_blocks)]
 
 
-def get_image_block_ranges(image_size, max_block_size, overlap_size):
+def ranges_for_max_block_size(image_size, max_block_size, overlap_size):
     """Returns a list of ranges, where each recommended block size (a list of
-    the number of blocks in each dimension) to allow the specified image_size
-    to be split into the specified number of blocks in each dimension,
-    with each block being roughly equal in size """
+    the number of blocks in each dimension) is set such that no block exceeds
+    the specified maximum size, and the specified image_size
+    is split so that each block is roughly equal in size """
 
     number_of_blocks = get_number_of_blocks(image_size, max_block_size)
+    return ranges_for_number_of_blocks(image_size, number_of_blocks,
+                                       overlap_size)
+
+
+def ranges_for_number_of_blocks(image_size, number_of_blocks, overlap_size):
+    """Returns a list of ranges, where each recommended block size (a list of
+    the number of blocks in each dimension) is set to allow the specified
+    image_size to be split into the specified number of blocks in each
+    dimension, with each block being roughly equal in size """
+
     suggested_block_size = get_suggested_block_size(image_size,
                                                     number_of_blocks)
     block_ranges = []
-
     for i in range(number_of_blocks[0]):
         for j in range(number_of_blocks[1]):
             for k in range(number_of_blocks[2]):
@@ -97,7 +106,6 @@ def get_image_block_ranges(image_size, max_block_size, overlap_size):
                      for index, block, overlap, size in
                      zip([i, j, k], suggested_block_size, overlap_size,
                          image_size)])
-
     return block_ranges
 
 

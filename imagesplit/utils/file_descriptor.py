@@ -16,7 +16,8 @@ from imagesplit.file.format_factory import FormatFactory
 from imagesplit.file.metaio_reader import load_mhd_header, parse_mhd
 from imagesplit.image.combined_image import Axis
 from imagesplit.utils.json_reader import write_json, read_json
-from imagesplit.utils.utilities import get_image_block_ranges, convert_to_array
+from imagesplit.utils.utilities import ranges_for_max_block_size, \
+    convert_to_array
 
 
 class SubImageRanges(object):
@@ -147,8 +148,8 @@ def generate_output_descriptors(filename_out_base,
                                                    "block size", num_dims)
     overlap_voxels_size_array = convert_to_array(overlap_size_voxels,
                                                  "overlap size", num_dims)
-    ranges = get_image_block_ranges(image_size, max_block_size_voxels_array,
-                                    overlap_voxels_size_array)
+    ranges = ranges_for_max_block_size(image_size, max_block_size_voxels_array,
+                                       overlap_voxels_size_array)
 
     extension = FormatFactory.get_extension_for_format(output_file_format)
     descriptors_out = []
@@ -230,7 +231,7 @@ def header_from_descriptor(descriptor_filename):
     input_file_list = descriptor["split_files"]
     descriptors = convert_to_descriptors(input_file_list)
 
-    global_descriptor = _global_descriptor_from_descriptors(descriptors)
+    global_descriptor = _aggregate_global_descriptor(descriptors)
 
     return original_header, descriptors, global_descriptor
 
@@ -332,7 +333,7 @@ def generate_input_descriptors(input_file, start_index):
 
     full_image_size = np.array(full_image_size).tolist()
 
-    global_descriptor = _global_descriptor_from_descriptors(descriptors)
+    global_descriptor = _aggregate_global_descriptor(descriptors)
 
     # Update the combined image size
     combined_header["DimSize"] = full_image_size
@@ -343,7 +344,7 @@ def generate_input_descriptors(input_file, start_index):
     return combined_header, descriptors, global_descriptor
 
 
-def _global_descriptor_from_descriptors(descriptors):
+def _aggregate_global_descriptor(descriptors):
     global_ranges = None
     combined_dim_order = None
     combined_file_format = None
