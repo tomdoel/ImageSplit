@@ -46,7 +46,6 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
     else:
         [header, descriptors_in] = header_from_descriptor(descriptor_filename)
 
-
     descriptors_out = specify_output_descriptors(dim_order,
                                                  filename_out_base,
                                                  global_descriptor,
@@ -225,7 +224,13 @@ def main(args=None):
     args = parser.parse_args(args)
 
     rescale = args.rescale
-    if rescale == []:
+
+    # Code inspection suggests "if not rescale", but that is wrong.
+    # We only set to "limits" if rescale is [], ie set without a range,
+    # whereas if rescale is None (not set) we keep it as None
+    #
+    # noinspection PySimplifyBooleanCheck
+    if rescale == []:  # rescale is set on command line but not given a range
         rescale = 'limits'
 
     if args.slice and (args.axis or args.max or args.overlap):
