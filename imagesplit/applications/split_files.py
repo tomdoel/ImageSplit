@@ -61,8 +61,11 @@ def split_file(input_file_base, filename_out_base, start_index, output_type,
     file_factory = FileFactory(file_handle_factory)
 
     write_files(descriptors_in, descriptors_out, file_factory, rescale, test)
-    write_descriptor_file(descriptors_in, descriptors_out, filename_out_base,
-                          test)
+
+    # Write out descriptor if one does not already exist
+    if not descriptor_filename:
+        write_descriptor_file(descriptors_in, descriptors_out,
+                              filename_out_base, test)
 
 
 def specify_output_descriptors(dim_order, filename_out_base, global_descriptor,
