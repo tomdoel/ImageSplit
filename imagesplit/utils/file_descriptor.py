@@ -179,7 +179,8 @@ def generate_output_descriptors(filename_out_base,
     descriptors_out = []
     index = 0
     for subimage_range in ranges:
-        suffix = "_" + '{0:04d}'.format(index)
+        suffix = "" if len(ranges) <= 1 else \
+            "_" + '{0:04d}'.format(index)
         output_filename_header = filename_out_base + suffix + extension
         file_descriptor_out = SubImageDescriptor(
             filename=output_filename_header,
