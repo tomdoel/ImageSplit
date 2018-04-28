@@ -111,7 +111,7 @@ class TestCombinedImage(TestCase):
             "ranges": ranges, "suffix": "SUFFIX", "dim_order": [1, 2, 3],
             "data_type": "XXXX", "index": index, "template": [],
             "file_format": "mhd", "msb": "True", "compression": [],
-            "voxel_size": [1, 1, 1], "voxel_size": [1, 1, 1]})
+            "voxel_size": [1, 1, 1]})
 
 
 def global_coordinate_transformer(size):

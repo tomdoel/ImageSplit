@@ -102,11 +102,16 @@ class SubImageDescriptor(object):
     def to_dict(self):
         """Get a dictionary for the metadata for this subimage"""
 
-        return {"index": self.index, "suffix": self.suffix,
-                "filename": self.filename, "data_type": self.data_type,
-                "file_format": self.file_format, "template": self.template,
+        return {"index": self.index,
+                "suffix": self.suffix,
+                "filename": self.filename,
+                "data_type": self.data_type,
+                "file_format": self.file_format,
+                "template": self.template,
                 "dim_order": self.axis.to_condensed_format(),
+                "compression": self.compression,
                 "msb": self.msb,
+                "voxel_size": self.voxel_size,
                 "ranges": self.ranges.ranges}
 
 
