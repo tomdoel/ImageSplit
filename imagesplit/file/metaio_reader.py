@@ -58,7 +58,7 @@ class MetaIoFile(LinearImageFileReader):
             self._header["ElementType"],
             self._header["BinaryDataByteOrderMSB"])
         self._subimage_size = self._header["DimSize"]
-        self._dimension_ordering = get_dimension_ordering(self._header)
+        self._dimension_ordering = get_condensed_dim_order(self._header)
 
     @classmethod
     def load_and_parse_header(cls, filename):
@@ -257,15 +257,6 @@ def save_mhd_header(filename, metadata):
     file_handle.close()
 
 
-def get_dimension_ordering(header):
-    """
-    Return the order in which dimensions are stored in the global system.
-    The first element in the array contains the index of the global dimension
-    which is represented by the first dimension in the file, and so on
-    """
-    return get_dim_order(header)
-
-
 def get_default_metadata():
     """Return an OrderedDict containing default mhd file metadata"""
 
@@ -283,7 +274,7 @@ def get_default_metadata():
          ('StudyDate', []), ('StudyTime', [])])
 
 
-def get_dim_order(header):
+def get_condensed_dim_order(header):
     """Return the condensed dimension order and flip string for this header"""
     if header["TransformMatrix"]:
         transform = header["TransformMatrix"]
@@ -420,7 +411,7 @@ def parse_mhd(header):
     """Read a metaheader and returns a FileImageDescriptor"""
 
     file_format = "mhd"
-    dim_order = get_dim_order(header)
+    dim_order = get_condensed_dim_order(header)
     data_type = DataType.name_from_metaio(header["ElementType"])
     image_size = header["DimSize"]
     msb = header["BinaryDataByteOrderMSB"]
