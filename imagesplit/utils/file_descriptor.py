@@ -184,12 +184,16 @@ def load_descriptor(descriptor_filename):
     return data
 
 
-def descriptor_from_mhd_header(filename_out_base, original_header,
+def descriptor_from_mhd_header(filename_out_base,
+                               original_header,
                                output_type):
     """Use a header to define a file descriptor"""
 
     image_descriptor, _ = parse_mhd(original_header)
 
+    if output_type is None:
+        output_type = image_descriptor.data_type
+    #
     # ToDo: Reorder image dims
     output_image_size = np.array(image_descriptor.image_size).tolist()
 
@@ -198,7 +202,7 @@ def descriptor_from_mhd_header(filename_out_base, original_header,
         file_format=image_descriptor.file_format,
         data_type=output_type,  # NB not from input
         template=copy.deepcopy(original_header),
-        dim_order_condensed=image_descriptor.dim_order.to_condensed_format(),
+        dim_order_condensed=image_descriptor.dim_order,
         suffix="",
         index=0,
         ranges=[[0, output_image_size[0] - 1, 0, 0],
