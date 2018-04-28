@@ -13,7 +13,7 @@ import os
 import numpy as np
 
 from imagesplit.file.format_factory import FormatFactory
-from imagesplit.file.metaio_reader import load_mhd_header, parse_mhd
+from imagesplit.file.metaio_reader import load_mhd_header
 from imagesplit.image.combined_image import Axis
 from imagesplit.utils.json_reader import write_json, read_json
 from imagesplit.utils.utilities import ranges_for_max_block_size, \
