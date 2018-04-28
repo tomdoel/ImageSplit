@@ -38,8 +38,8 @@ def combine_file(input_file_base, descriptor_filename, filename_out_base,
         [original_header, descriptors_in, global_descriptor] = \
             generate_input_descriptors(input_file_base, start_index)
     else:
-        [original_header,
-         descriptors_in] = header_from_descriptor(descriptor_filename)
+        [original_header, descriptors_in, global_descriptor] = \
+            header_from_descriptor(descriptor_filename)
 
     descriptors_out = descriptor_from_mhd_header(filename_out_base,
                                                  original_header,

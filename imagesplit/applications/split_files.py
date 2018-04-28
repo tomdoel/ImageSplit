@@ -44,7 +44,8 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
         [header, descriptors_in, global_descriptor] = \
             generate_input_descriptors(input_file, start_index)
     else:
-        [header, descriptors_in] = header_from_descriptor(descriptor_filename)
+        [header, descriptors_in, global_descriptor] = \
+            header_from_descriptor(descriptor_filename)
 
     descriptors_out = specify_output_descriptors(dim_order,
                                                  filename_out_base,

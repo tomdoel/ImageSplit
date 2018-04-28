@@ -229,7 +229,10 @@ def header_from_descriptor(descriptor_filename):
         original_header = None  # ToDo
     input_file_list = descriptor["split_files"]
     descriptors = convert_to_descriptors(input_file_list)
-    return original_header, descriptors
+
+    global_descriptor = _global_descriptor_from_descriptors(descriptors)
+
+    return original_header, descriptors, global_descriptor
 
 
 def generate_input_descriptors(input_file, start_index):
@@ -242,8 +245,6 @@ def generate_input_descriptors(input_file, start_index):
     current_ranges = None
     combined_header = None
     full_image_size = None
-    combined_file_format = None
-    combined_dim_order = None
 
     if start_index is None:
         # If no start index is specified, load a single header file
@@ -282,8 +283,6 @@ def generate_input_descriptors(input_file, start_index):
         if not current_ranges:
             full_image_size = copy.deepcopy(current_image_size)
             combined_header = copy.deepcopy(current_header)
-            combined_dim_order = dim_order
-            combined_file_format = file_format
             current_ranges = [[0, current_image_size[0] - 1, 0, 0],
                               [0, current_image_size[1] - 1, 0, 0],
                               [0, current_image_size[2] - 1, 0, 0]]
@@ -333,14 +332,7 @@ def generate_input_descriptors(input_file, start_index):
 
     full_image_size = np.array(full_image_size).tolist()
 
-    # All input files processed
-    global_descriptor = GlobalImageDescriptor(
-        size=full_image_size,
-        file_format=combined_file_format,
-        dim_order_condensed=combined_dim_order,
-        data_type=data_type,
-        msb=msb,
-        voxel_size=voxel_size)
+    global_descriptor = _global_descriptor_from_descriptors(descriptors)
 
     # Update the combined image size
     combined_header["DimSize"] = full_image_size
@@ -349,6 +341,53 @@ def generate_input_descriptors(input_file, start_index):
     combined_header["ElementSize"] = voxel_size
 
     return combined_header, descriptors, global_descriptor
+
+
+def _global_descriptor_from_descriptors(descriptors):
+    global_ranges = None
+    combined_dim_order = None
+    combined_file_format = None
+    data_type = None
+    msb = None
+    voxel_size = None
+
+    for descriptor in descriptors:
+        current_ranges = descriptor.ranges.ranges
+        if not global_ranges:
+            global_ranges = copy.deepcopy(current_ranges)
+        else:
+            global_ranges[0][0] = min(global_ranges[0][0], current_ranges[0][0])
+            global_ranges[0][1] = max(global_ranges[0][1], current_ranges[0][1])
+            global_ranges[1][0] = min(global_ranges[1][0], current_ranges[1][0])
+            global_ranges[1][1] = max(global_ranges[1][1], current_ranges[1][1])
+            global_ranges[2][0] = min(global_ranges[2][0], current_ranges[2][0])
+            global_ranges[2][1] = max(global_ranges[2][1], current_ranges[2][1])
+
+        if not combined_file_format:
+            combined_file_format = descriptor.file_format
+        if not combined_dim_order:
+            combined_dim_order = descriptor.axis.to_condensed_format()
+        if not data_type:
+            data_type = descriptor.data_type
+        if not msb:
+            msb = descriptor.msb
+        if not voxel_size:
+            voxel_size = copy.deepcopy(descriptor.voxel_size)
+
+    full_image_size = [global_ranges[0][1] - global_ranges[0][0] + 1,
+                       global_ranges[1][1] - global_ranges[1][0] + 1,
+                       global_ranges[2][1] - global_ranges[2][0] + 1]
+    full_image_size = np.array(full_image_size).tolist()
+
+    global_descriptor = GlobalImageDescriptor(
+        size=full_image_size,
+        file_format=combined_file_format,
+        dim_order_condensed=combined_dim_order,
+        data_type=data_type,
+        msb=msb,
+        voxel_size=voxel_size)
+
+    return global_descriptor
 
 
 def convert_to_descriptors(descriptors_dict):
