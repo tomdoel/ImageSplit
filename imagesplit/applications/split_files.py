@@ -26,14 +26,14 @@ from imagesplit.applications.write_files import write_files
 from imagesplit.utils.versioning import get_version_string
 
 
-def split_file(input_file, filename_out_base, max_block_size_voxels,
-               overlap_size_voxels, start_index, output_type, dim_order,
-               file_handle_factory, output_format, slice_output, rescale,
-               out_compression, descriptor_filename=None, test=False):
+def split_file(input_file_base, filename_out_base, start_index, output_type,
+               dim_order, file_handle_factory, output_format, slice_output,
+               rescale, out_compression, max_block_size_voxels,
+               overlap_size_voxels, descriptor_filename=None, test=False):
     """Saves the specified image file as a number of smaller files"""
 
     if not filename_out_base:
-        input_file_base = os.path.splitext(input_file)[0]
+        input_file_base = os.path.splitext(input_file_base)[0]
         filename_out_base = input_file_base + "_split"
 
     if rescale and rescale != "limits" and len(rescale) != 2:
@@ -42,7 +42,7 @@ def split_file(input_file, filename_out_base, max_block_size_voxels,
     if not descriptor_filename:
         # pylint: disable=unused-variable
         [header, descriptors_in, global_descriptor] = \
-            generate_input_descriptors(input_file, start_index)
+            generate_input_descriptors(input_file_base, start_index)
     else:
         [header, descriptors_in, global_descriptor] = \
             header_from_descriptor(descriptor_filename)
@@ -211,11 +211,15 @@ def main(args=None):
                              "dimension, dimensions are numbered 1,2,3,"
                              "... and a negative value means that axis is "
                              "flipped. This cannot be used with --slice")
+    parser.add_argument("-d", "--descriptor", required=False, default=None,
+                        help="Name of descriptor file (.gift) which defines "
+                             "the file splitting")
 
     parser.add_argument("--test", required=False,
                         action='store_true',
                         help="If set, No writing will be performed to the "
                              "output files")
+
     version_string = get_version_string()
     parser.add_argument(
         "-v", "--version",
@@ -241,10 +245,8 @@ def main(args=None):
         raise ValueError('No filename was specified')
     else:
         assert sys.version_info >= (2, 7)
-        split_file(input_file=args.input,
+        split_file(input_file_base=args.input,
                    filename_out_base=args.out,
-                   max_block_size_voxels=args.max,
-                   overlap_size_voxels=args.overlap,
                    start_index=args.startindex,
                    output_type=args.type,
                    dim_order=args.axis,
@@ -253,6 +255,9 @@ def main(args=None):
                    slice_output=args.slice,
                    rescale=rescale,
                    out_compression=args.compress,
+                   max_block_size_voxels=args.max,
+                   overlap_size_voxels=args.overlap,
+                   descriptor_filename=args.descriptor,
                    test=args.test)
 
 
