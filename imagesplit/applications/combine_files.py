@@ -86,11 +86,11 @@ def main(args):
 
     assert sys.version_info >= (2, 7)
 
-    if args.filename == '_no_filename_specified':
+    if args.input == '_no_filename_specified':
         raise ValueError('No filename was specified')
     else:
         combine_file(
-            input_file_base=args.filename,
+            input_file_base=args.input,
             descriptor_filename=args.descriptor,
             filename_out_base=args.out,
             start_index=args.startindex,
