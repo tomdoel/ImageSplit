@@ -170,7 +170,7 @@ Useful links
 Licensing and copyright
 -----------------------
 
-Copyright 2017 University College London.
+Copyright 2017-2018 University College London.
 ImageSplit is released under the BSD-3 licence. Please see the `license file`_ for details.
 
 
