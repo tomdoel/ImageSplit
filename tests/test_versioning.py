@@ -27,21 +27,6 @@ class TestVersioning(unittest.TestCase):
         self.assertTrue(is_valid == bool(re.match(VERSION_TAG_REGEX, tag)))
 
     @parameterized.expand([
-        ['v0.1', '0.1'],
-        ['v0.1s', None],
-        ['v0.1-1-gabcde', '0.1+1.gabcde'],
-        ['v0.1-G-gabcde', None],
-        ['v0.1-1-gabcdek', None],
-        ['v0.1-1-gabcde-dirty', '0.1+1.gabcde.dirty'],
-        ['v0.1-1-gabcde-broken', '0.1+1.gabcde.broken'],
-        ['v0.1-1-gabcde-brokenn', None],
-        ['gabcde', 'DEFAULT+0.gabcde'],
-        ['gabcde-dirty', 'DEFAULT+0.gabcde.dirty'],
-    ])
-    def test_parse_describe(self, output, expected, default='DEFAULT'):
-        self.assertEqual(versioning._parse_describe(output, default), expected)
-
-    @parameterized.expand([
         ['0.1', True],
         ['0.1dev', True],
         ['0.1s', False],
