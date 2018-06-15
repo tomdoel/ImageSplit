@@ -142,6 +142,7 @@ def version_from_versioneer():
         version_info = get_versions()
         if version_info['error'] is None:
             return version_info['version']
+        return None
     except:  # pylint: disable=bare-except
         return None
 
