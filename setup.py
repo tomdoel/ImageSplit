@@ -9,10 +9,11 @@ Copyright UCL 2017
 
 from setuptools import setup, find_packages
 
-from imagesplit.utils.versioning import version_from_git
+import versioneer
+from imagesplit.utils.versioning import get_version
 
 
-version_git = version_from_git('0.0.0')
+version_git = get_version()
 
 # Get the summary
 description = 'Utility for splitting large image files into slices or chunks'\
@@ -26,6 +27,7 @@ setup(
     name='ImageSplit',
 
     version=version_git,
+    cmdclass=versioneer.get_cmdclass(),
 
     description=description,
     long_description=long_description,

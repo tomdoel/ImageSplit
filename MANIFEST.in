@@ -1,0 +1,2 @@
+include versioneer.py
+include imagesplit/utils/versioneer_version.py

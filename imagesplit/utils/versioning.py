@@ -133,18 +133,31 @@ def version_from_pip():
         return None
 
 
+def version_from_versioneer():
+    """Return a version string based on the git repo, conforming to PEP440"""
+
+    # Attempt to get the version string from the git repository
+    try:
+        from .versioneer_version import get_versions
+        version_info = get_versions()
+        if version_info['error'] is None:
+            return version_info['version']
+    except:  # pylint: disable=bare-except
+        return None
+
+
 def _check_pip_version(version_string):
     return bool(re.match(PIP_VERSION_REGEX, version_string))
 
 
-def get_version(default='0.0'):
+def get_version():
     """
     Return a user-visible string describing the product version
 
     This is a safe function that will never throw an exception
     """
 
-    version_string = version_from_git(default)
+    version_string = version_from_versioneer()
 
     if not version_string:
         version_string = version_from_pip()
