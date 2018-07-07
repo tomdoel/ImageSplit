@@ -39,24 +39,21 @@ def split_file(input_file_base, filename_out_base, start_index, output_type,
     if rescale and rescale != "limits" and len(rescale) != 2:
         raise ValueError('Rescale must have no arguments, or a min and max')
 
-    if not descriptor_filename:
-        # pylint: disable=unused-variable
-        [header, descriptors_in, global_descriptor] = \
-            generate_input_descriptors(input_file_base, start_index)
-    else:
-        [header, descriptors_in, global_descriptor] = \
-            header_from_descriptor(descriptor_filename)
+    descriptors_in, global_descriptor, header = specify_input_descriptors(
+        descriptor_filename, input_file_base, start_index)
 
-    descriptors_out = specify_output_descriptors(dim_order,
-                                                 filename_out_base,
-                                                 global_descriptor,
-                                                 header,
-                                                 max_block_size_voxels,
-                                                 out_compression,
-                                                 output_format,
-                                                 output_type,
-                                                 overlap_size_voxels,
-                                                 slice_output)
+    descriptors_out = specify_output_descriptors(
+        dim_order,
+        filename_out_base,
+        global_descriptor,
+        header,
+        max_block_size_voxels,
+        out_compression,
+        output_format,
+        output_type,
+        overlap_size_voxels,
+        slice_output
+    )
 
     file_factory = FileFactory(file_handle_factory)
 
@@ -66,6 +63,19 @@ def split_file(input_file_base, filename_out_base, start_index, output_type,
     if not descriptor_filename:
         write_descriptor_file(descriptors_in, descriptors_out,
                               filename_out_base, test)
+
+
+def specify_input_descriptors(descriptor_filename, input_file_base,
+                              start_index):
+    """Compute input parameters based on input files and/or descriptor files"""
+    if not descriptor_filename:
+        # pylint: disable=unused-variable
+        [header, descriptors_in, global_descriptor] = \
+            generate_input_descriptors(input_file_base, start_index)
+    else:
+        [header, descriptors_in, global_descriptor] = \
+            header_from_descriptor(descriptor_filename)
+    return descriptors_in, global_descriptor, header
 
 
 def specify_output_descriptors(dim_order, filename_out_base, global_descriptor,
