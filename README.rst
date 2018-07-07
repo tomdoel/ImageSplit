@@ -108,7 +108,10 @@ Input and output filenames:
                              Start index for filename suffix when loading or saving
                              a sequence of files
 
-    -d DESCRIPTOR            Specifies that the input files shoudl be assembled using the file DESCRIPTOR as a guide. The DESCRIPTOR file (.imagesplit) is generated from a previous splitting, and stores file offsets which allow you to assemble subvolumes back into a volume. The filenames in the DESCRIPTOR file will be overridden by the specified INPUT file name. This allows you to combine files according to a template generated from a different file splitting.
+    -d DESCRIPTOR
+                             Specifies that the input files should be assembled using the file DESCRIPTOR as a guide. The DESCRIPTOR file (.imagesplit) is generated from a previous splitting, and stores file offsets which allow you to assemble subvolumes back into a volume.
+                             The filenames in the DESCRIPTOR file will be overridden by the specified INPUT file name.
+                             This allows you to combine files according to a template generated from a different file splitting.
 
 Specify how to split the image:
 
