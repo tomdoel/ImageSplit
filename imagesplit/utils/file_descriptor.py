@@ -210,7 +210,7 @@ def load_descriptor(descriptor_filename):
     return data
 
 
-def header_from_descriptor(descriptor_filename):
+def header_from_descriptor(descriptor_filename, filename_override):
     """Create a file header based on descriptor information"""
     descriptor = load_descriptor(descriptor_filename)
     original_file_list = descriptor["source_files"]
@@ -225,6 +225,16 @@ def header_from_descriptor(descriptor_filename):
     else:
         original_header = None  # ToDo
     input_file_list = descriptor["split_files"]
+
+    if filename_override:
+        input_file_base, extension = os.path.splitext(filename_override)
+        print("*" + input_file_base)
+        print("*" + extension)
+        for input_file in input_file_list:
+            # old_filename = input_file["filename"]
+            filename = input_file_base + input_file["suffix"] + extension
+            input_file["filename"] = filename
+
     descriptors = convert_to_descriptors(input_file_list)
 
     global_descriptor = _aggregate_global_descriptor(descriptors)

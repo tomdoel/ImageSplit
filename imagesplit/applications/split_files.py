@@ -40,7 +40,7 @@ def split_file(input_file_base, filename_out_base, start_index, output_type,
         raise ValueError('Rescale must have no arguments, or a min and max')
 
     descriptors_in, global_descriptor, header = specify_input_descriptors(
-        descriptor_filename, input_file_base, start_index)
+        descriptor_filename, input_file_base, start_index, input_file_base)
 
     descriptors_out = specify_output_descriptors(
         dim_order,
@@ -66,7 +66,7 @@ def split_file(input_file_base, filename_out_base, start_index, output_type,
 
 
 def specify_input_descriptors(descriptor_filename, input_file_base,
-                              start_index):
+                              start_index, filename_override):
     """Compute input parameters based on input files and/or descriptor files"""
     if not descriptor_filename:
         # pylint: disable=unused-variable
@@ -74,7 +74,7 @@ def specify_input_descriptors(descriptor_filename, input_file_base,
             generate_input_descriptors(input_file_base, start_index)
     else:
         [header, descriptors_in, global_descriptor] = \
-            header_from_descriptor(descriptor_filename)
+            header_from_descriptor(descriptor_filename, filename_override)
     return descriptors_in, global_descriptor, header
 
 
