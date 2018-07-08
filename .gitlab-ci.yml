@@ -7,7 +7,7 @@ stages:
 build docs:
   stage: build
   tags:
-    - gift-adelie
+    - shared-linux
   artifacts:
     paths:
     - doc/
@@ -19,7 +19,7 @@ build docs:
 test Linux:
   stage: test
   tags:
-    - gift-linux
+    - shared-linux
   coverage: '/^TOTAL.*\s+(\d+\%)$/'
   script:
       - tox
@@ -44,7 +44,7 @@ test Windows:
 test pip bundle:
   stage: test
   tags:
-    - gift-linux
+    - pip-staging
   script:
     # remove any previous distribution files
     - rm -rf dist
@@ -64,7 +64,7 @@ test pip bundle:
 deploy docs to staging:
   stage: deploy
   environment:
-    name: Staging docs on GIFT-Adelie
+    name: Staging docs
     url: http://gift-adelie.cs.ucl.ac.uk/staging/GIFT-Surg/ImageSplit
   tags:
     - docs-staging
@@ -85,7 +85,7 @@ deploy pip to staging:
     name: Test PyPI
     url: https://testpypi.python.org/pypi/ImageSplit
   tags:
-    - gift-linux
+    - pip-staging
   artifacts:
     paths:
     - dist/
@@ -125,7 +125,7 @@ deploy pip to production:
     name: PyPI
     url: https://pypi.python.org/pypi/ImageSplit
   tags:
-    - gift-linux
+    - pip-production
   artifacts:
     paths:
     - dist/

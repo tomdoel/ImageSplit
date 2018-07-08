@@ -69,10 +69,9 @@ This command will:
     * and data type unsigned char (`--type uchar`)
     * The data will be normalised (rescaled) between minimum and maximum values `-50` and `350` (`--rescale -50 350`)
 
+Here is an example which combines files which are derived from files produced by a previous splitting:
+
 ::
-
-
-Here is an example of combining files
 
     imagesplit --input input_data/split_mask.mhd --out output_data/combined_image --format mhd --descriptor output_data/split_image__info.imagesplit
 
