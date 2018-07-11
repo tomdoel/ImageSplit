@@ -276,12 +276,12 @@ def get_default_metadata():
 
 def get_condensed_dim_order(header):
     """Return the condensed dimension order and flip string for this header"""
-    if header["TransformMatrix"]:
+    if "TransformMatrix" in header and header["TransformMatrix"]:
         transform = header["TransformMatrix"]
         new_dimension_order, flip_orientation = \
             mhd_cosines_to_permutation(
                 transform[0:3], transform[3:6], transform[6:9])
-    elif header["AnatomicalOrientation"]:
+    elif "AnatomicalOrientation" in header and header["AnatomicalOrientation"]:
         new_dimension_order, flip_orientation = \
             anatomical_to_permutation(
                 header["AnatomicalOrientation"])

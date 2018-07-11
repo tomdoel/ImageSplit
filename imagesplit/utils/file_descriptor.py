@@ -228,8 +228,6 @@ def header_from_descriptor(descriptor_filename, filename_override):
 
     if filename_override:
         input_file_base, extension = os.path.splitext(filename_override)
-        print("*" + input_file_base)
-        print("*" + extension)
         for input_file in input_file_list:
             # old_filename = input_file["filename"]
             filename = input_file_base + input_file["suffix"] + extension
