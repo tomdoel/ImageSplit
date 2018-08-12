@@ -11,8 +11,8 @@ ImageSplit
     :target: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/commits/master
     :alt: GitLab-CI test status
 
-.. image:: https://travis-ci.org/gift-surg/ImageSplit.svg?branch=master
-    :target: https://travis-ci.org/gift-surg/ImageSplit
+.. image:: https://travis-ci.org/tomdoel/ImageSplit.svg?branch=master
+    :target: https://travis-ci.org/tomdoel/ImageSplit
     :alt: Travis test status
 
 .. image:: https://cmiclab.cs.ucl.ac.uk/GIFT-Surg/ImageSplit/badges/master/coverage.svg
