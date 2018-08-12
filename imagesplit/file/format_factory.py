@@ -27,8 +27,8 @@ class FormatFactory(object):
         format_string = cls.simplify_format(format_string)
         if format_string in cls._factories:
             return cls._factories[format_string]
-        else:
-            raise ValueError("Unknown file format: " + format_string)
+
+        raise ValueError("Unknown file format: " + format_string)
 
     @classmethod
     def extension_to_format(cls, file_extension):
@@ -37,17 +37,16 @@ class FormatFactory(object):
         # Remove leading and trailing spaces and leading period if it exists
         ext = file_extension.lower().strip().lstrip('.')
 
-        if ext == "mhd" or ext == "mha":
+        if ext in ("mhd", "mha"):
             return FileFormats.METAIO_FORMAT
 
         elif ext == "vge":
             return FileFormats.VOL_FORMAT
 
-        elif ext == "tif" or ext == "tiff":
+        elif ext in ("tif", "tiff"):
             return FileFormats.TIFF_FORMAT
 
-        else:
-            raise ValueError("Unknown file format: " + file_extension)
+        raise ValueError("Unknown file format: " + file_extension)
 
     @classmethod
     def simplify_format(cls, format_name):
@@ -57,17 +56,16 @@ class FormatFactory(object):
         # Remove leading and trailing spaces and leading period if it exists
         name = format_name.lower().strip().lstrip('.')
 
-        if name == "mhd" or name == "mha":
+        if name in ("mhd", "mha"):
             return FileFormats.METAIO_FORMAT
 
-        elif name == "vge" or name == "vol":
+        elif name in ("vge", "vol"):
             return FileFormats.VOL_FORMAT
 
-        elif name == "tif" or name == "tiff":
+        elif name in ("tif", "tiff"):
             return FileFormats.TIFF_FORMAT
 
-        else:
-            raise ValueError("Unknown file format: " + format_name)
+        raise ValueError("Unknown file format: " + format_name)
 
     @classmethod
     def get_extension_for_format(cls, file_format):
@@ -79,5 +77,4 @@ class FormatFactory(object):
         elif file_format == "tiff":
             return ".tiff"
 
-        else:
-            raise ValueError("Format " + file_format + " not supported")
+        raise ValueError("Format " + file_format + " not supported")

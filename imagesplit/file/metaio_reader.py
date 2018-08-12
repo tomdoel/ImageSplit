@@ -323,9 +323,9 @@ def anatomical_to_cosine(anatomical_orientation_char):
         return [0, 0, 1]
     elif anatomical_orientation_char == 'S':
         return [0, 0, -1]
-    else:
-        raise ValueError('No implementation yet for anatomical orientation ' +
-                         anatomical_orientation_char + '.')
+
+    raise ValueError('No implementation yet for anatomical orientation ' +
+                     anatomical_orientation_char + '.')
 
 
 def permutation_to_cosine(permutation, flip):
