@@ -5,3 +5,5 @@ pyfakefs
 parameterized
 pylint
 sphinx
+pyinstaller
+tox
